@@ -1,0 +1,10 @@
+@import '../tools.scss';
+
+
+.Navbar{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: $dark-color;
+    height: toRem(100);
+}

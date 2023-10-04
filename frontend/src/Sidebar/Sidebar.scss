@@ -1,0 +1,10 @@
+@import '../tools.scss';
+
+
+.Sidebar{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: $dark-color;
+    width: toRem(346);
+}
