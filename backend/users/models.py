@@ -28,10 +28,11 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True, max_length=250, db_index=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    mobile = models.CharField(max_length=15)
+    mobile = models.CharField(unique=True, max_length=15)
     proffession = models.CharField(max_length=70)
     avatar = models.ImageField(upload_to='profile/', blank=True, null=True)
 

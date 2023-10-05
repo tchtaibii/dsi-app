@@ -1,0 +1,8 @@
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+    # path('add/', views.add_product, name='add-product'),
+    # Define other app-specific URL patterns here
+]

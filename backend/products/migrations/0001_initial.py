@@ -11,7 +11,7 @@ def create_default_type_products(apps, schema_editor):
     TypeProduct.objects.create(name="phone")
 
 def create_default_etat_products(apps, schema_editor):
-    EtatProduct = apps.get_model('products', 'EtatProduct')  # Replace 'your_app_name' with your actual app name
+    EtatProduct = apps.get_model('products', 'EtatProduct')
     EtatProduct.objects.create(name='arrivé')
     EtatProduct.objects.create(name='attente')
     EtatProduct.objects.create(name='affecté')

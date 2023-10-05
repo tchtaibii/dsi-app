@@ -1,18 +1,45 @@
 @import './tools.scss';
-
+// @use "sass:math";
 
 #app {
     display: flex;
-    flex-direction: column;
+    flex-direction:row;
     width: 100vw;
     height: 100vh;
+    // background-color: aliceblue;
     .underNav{
         display: flex;
         width: 100vw;
         flex-grow: 1;
         .content{
             flex-grow: 1;
-
         }
     }
+}
+
+
+$base-font-size: 16px;
+$base-screen-width: 1920px;
+$base-screen-font-size: $base-font-size;
+
+@function calculate-font-size($screen-width) {
+  $base-factor: calc($screen-width / $base-screen-width);
+  $calculated-font-size: $base-factor * $base-screen-font-size;
+  // $calculated-font-size: $base-factor * $base-screen-font-size;
+  @return $calculated-font-size;
+}
+
+@mixin font-size($min-width) {
+  $font-size: calculate-font-size($min-width);
+
+  @media screen and (min-width: $min-width) {
+    :root {
+      font-size: $font-size;
+    }
+  }
+}
+
+@for $i from 320px through 7680px {
+  $base-screen-font-size: $base-font-size;
+  @include font-size($i);
 }

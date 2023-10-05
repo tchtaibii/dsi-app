@@ -2,8 +2,14 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    font-family: 'Inter';
+    color: #BABABA;
 }
 
 body {
     background-color: #212332;
+}
+
+a {
+    all: unset;
 }

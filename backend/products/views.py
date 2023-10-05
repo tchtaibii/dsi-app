@@ -10,7 +10,6 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
 import logging
 from datetime import datetime, timedelta, date
-from django.db.models import Count
 from collections import Counter
 
 
