@@ -3,6 +3,6 @@ from . import views
 
 
 urlpatterns = [
-    # path('add/', views.add_product, name='add-product'),
+    path('add/', views.add_commande, name='add_commande'),
     # Define other app-specific URL patterns here
 ]

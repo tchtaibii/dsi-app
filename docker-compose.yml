@@ -1,0 +1,73 @@
+version: '3.1'
+services:
+  #database
+  my-mariadb:
+    image: mariadb:latest
+    container_name: my-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - net
+  #database GUI
+  adminer:
+    image: adminer:latest
+    container_name: my-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - my-mariadb
+    networks:
+      - net
+  #backend
+  backend:
+    container_name: my-backend
+    build:
+      context: ./backend  # Use this directory as the build context
+    restart: always
+    depends_on:
+      - my-mariadb
+    volumes :
+      - ./backend:/app
+      - ./backend/requirements.txt:/app/requirements.txt
+    env_file:
+      - ./backend/.env
+    networks:
+        - net
+    ports:
+      - "8000:8000"
+  #frontend
+  frontend:
+    container_name: my-frontend
+    build: ./frontend
+    restart: always
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./front-end/src:/app/src
+    networks:
+        - net
+
+#volumes
+volumes:
+  #mariadb volume
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database
+#networks 
+networks:
+  net:
+    driver: bridge
