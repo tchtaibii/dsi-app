@@ -54,7 +54,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./front-end/src:/app/src
+      - ./frontend/src:/app/src
     networks:
         - net
 

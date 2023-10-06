@@ -1,27 +1,21 @@
 from rest_framework import serializers
 from .models import Achat, Article
+from rest_framework.response import Response
+from rest_framework import status
 
+# Serializer for the Article model
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ['code', 'designation', 'contrat', 'type', 'fourniseur', 'prix_estimatif']
+        fields = ('code', 'designation', 'type', 'fourniseur', 'prix_estimatif')
 
-class AchatSerializer(serializers.ModelSerializer):
-    article_data = ArticleSerializer()  # Serializer for Article data
-
-    class Meta:
-        model = Achat
-        fields = ['demandeur', 'entité', 'article_data', 'ligne_bugetaire', 'quantité', 'DateDeCommande', 'typeDachat']
-
-    def create(self, validated_data):
-        # Extract the Article data from the validated_data
-        article_data = validated_data.pop('article_data')
-        
-        # Create the Article instance
-        article, created = Article.objects.get_or_create(**article_data)
-        
-        # Create the Achat instance with the Article
-        achat = Achat.objects.create(article=article, **validated_data)
-        return achat
-
-        
+# Serializer for creating an Achat instance
+class AchatCreateSerializer(serializers.Serializer):
+    demandeur = serializers.CharField()
+    entité = serializers.CharField()
+    article = ArticleSerializer(required=False)  # Make it optional
+    ligne_bugetaire = serializers.CharField()
+    quantité = serializers.IntegerField()
+    DateDeCommande = serializers.DateField()
+    typeDachat = serializers.IntegerField()
+    situation_d_achat = serializers.IntegerField(default=2)  # Set default value

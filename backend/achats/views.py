@@ -1,79 +1,69 @@
-from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
+from random import randint
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers
+from .models import Achat, Article
+from .serializers import AchatCreateSerializer, ArticleSerializer
 from .permissions import IsManagerAchatPermission
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
-from .serializers import AchatSerializer
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Achat, Article
-import random
-import string
-
-# Create your views here.
+from drf_yasg import openapi
 
 
-@swagger_auto_schema(methods=['post'], request_body=AchatSerializer)
+@swagger_auto_schema(methods=['post'], request_body=AchatCreateSerializer)
 @api_view(['POST'])
-# Apply the custom permission
 @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def add_commande(request):
-    try:
-        serializer = AchatSerializer(
-            data=request.data, context={'request': request})
-        if serializer.is_valid():
-            typedachat = serializer.validated_data.get('typeDachat')
+    serializer = AchatCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        article_data = serializer.validated_data.pop('article')
+        type_dachat = serializer.validated_data.get('typeDachat')
+        # Case 1: typeDachat == 1
+        if type_dachat == 1:
+            code = serializer.validated_data.get('article', {}).get('code')
+            try:
+                article = Article.objects.get(code=code)
+                serializer.validated_data['article'] = article  # Set the article instance
+                serializer.validated_data['type'] = article.type  # Set type from the article
+            except Article.DoesNotExist:
+                return Response({'message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            if typedachat == 1:  # Contrat Cadre
-                code = serializer.validated_data.get(
-                    'article_data', {}).get('code')
-                if code:
-                    try:
-                        article = Article.objects.get(code=code)
-                        # Set the retrieved article as the article foreign key
-                        serializer.validated_data['article'] = article
-                    except Article.DoesNotExist:
-                        return Response({'detail': 'Article with code not found'}, status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    return Response({'detail': 'Code is required for Contrat Cadre'}, status=status.HTTP_400_BAD_REQUEST)
-            elif typedachat == 2 or typedachat == 3:  # Achat Direct
-                # Check if fourniseur exists in request data
-                fourniseur = serializer.validated_data.get('article_data', {}).get('fourniseur')
-                
-                # Generate a random code for the Article starting with 'DSI'
-                random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=7))
-                random_code = 'DSI' + random_suffix
-                
-                # Set the fourniseur in Article if it exists
-                if fourniseur:
-                    serializer.validated_data['article_data']['fourniseur'] = fourniseur
-                
-                # Set the generated code in Article
-                serializer.validated_data['article_data']['code'] = random_code
-                
-                # Set prix_estimatif from request data if it exists
-                prix_estimatif = serializer.validated_data.get('article_data', {}).get('prix_estimatif')
-                if prix_estimatif is not None:
-                    serializer.validated_data['article_data']['prix_estimatif'] = prix_estimatif
-                
-                # Set the type from request data if it exists
-                type_darticle = serializer.validated_data.get('article_data', {}).get('type')
-                if type_darticle:
-                    serializer.validated_data['article_data']['type'] = type_darticle
-                # Example: logic_achat_offre(serializer.validated_data)
-            elif typedachat == 4:  # Achat en ligne
-                # Apply logic for Achat en ligne
-                # Example: logic_achat_en_ligne(serializer.validated_data)
-            else:
-                return Response({'detail': 'Invalid typeDachat value'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            achat = serializer.save()
+        # Case 2 and 3: typeDachat == 2 or typeDachat == 3
+        # elif type_dachat in [2, 3]:
+        #     code = article_data.get('code', f'dsi{randint(10000, 99999)}')
+        #     designation = article_data.get('designation')
+        #     article_type = article_data.get('type')
+        #     fournisseur = article_data.get('fournisseur')
+        #     prix_estimatif = article_data.get('prix_estimatif')
 
-            # Return a success response or perform any additional actions
-            return Response({'detail': 'Commande added successfully'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     try:
+        #         article = Article.objects.get(code=code)
+        #     except Article.DoesNotExist:
+        #         article = Article(
+        #             code=code,
+        #             designation=designation,
+        #             type=article_type,
+        #             fournisseur=fournisseur,
+        #             prix_estimatif=prix_estimatif
+        #         )
+        #         article.save()
+
+        # # Case 4: typeDachat == 4
+        # elif type_dachat == 4:
+        #     code = article_data.get('code', f'dsi{randint(10000, 99999)}')
+        #     try:
+        #         article = Article.objects.get(code=code)
+        #     except Article.DoesNotExist:
+        #         article = Article(**article_data)
+        #         article.save()
+
+        # Create Achat instance with the validated data and the Article instance
+        achat = Achat(article=article, **serializer.validated_data)
+        achat.save()
+
+        return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -17,8 +17,8 @@ class TypeDArticle(models.Model):
 
 
 class Article(models.Model):
-    code = models.CharField(max_length=30, blank=True)
-    designation = models.TextField()
+    code = models.CharField(max_length=30, primary_key=True)
+    designation = models.TextField(null=True, blank=True)
     contrat = models.ForeignKey(
         'Contrat', on_delete=models.PROTECT, null=True, blank=True)
     type = models.ForeignKey('TypeDArticle', on_delete=models.PROTECT)
@@ -48,7 +48,7 @@ class Achat(models.Model):
     demandeur = models.CharField(max_length=70, blank=False, null=False)
     entité = models.CharField(max_length=30, blank=False, null=False)
     article = models.ForeignKey(
-        'Article', on_delete=models.PROTECT, null=False, blank=False)
+        'Article', on_delete=models.PROTECT, null=False, blank=False, to_field='code')
     ligne_bugetaire = models.CharField(max_length=30, null=False, blank=False)
     quantité = models.IntegerField(null=False, blank=False)
     DateDeCommande = models.DateField(null=False, blank=False)
@@ -56,15 +56,15 @@ class Achat(models.Model):
     DateDA = models.DateField(null=True, blank=True)
     BC = models.CharField(max_length=30, null=True, blank=True)
     DateBC = models.DateField(null=True, blank=True)
-    BC_File = models.FileField(upload_to='uploads/BC')
+    BC_File = models.FileField(upload_to='uploads/BC', null=True, blank=True)
     typeDachat = models.ForeignKey(
         'TypeDachat', on_delete=models.PROTECT, null=False, blank=False)
     situation_d_achat = models.ForeignKey(
         'SituationDachat', on_delete=models.PROTECT, null=False, blank=False)
     BL = models.CharField(max_length=30, null=True, blank=True)
     DateBL = models.DateField(null=True, blank=True)
-    BL_File = models.FileField(upload_to='uploads/BL')
-    reste = models.IntegerField(blank=True)
+    BL_File = models.FileField(upload_to='uploads/BL', null=True, blank=True)
+    reste = models.IntegerField(blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
 
     def __str__(self):
