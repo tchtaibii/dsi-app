@@ -39,7 +39,7 @@ def user_registration(request):
                               first_name=serializer.validated_data['first_name'],
                               last_name=serializer.validated_data['last_name'],
                               mobile=serializer.validated_data['mobile'],
-                              profession=serializer.validated_data['profession'])
+                              proffession=serializer.validated_data['proffession'])
 
             # Set and hash the password using set_password
             user.set_password(password)

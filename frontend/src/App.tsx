@@ -4,6 +4,7 @@ import Sidebar from './Sidebar/Sidebar'
 import Dashboard from './Dashboard/Dashboard'
 import Achats from './Achats/Achats'
 import Commandes from './Commandes/Commandes'
+import AddCommande from './AddCommande/AddCommande'
 import Orders from './Orders/Orders'
 import Products from './Products/Products'
 import Product from './Product/Product'
@@ -30,7 +31,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="achats" element={<Achats />} />
-                  <Route path="comandes" element={<Commandes />} />
+                  <Route path="commandes" element={<Commandes />} />
+                  <Route path="AddCommande" element={<AddCommande />} />
                   {/* <Route path="Profile/id" element={<Profile />} />
               <Route path="Products" element={<Products />} />
               <Route path="Product/:id" element={<Product />} />

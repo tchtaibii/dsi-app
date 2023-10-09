@@ -4,9 +4,9 @@ interface InputTextProps {
   mwidth?: string;
   mheight?: string;
   mbackground?: string;
-  placeholder : string;
+  placeholder: string;
   value: string;
-  border? : string;
+  border?: string;
 }
 
 const InputText = ({
@@ -23,7 +23,7 @@ const InputText = ({
       height: mheight,
       borderRadius: '1.875rem',
       background: mbackground,
-      border : border,
+      border: border,
     }}
     className='InputText'
   >

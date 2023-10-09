@@ -21,7 +21,7 @@ class Article(models.Model):
     designation = models.TextField(null=True, blank=True)
     contrat = models.ForeignKey(
         'Contrat', on_delete=models.PROTECT, null=True, blank=True)
-    type = models.ForeignKey('TypeDArticle', on_delete=models.PROTECT)
+    type = models.ForeignKey('TypeDArticle', on_delete=models.PROTECT, null=True, blank=True)
     fourniseur = models.CharField(max_length=60, null=True, blank=True)
     prix_estimatif = models.IntegerField(blank=True, null=True)
     def __str__(self):

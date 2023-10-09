@@ -4,10 +4,14 @@
     margin: 0;
     font-family: 'Inter';
     color: #BABABA;
+    
 }
+
 
 body {
     background-color: #212332;
+    /* overflow-y: hidden; */
+    overflow-x: hidden;
 }
 
 a {

@@ -1,0 +1,107 @@
+@import '../tools.scss';
+
+.main {
+    gap: 1.8rem;
+    overflow-x: hidden;
+    height: fit-content;
+}
+
+.inputsCommande {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    align-items: flex-start;
+
+    .inputCommande {
+        max-width: 100%;
+        min-width: 20rem;
+        width: 48%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+
+        .inputText {
+            width: 100%;
+            height: 100%;
+            height: 4rem;
+            background-color: $dark-color;
+            padding-left: 1.5rem;
+            border-radius: 1.5rem;
+            display: flex;
+            padding-right: 1rem;
+            gap: 0.5rem;
+
+            input[type=text],
+            input[type=number],
+            input[type=date] {
+                all: none;
+                color: rgba(186, 186, 186, 0.70);
+                font-size: 1.4rem;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+                width: 100%;
+                height: 100%;
+                background-color: transparent;
+                outline: none;
+                border: none;
+
+                &::placeholder {
+                    color: inherit;
+                    opacity: 0.5;
+                }
+            }
+
+        }
+    }
+
+    .typeDachat {
+        .colcheks {
+            display: flex;
+            gap: 1rem;
+            flex-direction: column;
+
+            .rowchecks {
+                display: flex;
+                gap: 9rem;
+
+                .checkboxs {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    width: 9.5rem;
+
+                    input[type=checkbox] {
+                        width: 1.5rem;
+                        height: 1.5rem;
+                        border: 0.06rem solid $primary-color;
+                        border-radius: 0.3rem;
+                        cursor: pointer;
+                        appearance: none;
+
+                        &:checked {
+                            background-color: $dark-color;
+                            background-image: url('../assets/checkbox.svg');
+                            background-position: center;
+                            background-repeat: no-repeat;
+                            background-size: 70%;
+
+                        }
+                    }
+
+                    h3 {
+                        color: rgba(186, 186, 186, 0.70);
+                        font-size: 1.5rem;
+                        font-style: normal;
+                        font-weight: 200;
+                        line-height: normal;
+                    }
+                }
+            }
+
+        }
+
+    }
+}

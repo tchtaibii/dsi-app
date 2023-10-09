@@ -42,9 +42,9 @@ const SettingSvg = () => (
 
 const LogoutSvg = () => (
     <svg style={{ width: "1.5rem", height: "1.5rem", marginLeft: "0.5rem" }} width={39} height={36} viewBox="0 0 39 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M19.7263 3H3.38989V33H19.7338" stroke="#E79613" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M27.9059 25.5L36.0778 18L27.9059 10.5" stroke="#E79613" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12.4701 17.9932H36.078" stroke="#E79613" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M19.7263 3H3.38989V33H19.7338" stroke="#7e2f1d" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M27.9059 25.5L36.0778 18L27.9059 10.5" stroke="#7e2f1d" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12.4701 17.9932H36.078" stroke="#7e2f1d" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 
 )
@@ -89,7 +89,7 @@ const Sidebar = () => {
             </div>
             <div className="top">
                 <ul>
-                    <a style={{ width: changeWidthC, color: "#E79613" }} href="" ><LogoutSvg />{increaseNav && "Log out"}</a>
+                    <a style={{ width: changeWidthC }} href="" className="logout" ><LogoutSvg />{increaseNav && "Log out"}</a>
                 </ul>
             </div>
         </div>

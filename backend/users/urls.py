@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from users.views import AvatarUpdateAPIView
 from django.contrib.auth import views as auth_views
-
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 
 urlpatterns = [
@@ -14,6 +14,8 @@ urlpatterns = [
     path('all/', views.get_all_profile, name='get_all_profile'),
     path('my/', views.my_info, name='get_my_info'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/access/', TokenObtainPairView.as_view(), name='token_access'),
 
     # Define other app-specific URL patterns here
 ]

@@ -8,10 +8,12 @@
     background-color: $dark-color;
     height: 6.4rem;
     padding-right: 2rem;
-    padding-left: 4.7rem;
-    // justify-content: space-between;
+    // padding-left: 4.7rem;
+    justify-content: space-between;
     align-items: center;
-    padding-left: 15rem;
+    padding-left: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     gap: 20rem;
 
     .navLeft {
@@ -47,5 +49,8 @@
             width: 100%;
             height: 100%;
         }
+    }
+    img{
+        width: 10rem;
     }
 }
