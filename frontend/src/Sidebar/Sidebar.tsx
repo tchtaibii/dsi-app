@@ -89,7 +89,10 @@ const Sidebar = () => {
             </div>
             <div className="top">
                 <ul>
-                    <a style={{ width: changeWidthC }} href="" className="logout" ><LogoutSvg />{increaseNav && "Log out"}</a>
+                    <a style={{ width: changeWidthC }} onClick={() => {
+                        localStorage.removeItem('access_token');
+                        window.location.reload();
+                    }} href="" className="logout" ><LogoutSvg />{increaseNav && "Log out"}</a>
                 </ul>
             </div>
         </div>

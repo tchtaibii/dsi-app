@@ -1,11 +1,12 @@
 import './AddCommande.scss';
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from '../Interceptor'
 
 
 interface Article {
     code?: string,
-    destination?: string,
+    designation?: string,
     type?: string,
     fourniseur?: string,
     prix_estimatif?: number
@@ -24,6 +25,7 @@ interface Commandes {
 function AddCommande() {
 
 
+
     const [typeDachat, setType] = useState<number>(1);
     const [submit, setSubmit] = useState<boolean>(true);
 
@@ -38,12 +40,20 @@ function AddCommande() {
         }
     })
     useEffect(() => {
-        if (typeDachat >= 1 && typeDachat <= 4 && achat.demandeur.length > 0 && achat.entité.length > 0 && achat.ligne_bugetaire.length > 0 && achat.quantité > 0) {
+        if (typeDachat >= 1 && typeDachat <= 4 && achat.demandeur.length > 0 && achat.entité.length > 0 && achat.ligne_bugetaire.length > 0 && achat.quantité > 0 && achat.article) {
             if (typeDachat === 1 && achat.article.code && achat.article.code.length > 0) {
                 setSubmit(false);
             }
-            else if (achat.article.destination && achat.article.destination.length > 0 && achat.article.type && achat.article.type.length > 0
-                && achat.article.fourniseur && achat.article.fourniseur.length > 0 && achat.article.prix_estimatif && achat.article.prix_estimatif > 0) {
+            else if (achat.article.designation &&
+                achat.article.designation.length > 0
+                && achat.article.type
+                && achat.article.type.length > 0
+                && achat.article.fourniseur &&
+                achat.article.fourniseur.length > 0
+                && achat.article.prix_estimatif
+                && achat.article.prix_estimatif >= 0
+            ) {
+                console.log('heelooe')
                 setSubmit(false);
             }
             else
@@ -51,7 +61,22 @@ function AddCommande() {
         }
         else
             setSubmit(true)
-    }, [achat, typeDachat])
+        console.log('tipouwa', achat)
+    }, [achat, typeDachat, achat.article])
+
+    const handleSubmit = async () => {
+        setAchat((state:any) => ({
+            ...state,
+            typeDachat
+        }))
+        await axios.post('/achats/add/', achat).then((rsp: any) => {
+            console.log(rsp);
+        }).catch((rsp: any) => console.log(rsp))
+    }
+
+    function capitalize(str: string) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
 
     return (
         <div className='ContentMain'>
@@ -59,8 +84,7 @@ function AddCommande() {
                 {/* title */}
                 <h1>Add Command</h1>
                 <div className="header2">
-                    <button disabled={submit} onClick={() => {
-                    }}>Submit</button>
+                    <button disabled={submit} onClick={handleSubmit}>Submit</button>
                     <Link to='/'><button className="btn-sec">Cancel</button></Link>
                 </div>
             </div>
@@ -162,7 +186,7 @@ function AddCommande() {
                                 const newD = e.target.value;
                                 setAchat((state: any) => ({
                                     ...state,
-                                    quantité: newD
+                                    quantité: parseInt(newD)
                                 }))
                             }} placeholder="Ex: 5" type="number" name="Quantité" id="" />
                         </div>
@@ -180,6 +204,7 @@ function AddCommande() {
                                         setAchat((state: any) => ({
                                             ...state,
                                             article: {
+                                                ...state.article,
                                                 code: newD
                                             }
                                         }))
@@ -195,7 +220,8 @@ function AddCommande() {
                                             setAchat((state: any) => ({
                                                 ...state,
                                                 article: {
-                                                    destination: newD
+                                                    ...state.article, // Copy the old article properties
+                                                    designation: newD// Update only the 'type' property
                                                 }
                                             }))
                                         }} placeholder="Ex: Dell Mobile Precision..." type="text" name="designation" id="" />
@@ -209,10 +235,11 @@ function AddCommande() {
                                             setAchat((state: any) => ({
                                                 ...state,
                                                 article: {
+                                                    ...state.article,
                                                     prix_estimatif: newD
                                                 }
                                             }))
-                                        }} placeholder="Ex: 5000" type="number" name="Type d'article" id="" />
+                                        }} placeholder="Ex: 5000" type="number" name="Prix Estimatif" id="" />
                                     </div>
                                 </div>
                             </>
@@ -229,7 +256,8 @@ function AddCommande() {
                                     setAchat((state: any) => ({
                                         ...state,
                                         article: {
-                                            type: newD
+                                            ...state.article,
+                                            type: capitalize(newD)
                                         }
                                     }))
                                 }} placeholder="Ex: Laptop" type="text" name="Type d'article" id="" />
@@ -243,7 +271,8 @@ function AddCommande() {
                                     setAchat((state: any) => ({
                                         ...state,
                                         article: {
-                                            fourniseur: newD
+                                            ...state.article, // Copy the old article properties
+                                            fourniseur: newD // Update only the 'type' property
                                         }
                                     }))
                                 }} placeholder="Ex: AROCOM" type="text" name="Fournisseur" id="" />

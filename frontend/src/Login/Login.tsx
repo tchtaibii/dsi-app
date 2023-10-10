@@ -35,6 +35,7 @@ function Login({ setIsLogin }): { setIsLogin: any } {
         console.log(response)
         localStorage.setItem('access_token', accessToken);
         setIsLogin(true);
+        window.location.reload();
 
         // Redirect or perform other actions upon successful login
         // For example, you can navigate to another page

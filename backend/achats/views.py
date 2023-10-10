@@ -30,10 +30,13 @@ def add_commande(request):
         entité = data.get('entité')
         ligne_bugetaire = data.get('ligne_bugetaire')
         quantité = data.get('quantité')
+        if(isinstance(quantité, str)):
+            quantité = int(quantité)
         DateDeCommande = data.get('DateDeCommande')
         date_obj = datetime.strptime(DateDeCommande, "%Y-%m-%d")
         Type_d_achat = data.get('typeDachat')
         article_ = data.get('article')
+        print(data)
         if not ((demandeur is not None and isinstance(demandeur, str)) \
                 and (entité is not None and isinstance(entité, str)) \
                 and (ligne_bugetaire is not None and isinstance(ligne_bugetaire, str)) \

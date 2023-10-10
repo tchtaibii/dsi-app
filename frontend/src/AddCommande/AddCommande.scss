@@ -12,7 +12,7 @@
     justify-content: space-between;
     width: 100%;
     align-items: flex-start;
-    
+
     .typeDachat {
         .colcheks {
             display: flex;
@@ -36,6 +36,10 @@
                         border-radius: 0.3rem;
                         cursor: pointer;
                         appearance: none;
+                        transition: background-color 700ms ease-in-out;
+                        &:hover {
+                            background-color: $dark-color;
+                        }
 
                         &:checked {
                             background-color: $dark-color;
