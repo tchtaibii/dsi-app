@@ -3,6 +3,8 @@ from . import views
 from users.views import AvatarUpdateAPIView
 from django.contrib.auth import views as auth_views
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from .views import MyProtectedView
+
 
 
 urlpatterns = [
@@ -16,6 +18,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/access/', TokenObtainPairView.as_view(), name='token_access'),
+    path('my-protected-endpoint/', MyProtectedView.as_view(), name='my_protected_endpoint'),
 
     # Define other app-specific URL patterns here
 ]

@@ -14,6 +14,8 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from drf_yasg import openapi
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.views.decorators.http import require_http_methods
+
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -26,7 +28,7 @@ logger = logging.getLogger(__name__)
 @swagger_auto_schema(methods=['post'], request_body=CustomUserSerializer)
 @api_view(['POST'])
 @permission_classes([IsSuperuserPermission])
-@throttle_classes([UserRateThrottle]) 
+@throttle_classes([UserRateThrottle])
 def user_registration(request):
     try:
         serializer = CustomUserSerializer(data=request.data)
@@ -62,10 +64,12 @@ def user_registration(request):
 
 
 @swagger_auto_schema(methods=['post'], request_body=LoginSerializer)
-@api_view(['POST'])
 @permission_classes([AllowAny])  # Allow anyone to access this view (for login)
 @throttle_classes([UserRateThrottle])  # Add rate limiting
+@require_http_methods(["POST"])
+@api_view(['POST'])
 def user_login(request):
+    print('helo')
     try:
         email = request.data.get('email')
         password = request.data.get('password')
@@ -87,7 +91,7 @@ def user_login(request):
 @swagger_auto_schema(methods=['patch'], request_body=UpdateUserSerializer)
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated, IsOwnerOrSuperuser])
-@throttle_classes([UserRateThrottle]) 
+@throttle_classes([UserRateThrottle])
 def update_login(request):
     try:
         user = request.user
@@ -111,6 +115,7 @@ def update_login(request):
 
 class AvatarUpdateAPIView(APIView):
     parser_classes = [MultiPartParser]
+
     @swagger_auto_schema(
         operation_id='Update user avatar',
         operation_description='Update user avatar by providing an image file',
@@ -148,7 +153,7 @@ class AvatarUpdateAPIView(APIView):
         }
     )
     @permission_classes([IsOwnerOrSuperuser])
-    @throttle_classes([UserRateThrottle]) 
+    @throttle_classes([UserRateThrottle])
     def post(self, request, *args, **kwargs):
         try:
             user = request.user
@@ -174,7 +179,7 @@ class AvatarUpdateAPIView(APIView):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([UserRateThrottle]) 
+@throttle_classes([UserRateThrottle])
 def get_profile(request, email):
     try:
         profile = get_object_or_404(CustomUser, email=email)
@@ -190,7 +195,7 @@ def get_profile(request, email):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([UserRateThrottle]) 
+@throttle_classes([UserRateThrottle])
 def get_all_profile(request):
     try:
         users = CustomUser.objects.all()
@@ -199,13 +204,15 @@ def get_all_profile(request):
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_info(request):
-    user = request.user  # The authenticated user making the request
-    serializer = GetUserSerializer(user)  # Assuming you have a UserSerializer defined
+    user = request.user
+    serializer = GetUserSerializer(user)
 
     return Response(serializer.data)
+
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -215,3 +222,15 @@ class LogoutView(APIView):
         request.auth.logout(request)
 
         return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from .decorators import validate_access_token
+
+class MyProtectedView(APIView):
+    @validate_access_token
+    def get(self, request):
+        # Your view logic for authenticated users
+        response_data = {
+            'message': 'Authenticated user can access this endpoint.'}
+        return JsonResponse(response_data)

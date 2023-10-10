@@ -60,7 +60,6 @@ function AddCommande() {
                 <h1>Add Command</h1>
                 <div className="header2">
                     <button disabled={submit} onClick={() => {
-
                     }}>Submit</button>
                     <Link to='/'><button className="btn-sec">Cancel</button></Link>
                 </div>

@@ -41,6 +41,7 @@ class LoginSerializer(serializers.ModelSerializer):
 class AvatarSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(
         max_length=None, allow_empty_file=False, use_url=True)
+
     class Meta:
         model = CustomUser
         fields = ('avatar',)
@@ -50,4 +51,4 @@ class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('email', 'avatar', 'first_name',
-                  'last_name', 'mobile', 'proffession')
+                  'last_name', 'mobile', 'proffession', 'is_achat_manager')

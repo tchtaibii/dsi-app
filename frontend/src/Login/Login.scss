@@ -3,4 +3,13 @@
 .Login{
     width: 100vw;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.88rem;
+    img{
+        width: 23rem;
+        margin-bottom: 0.6rem;
+    }
 }

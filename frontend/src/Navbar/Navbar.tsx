@@ -2,6 +2,9 @@ import './Navbar.scss';
 import profile from '../assets/profile.png'
 import { Link } from "react-router-dom";
 import logo from '../assets/logo.png'
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
+import { useEffect } from 'react';
 
 const ArrowP = () => (
     <svg style={{ width: "0.875rem", height: "1.44388rem", transform: "rotate(-90deg)" }} width={24} height={15} viewBox="0 0 24 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -22,23 +25,32 @@ const Search = () => (
 
 )
 
-const Navbar = () => (
-    <div className='Navbar'>
-        <div className="navLeft">
-            <div style={{ cursor: 'pointer', }} className="profileNav">
-                <img style={{ width: "2rem", }} src={profile} />
-                <p>Imane Hamama</p>
-                <ArrowP />
+
+
+const Navbar = () => {
+    const data = useRecoilValue(myData)
+
+    useEffect(()=>{
+        console.log('data : ',data)
+    },[data])
+    return (
+        <div className='Navbar'>
+            <div className="navLeft">
+                <div style={{ cursor: 'pointer', }} className="profileNav">
+                    <img style={{ width: "2rem", borderRadius: "0.625rem"}} src={data.avatar ? data.avatar : profile} />
+                    <p>{`${data.first_name} ${data.last_name}`}</p>
+                    <ArrowP />
+                </div>
+                <Link to='/AddCommande' style={{ cursor: 'pointer' }}>
+                    <BtnAdd />
+                </Link>
             </div>
-            <Link to='/AddCommande' style={{ cursor: 'pointer' }}>
-                <BtnAdd />
-            </Link>
+            <div className="search">
+                <input type="text" placeholder='Search...' />
+                <Search />
+            </div>
+            <img src={logo} />
         </div>
-        <div className="search">
-            <input type="text" placeholder='Search...' />
-            <Search />
-        </div>
-        <img src={logo} alt="" srcset="" />
-    </div>
-)
+    )
+}
 export default Navbar

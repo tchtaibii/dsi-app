@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
 
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'drf_yasg',
     'achats',
+    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -53,12 +55,14 @@ AUTH_USER_MODEL = 'users.CustomUser'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Place it before other middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'dsi.urls'
 
@@ -86,11 +90,10 @@ REST_FRAMEWORK = {
     ),
 }
 
-from datetime import timedelta
 
 SIMPLE_JWT = {
     # Set your desired access token lifetime
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=720),
     # Set your desired refresh token lifetime
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=2),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
@@ -151,16 +154,40 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 MEDIA_URL = '/images/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Authorization',  # Include 'Authorization' header
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]

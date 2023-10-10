@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 $primary-color : #7e2f1d;
-$primary-color-hover : #d4341031;
+$primary-color-hover : #693428;
 $primary-color-hover2 : #ad3015;
 $second-color : #BABABA;
 $dark-color : #2A2D3E;
@@ -40,6 +40,51 @@ h3 {
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+}
+
+.inputCommande {
+  max-width: 100%;
+  min-width: 20rem;
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .inputText {
+    width: 100%;
+    height: 100%;
+    height: 4rem;
+    background-color: $dark-color;
+    padding-left: 1.5rem;
+    border-radius: 1.5rem;
+    display: flex;
+    padding-right: 1rem;
+    gap: 0.5rem;
+
+    input[type=text],
+    input[type=email],
+    input[type=number],
+    input[type=date],
+    input[type=password] {
+      all: none;
+      color: rgba(186, 186, 186, 0.70);
+      font-size: 1.4rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      outline: none;
+      border: none;
+
+      &::placeholder {
+        color: inherit;
+        opacity: 0.5;
+      }
+    }
+
+  }
 }
 
 // @function toRem($value) {
