@@ -21,3 +21,14 @@ class AchatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achat
         fields = '__all__'
+
+
+class AchatFilterSerializer(serializers.Serializer):
+    typeDachat = serializers.IntegerField(required=False)
+    DA = serializers.CharField(max_length=100, required=False)
+    BC = serializers.CharField(max_length=100, required=False)
+    BL = serializers.CharField(max_length=100, required=False)
+    situation_d_achat = serializers.IntegerField(required=False)
+    typeDarticle = serializers.CharField(max_length=100, required=False)
+    reste = serializers.BooleanField(required=False)
+    isLivre = serializers.BooleanField(required=False)

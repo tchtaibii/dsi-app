@@ -37,20 +37,75 @@ const FilterSvg = () => (
 
 )
 
+const ExitSvg = () => (
+    <svg style={{
+        width: "1.9375rem",
+        height: "1.9375rem"
+    }} xmlns="http://www.w3.org/2000/svg" width={31} height={31} viewBox="0 0 31 31" fill="none">
+        <path d="M31 3.12214L27.8779 0L15.5 12.3779L3.12214 0L0 3.12214L12.3779 15.5L0 27.8779L3.12214 31L15.5 18.6221L27.8779 31L31 27.8779L18.6221 15.5L31 3.12214Z" fill="#B43316" />
+    </svg>
+
+)
+
 const Achats = () => {
 
-
-
+    interface QueryParams {
+        typeDachat: number | null;
+        DA: string | null;
+        BC: string | null;
+        BL: string | null;
+        situation_d_achat: number | null;
+        typeDarticle: string | null;
+        reste: boolean;
+        isLivre : boolean;
+    }
     const [achats, setAchats] = useState<any[]>([])
+
+    const [typeDarticles, setTypeArticle] = useState([]);
+    const [typeDachat, setTypeDachat] = useState([]);
+    const [situationDachat, setSituationDachat] = useState([]);
 
     let navigate = useNavigate();
 
+    const [queryParams, setQueryParams] = useState<QueryParams>({
+        typeDachat: null,
+        DA: null,
+        BC: null,
+        BL: null,
+        situation_d_achat: null,
+        typeDarticle: null,
+        reste: false,
+        isLivre : false
+    });
+
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get('/achats/get/commandes/').then((rsp: any) => setAchats(rsp.data.reverse()))
-        }
+            const nonNullParams: QueryParams | any = {};
+
+            Object.keys(queryParams).forEach((key) => {
+                if (queryParams[key as keyof QueryParams] !== null) {
+                    nonNullParams[key as keyof QueryParams] = queryParams[key as keyof QueryParams];
+                }
+            });
+
+            try {
+                const Commandes = await axios.get('/achats/get/commandes/', {
+                    params: nonNullParams,
+                });
+                setAchats(Commandes.data.reverse());
+                const typeart = await axios.get('/achats/get/types_article');
+                setTypeArticle(typeart.data);
+                const typedach = await axios.get('/achats/get/types_achats');
+                setTypeDachat(typedach.data);
+                const situation = await axios.get('/achats/get/situations_article');
+                setSituationDachat(situation.data);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
         fetchData();
-    }, [])
+    }, []);
 
     const Situation = (sda: number) => {
         switch (sda) {
@@ -68,6 +123,38 @@ const Achats = () => {
     }
     return (
         <div className='ContentMain'>
+            <div className="filter">
+                <div className="filterBox">
+                    <div className="header">
+                        <h1>Filter</h1>
+                        <div style={{ cursor: 'pointer' }}><ExitSvg /></div>
+                    </div>
+                    <div className="row">
+                        <div className="inputCommande" >
+                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                <input type="text" placeholder="Type D’achat" />
+                            </div>
+                        </div>
+                        <div className="inputCommande" >
+                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                <input type="text" placeholder="Entrez code DA" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="inputCommande" >
+                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                <input type="text" placeholder="Type de Désignation" />
+                            </div>
+                        </div>
+                        <div className="inputCommande" >
+                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                <input type="text" placeholder="Entrez code BC" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="header">
                 <h1>Add Command</h1>
                 <div className="header2">

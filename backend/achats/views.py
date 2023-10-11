@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view, permission_classes, throttle_cla
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from .models import Achat, TypeDArticle, Article, SituationDachat, TypeDachat
-from .serializers import AchatSerializer
+from .models import Achat, TypeDachat, TypeDArticle, Article, SituationDachat
+from .serializers import AchatSerializer, AchatFilterSerializer
 from .permissions import IsManagerAchatPermission
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
@@ -103,24 +103,43 @@ def add_commande(request):
             return Response({'**message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response("ok", status=status.HTTP_201_CREATED)
     except Exception as e:
-        return Response({'**message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
     # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
     try:
-        achats = Achat.objects.select_related('article').values(
-            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation',)
+        achats = Achat.objects.all()
+        params = request.query_params
+        if 'typeDachat' in params:
+            achats = achats.filter(typeDachat=params['typeDachat'])
+        if 'DA' in params:
+            achats = achats.filter(DA=params['DA'])
+        if 'BC' in params:
+            achats = achats.filter(BC=params['BC'])
+        if 'BL' in params:
+            achats = achats.filter(BL=params['BL'])
+        if 'situation_d_achat' in params:
+            achats = achats.filter(
+                situation_d_achat=params['situation_d_achat'])
+        if 'typeDarticle' in params:
+            achats = achats.filter(article__type=params['typeDarticle'])
+        if 'reste' in params and params['reste'].lower() == 'true':
+            achats = achats.filter(reste__gt=0)
+        if 'isLivre' in params and params['isLivre'].lower() == 'true':
+            achats = achats.filter(
+                ~Q(situation_d_achat__situation=params['Livré']))
+        achats = achats.select_related('article').values(
+            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation')
         achats_list = list(achats)
         print(achats_list)
     except Exception as e:
         print(e)
     return JsonResponse(achats_list, safe=False)
-
-
 
 
 @api_view(['GET'])
@@ -129,6 +148,34 @@ def get_commandes(request):
 def get_achat(request, id):
     achat = get_object_or_404(Achat, id=id)
     serializer = AchatSerializer(achat)
-
     return Response(serializer.data)
 
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_types_article(request):
+    types = TypeDArticle.objects.all()
+    types = types.values('type')
+    types_list = list(types)
+    return JsonResponse(types_list, safe=False)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_types_achat(request):
+    types = TypeDachat.objects.all()
+    types = types.values('id', 'type')
+    types_list = list(types)
+    return JsonResponse(types_list, safe=False)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_situation_achat(request):
+    types = SituationDachat.objects.all()
+    types = types.values('id', 'situation')
+    types_list = list(types)
+    return JsonResponse(types_list, safe=False)
