@@ -3,6 +3,7 @@ import Navbar from './Navbar/Navbar'
 import Sidebar from './Sidebar/Sidebar'
 import Dashboard from './Dashboard/Dashboard'
 import Achats from './Achats/Achats'
+import Achat from './Achat/Achat'
 import Commandes from './Commandes/Commandes'
 import AddCommande from './AddCommande/AddCommande'
 // import Orders from './Orders/Orders'
@@ -60,6 +61,7 @@ function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="achats" element={<Achats />} />
                     <Route path="commandes" element={<Commandes />} />
+                    <Route path="achat/:id" element={<Achat />} />
                     <Route path="AddCommande" element={<AddCommande />} />
                     {/* <Route path="Profile/id" element={<Profile />} />
               <Route path="Products" element={<Products />} />

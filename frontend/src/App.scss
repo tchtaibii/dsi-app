@@ -39,6 +39,7 @@
   padding-inline: 2rem;
   gap: 3rem;
   padding-bottom: 2rem;
+  position: relative;
 
   .header {
     display: flex;
@@ -70,6 +71,7 @@
     display: flex;
     overflow-y: auto;
     padding-bottom: 8rem;
+    overflow-y: auto;
 
     &::-webkit-scrollbar-track {
       all: none;

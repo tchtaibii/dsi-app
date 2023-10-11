@@ -1,19 +1,18 @@
-from random import randint
+from .models import Achat
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import serializers
 from .models import Achat, TypeDArticle, Article, SituationDachat, TypeDachat
 from .serializers import AchatSerializer
 from .permissions import IsManagerAchatPermission
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
-from drf_yasg import openapi
 from datetime import datetime
 from django.utils import timezone
-import random
+from django.http import JsonResponse
 import logging
+from django.shortcuts import get_object_or_404
 
 
 logger = logging.getLogger(__name__)
@@ -30,19 +29,19 @@ def add_commande(request):
         entité = data.get('entité')
         ligne_bugetaire = data.get('ligne_bugetaire')
         quantité = data.get('quantité')
-        if(isinstance(quantité, str)):
+        if (isinstance(quantité, str)):
             quantité = int(quantité)
         DateDeCommande = data.get('DateDeCommande')
         date_obj = datetime.strptime(DateDeCommande, "%Y-%m-%d")
         Type_d_achat = data.get('typeDachat')
         article_ = data.get('article')
         print(data)
-        if not ((demandeur is not None and isinstance(demandeur, str)) \
-                and (entité is not None and isinstance(entité, str)) \
-                and (ligne_bugetaire is not None and isinstance(ligne_bugetaire, str)) \
-                and (quantité is not None and isinstance(quantité, int)) \
-                and (DateDeCommande is not None and date_obj.time() == timezone.datetime.min.time()) \
-                and (Type_d_achat is not None and isinstance(Type_d_achat, int)) \
+        if not ((demandeur is not None and isinstance(demandeur, str))
+                and (entité is not None and isinstance(entité, str))
+                and (ligne_bugetaire is not None and isinstance(ligne_bugetaire, str))
+                and (quantité is not None and isinstance(quantité, int))
+                and (DateDeCommande is not None and date_obj.time() == timezone.datetime.min.time())
+                and (Type_d_achat is not None and isinstance(Type_d_achat, int))
                 and article_ is not None):
             return Response("1 Error Data", status=status.HTTP_400_BAD_REQUEST)
         if Type_d_achat == 1:
@@ -57,7 +56,8 @@ def add_commande(request):
                 return Response("2 Error Data", status=status.HTTP_400_BAD_REQUEST)
         else:
             now = datetime.now()
-            timestamp = now.strftime("%Y%m%d%H%M%S")  # Format the current time as a string
+            # Format the current time as a string
+            timestamp = now.strftime("%Y%m%d%H%M%S")
             code = 'DSI' + timestamp
             designation = article_.get('designation')
             type_article = article_.get('type')
@@ -69,7 +69,7 @@ def add_commande(request):
                     type=type_article)
                 if article_.get('prix_estimatif') is not None and isinstance(article_.get('prix_estimatif'), int):
                     prix_estimatif = article_.get('prix_estimatif')
-                try :
+                try:
                     article = Article(
                         code=code,
                         designation=designation,
@@ -100,8 +100,35 @@ def add_commande(request):
         try:
             achat.save()
         except Exception as e:
-            print(f"Error: {str(e)}")
+            return Response({'**message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response("ok", status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'**message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
     # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_commandes(request):
+    try:
+        achats = Achat.objects.select_related('article').values(
+            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation',)
+        achats_list = list(achats)
+        print(achats_list)
+    except Exception as e:
+        print(e)
+    return JsonResponse(achats_list, safe=False)
+
+
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_achat(request, id):
+    achat = get_object_or_404(Achat, id=id)
+    serializer = AchatSerializer(achat)
+
+    return Response(serializer.data)
+

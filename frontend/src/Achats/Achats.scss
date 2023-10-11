@@ -1,6 +1,80 @@
 @import '../tools.scss';
 
 
-.Achats{
-    
+.headerMain {
+    width: 100%;
+    padding-left: 1.5rem;
+    display: flex;
+    // justify-content: space-between;
+    align-items: center;
+    padding-right: 5rem;
+
+    p {
+        font-size: 1.3rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        width: 16%;
+
+    }
+}
+
+.rowAchats {
+    border-radius: 1.25rem;
+    background: #2A2D3E;
+    width: 100%;
+    padding-left: 1.5rem;
+    height: 6.4rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    align-items: center;
+    display: flex;
+    margin-bottom: 0.4rem;
+    // justify-content: space-between;
+
+    p {
+        font-size: 1.3rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 1.2rem;
+        text-transform: capitalize;
+    }
+
+    .btnAchat {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .etatCont {
+        .etat {
+            opacity: 0.7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            height: 2.4rem;
+            padding-inline: 1.4rem;
+            // background: rgba(180, 51, 22, 0.50);
+            border-radius: 2rem;
+            width: fit-content;
+
+            p {
+                color: #B43316;
+                font-size: 1.209rem;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                width: fit-content;
+                padding: 0;
+            }
+        }
+    }
+
+
 }

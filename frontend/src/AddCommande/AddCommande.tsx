@@ -26,6 +26,12 @@ function AddCommande() {
 
 
 
+    const [statusCode, setStatus] = useState({
+        color: "#AF4C4C",
+        status: "Failed",
+        text: "Wrong Inputs",
+        is: false
+    })
     const [typeDachat, setType] = useState<number>(1);
     const [submit, setSubmit] = useState<boolean>(true);
 
@@ -50,8 +56,6 @@ function AddCommande() {
                 && achat.article.type.length > 0
                 && achat.article.fourniseur &&
                 achat.article.fourniseur.length > 0
-                && achat.article.prix_estimatif
-                && achat.article.prix_estimatif >= 0
             ) {
                 console.log('heelooe')
                 setSubmit(false);
@@ -65,14 +69,39 @@ function AddCommande() {
     }, [achat, typeDachat, achat.article])
 
     const handleSubmit = async () => {
-        setAchat((state:any) => ({
+        setAchat((state: any) => ({
             ...state,
             typeDachat
         }))
         await axios.post('/achats/add/', achat).then((rsp: any) => {
-            console.log(rsp);
-        }).catch((rsp: any) => console.log(rsp))
+            console.log(rsp)
+            setStatus({
+                color: "#4CAF50",
+                status: "Success!",
+                text: "Your order is added successfully.",
+                is: true
+            })
+        }).catch((rsp: any) => {
+            setStatus({
+                color: "#AF4C4C",
+                status: "Failed!",
+                text: "Wrong Inputs",
+                is: true
+            })
+        })
     }
+
+    useEffect(() => {
+        if (statusCode.is) {
+            const timer = setTimeout(() => {
+                setStatus((state) => ({
+                    ...state,
+                    is: false
+                }))
+            }, 5000)
+            return () => clearTimeout(timer);
+        }
+    }, [statusCode])
 
     function capitalize(str: string) {
         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -80,6 +109,23 @@ function AddCommande() {
 
     return (
         <div className='ContentMain'>
+            {
+                statusCode.is &&
+                <div style={{ backgroundColor: statusCode.color }} className="statusBar">
+                    <h1>{statusCode.status}</h1>
+                    <p>{statusCode.text}</p>
+                    <div onClick={() => {
+                        setStatus((state) => ({
+                            ...state,
+                            is: false
+                        }))
+                    }} className="exitB">
+                        <svg style={{ width: "1rem", height: "1rem", cursor: "pointer" }} width={"1.5rem"} height={"1.5rem"} viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 1.91357L17.0864 0L9.5 7.58643L1.91357 0L0 1.91357L7.58643 9.5L0 17.0864L1.91357 19L9.5 11.4136L17.0864 19L19 17.0864L11.4136 9.5L19 1.91357Z" fill="white" />
+                        </svg>
+                    </div>
+                </div>
+            }
             <div className="header">
                 {/* title */}
                 <h1>Add Command</h1>

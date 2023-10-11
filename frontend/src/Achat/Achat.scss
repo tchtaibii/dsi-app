@@ -1,0 +1,57 @@
+@import '../tools.scss';
+
+
+.Edits {
+    cursor: pointer;
+}
+
+.TableAchat {
+    border-radius: 1.25rem;
+    background: $dark-color;
+    width: 100%;
+
+    tbody {
+        width: 100%;
+        padding: 0;
+
+        tr {
+            padding: 0;
+
+            &:nth-child(even) {
+                background-color: $dark2-color;
+                /* Choose your desired background color */
+            }
+
+            td {
+                padding: 0;
+                border-bottom: 0.5rem solid $back-color;
+                padding-left: 1.87rem;
+                padding-top: 1.69rem;
+                padding-bottom: 1.69rem;
+                // color: #BABABA;
+                // text-align: center;
+                // font-family: Inter;
+                font-size: 1.8rem;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                text-transform: capitalize;
+
+            }
+
+            .lastTd {
+                border-bottom: none;
+            }
+
+            .keyTd {
+                width: 26.25rem;
+                border-right: 0.5rem solid $back-color;
+            }
+
+            .ValueTd {
+                display: flex;
+                justify-content: center;
+            }
+        }
+    }
+}
