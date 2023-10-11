@@ -12,7 +12,7 @@ interface Field {
 function Login({ setIsLogin }): { setIsLogin: any } {
 
   useEffect(() => {
-    
+
   }, [])
 
   const [loginField, setLogin] = useState<Field>({
@@ -56,7 +56,7 @@ function Login({ setIsLogin }): { setIsLogin: any } {
   return (
     <div className='Login'>
       <img src={logo} />
-      <div style={{ width: '46.1385rem' }} className="inputCommande">
+      <div style={{ width: '40.1385rem' }} className="inputCommande">
         <div className="label">Email </div>
         <div className="inputText">
           <input onChange={(e: any) => {
@@ -68,7 +68,7 @@ function Login({ setIsLogin }): { setIsLogin: any } {
           }} placeholder="ex: user@example.com" type="email" name="email" id="email-login" />
         </div>
       </div>
-      <div style={{ width: '46.1385rem' }} className="inputCommande">
+      <div style={{ width: '40.1385rem' }} className="inputCommande">
         <div className="label">Password </div>
         <div className="inputText">
           <input onChange={(e: any) => {
