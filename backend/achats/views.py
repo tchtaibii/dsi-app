@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Achat, TypeDachat, TypeDArticle, Article, SituationDachat
-from .serializers import AchatSerializer, AchatFilterSerializer, ProgressSerializer
+from .serializers import AchatSerializer, AchatFilterSerializer, ProgressSerializer, PostDaSerializer, PostBCSerializer, PostBLSerializer
 from .permissions import IsManagerAchatPermission
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
@@ -15,9 +15,88 @@ from django.http import JsonResponse
 import logging
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+import os
 
 
 logger = logging.getLogger(__name__)
+
+
+@swagger_auto_schema(methods=['post'], request_body=PostDaSerializer)
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def post_da(request, id):
+    try:
+        data = request.data
+        serializer = PostDaSerializer(data=data)
+        if serializer.is_valid():
+            DA = serializer.validated_data['DA']
+            DateDA = serializer.validated_data['DateDA']
+            achat = Achat.objects.get(id=id)
+            achat.DA = DA
+            achat.DateDA = DateDA
+            achat.situation_d_achat = SituationDachat.objects.get(id=2)
+            achat.save()
+            return Response({"message": "Data is valid. Process it."})
+        return Response(serializer.errors, status=400)
+    except Exception as e:
+        return Response({"message": str(e)}, status=500)
+
+
+@swagger_auto_schema(methods=['post'], request_body=PostBCSerializer)
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def post_bc(request, id):
+    try:
+        data = request.data
+        serializer = PostBCSerializer(data=data)
+        if serializer.is_valid():
+            BC = serializer.validated_data['BC']
+            DateBC = serializer.validated_data['DateBC']
+            FileBC = serializer.validated_data['FileBC']
+            allowed_extensions = ['.pdf']
+            file_extension = os.path.splitext(FileBC.name)[1].lower()
+            if file_extension not in allowed_extensions:
+                return Response({"message": "Invalid file extension. Allowed extension are: .pdf"}, status=400)
+            achat = Achat.objects.get(id=id)
+            achat.BC = BC
+            achat.DateBC = DateBC
+            achat.BC_File = FileBC
+            achat.situation_d_achat = SituationDachat.objects.get(id=3)
+            achat.save()
+            return Response({"message": "Data is valid. Process it."})
+        return Response(serializer.errors, status=400)
+    except Exception as e:
+        return Response({"message": str(e)}, status=500)
+
+
+@swagger_auto_schema(methods=['post'], request_body=PostBLSerializer)
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def post_bc(request, id):
+    try:
+        data = request.data
+        serializer = PostBLSerializer(data=data)
+        if serializer.is_valid():
+            BL = serializer.validated_data['BL']
+            DateBL = serializer.validated_data['DateBL']
+            FileBL = serializer.validated_data['FileBL']
+            allowed_extensions = ['.pdf']
+            file_extension = os.path.splitext(FileBL.name)[1].lower()
+            if file_extension not in allowed_extensions:
+                return Response({"message": "Invalid file extension. Allowed extension are: .pdf"}, status=400)
+            achat = Achat.objects.get(id=id)
+            achat.BL = BL
+            achat.DateBL = DateBL
+            achat.BL_File = FileBL
+            achat.situation_d_achat = SituationDachat.objects.get(id=3)
+            achat.save()
+            return Response({"message": "Data is valid. Process it."})
+        return Response(serializer.errors, status=400)
+    except Exception as e:
+        return Response({"message": str(e)}, status=500)
 
 
 @swagger_auto_schema(methods=['post'], request_body=AchatSerializer)
@@ -53,8 +132,10 @@ def add_commande(request):
                 try:
                     article = Article.objects.filter(code=code).first()
                 except Article.DoesNotExist:
+                    print('here 1')
                     return Response({'message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
+                print('here 2')
                 return Response("2 Error Data", status=status.HTTP_400_BAD_REQUEST)
         else:
             now = datetime.now()
@@ -83,8 +164,9 @@ def add_commande(request):
                 except Exception as e:
                     print(e)
             else:
+                print('here 3')
                 return Response("3 Error Data", status=status.HTTP_400_BAD_REQUEST)
-        situation = SituationDachat.objects.get(id=2)
+        situation = SituationDachat.objects.get(id=1)
         Type_d_achat_instance = TypeDachat.objects.get(id=Type_d_achat)
         try:
             achat = Achat(
@@ -102,9 +184,12 @@ def add_commande(request):
         try:
             achat.save()
         except Exception as e:
+            print('here 4')
             return Response({'**message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        print('here 5')
         return Response("ok", status=status.HTTP_201_CREATED)
     except Exception as e:
+        print('here 6')
         return Response({'message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
     # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,6 +204,7 @@ def get_commandes(request):
     try:
         achats = Achat.objects.all()
         params = request.query_params
+        print(params)
         if 'typeDachat' in params:
             achats = achats.filter(typeDachat=params['typeDachat'])
         if 'DA' in params:
@@ -137,7 +223,7 @@ def get_commandes(request):
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)  # Fixed this line
         achats = achats.select_related('article').values(
-            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation', 'isComplete')
+            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation', 'isComplet')
         achats_list = list(achats)
         print(achats_list)
     except Exception as e:
@@ -190,6 +276,12 @@ def get_situation_achat(request):
 @throttle_classes([UserRateThrottle])
 def get_progress(request, id):
     achat = get_object_or_404(Achat, id=id)
-    serializer = ProgressSerializer(achat)
-    serializer = AchatSerializer(achat)
+    serializer = ProgressSerializer({
+        'DA': achat.DA,
+        'BC': achat.BC,
+        'BL': achat.BL,
+        'isComplet': achat.isComplet,
+        'Designation': achat.article.designation,
+        'demandeur': achat.demandeur
+    })
     return Response(serializer.data)

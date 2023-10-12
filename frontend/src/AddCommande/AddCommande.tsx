@@ -88,9 +88,15 @@ function AddCommande() {
                 text: "Wrong Inputs",
                 is: true
             })
+            console.log(rsp)
         })
     }
-
+    useEffect(() => {
+        setAchat((state: any) => ({
+            ...state,
+            typeDachat
+        }))
+    }, [typeDachat])
     useEffect(() => {
         if (statusCode.is) {
             const timer = setTimeout(() => {
@@ -127,7 +133,6 @@ function AddCommande() {
                 </div>
             }
             <div className="header">
-                {/* title */}
                 <h1>Add Command</h1>
                 <div className="header2">
                     <button disabled={submit} onClick={handleSubmit}>Submit</button>

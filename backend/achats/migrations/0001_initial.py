@@ -21,13 +21,11 @@ def create_default_type_dachat(apps, schema_editor):
 
 def create_default_situation_dachat(apps, schema_editor):
     situation_dachat = apps.get_model('achats', 'SituationDachat')
-    situation_dachat.objects.create(situation='Non livré')
-    situation_dachat.objects.create(situation='Non Validé')
-    situation_dachat.objects.create(situation="Livré")
+    situation_dachat.objects.create(situation='Nouveau')
+    situation_dachat.objects.create(situation='En cours de traitement')
     situation_dachat.objects.create(situation="En cours de livraison")
+    situation_dachat.objects.create(situation="Livré")
     situation_dachat.objects.create(situation="Livraison partielle")
-    # situation_dachat.objects.create(situation="En cours de livraison")
-    # situation_dachat.objects.create(situation="En cours de livraison")
 
 
 def create_TypeArticle(apps, schema_editor):
@@ -114,31 +112,32 @@ def create_default_articles(apps, schema_editor):
 
     contrat_object = contratM.objects.get(name='Munisys')
     data = [
-        ("504 172", "Laptop Standard Version 1"),
-        ("504 173", "Laptop Standard Version 2"),
-        ("504 174", "Laptop Leger"),
-        ("504 175", "Laptop Ultra leger"),
-        ("504 176", "Mobile Workstation"),
-        ("504 177", "Desktop SFF version 1"),
-        ("504 178", "Desktop SFF version 2"),
-        ("504 179", "Desktop SFF version 3"),
-        ("504 180", "Desktop USFF version 4"),
-        ("314 854", "Monitor 22\""),
-        ("502 295", "Monitor 24\""),
-        ("501 901", "Monitor 27\""),
-        ("504 181", "Monitor 86 interactive"),
-        ("504 182", "Monitor T75 interactive"),
-        ("504 183", "Dock Station :"),
-        ("337 925", "Cartable Laptop 15\""),
-        ("337 926", "Sac à Dos 15\""),
-        ("333 471", "Pochette PC 14\""),
-        ("337 927", "Sac à Dos 17\""),
-        ("337 928", "Wireless Keyboard & Mouse (French)"),
+        ("504172", "Laptop Standard Version 1"),
+        ("504173", "Laptop Standard Version 2"),
+        ("504174", "Laptop Leger"),
+        ("504175", "Laptop Ultra leger"),
+        ("504176", "Mobile Workstation"),
+        ("504177", "Desktop SFF version 1"),
+        ("504178", "Desktop SFF version 2"),
+        ("504179", "Desktop SFF version 3"),
+        ("504180", "Desktop USFF version 4"),
+        ("314854", "Monitor 22\""),
+        ("502295", "Monitor 24\""),
+        ("501901", "Monitor 27\""),
+        ("504181", "Monitor 86 interactive"),
+        ("504182", "Monitor T75 interactive"),
+        ("504183", "Dock Station :"),
+        ("337925", "Cartable Laptop 15\""),
+        ("337926", "Sac à Dos 15\""),
+        ("333471", "Pochette PC 14\""),
+        ("337927", "Sac à Dos 17\""),
+        ("337928", "Wireless Keyboard & Mouse (French)"),
     ]
 
     for code, designation in data:
         Article.objects.create(
             code=code, designation=designation, contrat=contrat_object, type=laptop_type)
+
 
 class Migration(migrations.Migration):
 
@@ -151,45 +150,54 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Contrat',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=60)),
             ],
         ),
         migrations.CreateModel(
             name='SituationDachat',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('situation', models.CharField(default='Non Validé', max_length=50)),
             ],
         ),
         migrations.CreateModel(
             name='TypeDachat',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('type', models.CharField(default='Contrat Cadre', max_length=50)),
             ],
         ),
         migrations.CreateModel(
             name='TypeDArticle',
             fields=[
-                ('type', models.CharField(max_length=50, primary_key=True, serialize=False, unique=True)),
+                ('type', models.CharField(max_length=50,
+                 primary_key=True, serialize=False, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='Article',
             fields=[
-                ('code', models.CharField(max_length=30, primary_key=True, serialize=False)),
+                ('code', models.CharField(max_length=30,
+                 primary_key=True, serialize=False)),
                 ('designation', models.TextField(blank=True, null=True)),
-                ('fourniseur', models.CharField(blank=True, max_length=60, null=True)),
+                ('fourniseur', models.CharField(
+                    blank=True, max_length=60, null=True)),
                 ('prix_estimatif', models.IntegerField(blank=True, null=True)),
-                ('contrat', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='achats.contrat')),
-                ('type', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='achats.typedarticle')),
+                ('contrat', models.ForeignKey(blank=True, null=True,
+                 on_delete=django.db.models.deletion.PROTECT, to='achats.contrat')),
+                ('type', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, to='achats.typedarticle')),
             ],
         ),
         migrations.CreateModel(
             name='Achat',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('demandeur', models.CharField(max_length=70)),
                 ('entité', models.CharField(max_length=30)),
                 ('ligne_bugetaire', models.CharField(max_length=30)),
@@ -199,15 +207,20 @@ class Migration(migrations.Migration):
                 ('DateDA', models.DateField(blank=True, null=True)),
                 ('BC', models.CharField(blank=True, max_length=30, null=True)),
                 ('DateBC', models.DateField(blank=True, null=True)),
-                ('BC_File', models.FileField(blank=True, null=True, upload_to='uploads/BC')),
+                ('BC_File', models.FileField(
+                    blank=True, null=True, upload_to='uploads/BC')),
                 ('BL', models.CharField(blank=True, max_length=30, null=True)),
                 ('DateBL', models.DateField(blank=True, null=True)),
-                ('BL_File', models.FileField(blank=True, null=True, upload_to='uploads/BL')),
+                ('BL_File', models.FileField(
+                    blank=True, null=True, upload_to='uploads/BL')),
                 ('reste', models.IntegerField(blank=True, null=True)),
                 ('observation', models.TextField(blank=True, null=True)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='achats.article')),
-                ('situation_d_achat', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='achats.situationdachat')),
-                ('typeDachat', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='achats.typedachat')),
+                ('article', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, to='achats.article')),
+                ('situation_d_achat', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, to='achats.situationdachat')),
+                ('typeDachat', models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT, to='achats.typedachat')),
             ],
         ),
         migrations.RunPython(create_default_contrat),

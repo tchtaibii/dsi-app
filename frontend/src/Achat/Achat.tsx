@@ -2,7 +2,7 @@ import './Achat.scss';
 
 import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const Edits = () => (
     <svg style={{
@@ -12,8 +12,6 @@ const Edits = () => (
         <circle cx={16} cy={16} r={16} fill="#2A2D3E" />
         <path d="M9 19.8754V23H12.1246L21.34 13.7846L18.2154 10.66L9 19.8754ZM23.7563 11.3683C24.0812 11.0433 24.0812 10.5184 23.7563 10.1934L21.8066 8.24372C21.4816 7.91876 20.9567 7.91876 20.6317 8.24372L19.1069 9.7685L22.2315 12.8931L23.7563 11.3683Z" fill="#B43316" />
     </svg>
-
-
 )
 
 const Achat = () => {
@@ -34,13 +32,13 @@ const Achat = () => {
     const Situation = (sda: number) => {
         switch (sda) {
             case 1:
-                return "Non livré";
+                return "Nouveau";
             case 2:
-                return "Non validé"
+                return "En cours de traitement"
             case 3:
-                return "livré"
+                return "En cours de livraison"
             case 4:
-                return "Livraison en cours "
+                return "Livré"
             case 5:
                 return "Livraison partielle"
         }
@@ -55,16 +53,17 @@ const Achat = () => {
         fetchData();
     }, [])
 
+    const navigate = useNavigate()
+
     return (
         <div className='ContentMain'>
             {
                 Data !== null ?
                     <>
-
                         <div style={{ justifyContent: "flex-start", gap: '1rem', alignItems: 'center' }} className="header">
                             <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur} --> ${Data.article.type}`}</h1>
                             <div onClick={() => {
-
+                                navigate(`/commandes/${id}`)
                             }} className="Edits"><Edits /></div>
                         </div>
                         <div className="main">

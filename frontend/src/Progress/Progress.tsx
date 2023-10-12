@@ -36,11 +36,16 @@ const PendingSvg = () => (
 
 )
 
+interface AChat {
+    Designation: string;
+    demandeur: string;
+}
+
 const Achats = () => {
 
     const navigate = useNavigate()
     const { id } = useParams();
-
+    const [article, setarticle] = useState<null | AChat>(null)
     const [statusAchat, setStatus] = useState({
         DA: {
             img: ProgressSvg,
@@ -69,7 +74,7 @@ const Achats = () => {
     });
 
     const statusFunc = (obj: any) => {
-        if (obj.Complete === true) {
+        if (obj.isComplet === true) {
             setStatus({
                 DA: {
                     img: ValidateSvg,
@@ -210,55 +215,102 @@ const Achats = () => {
                 }
             })
         }
-
+        setarticle({ Designation: obj.Designation, demandeur: obj.demandeur });
     }
 
     useEffect(() => {
-        
-    })
+        const fetchData = async () => {
+            await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => statusFunc(rsp.data)).catch((rsp: any) => console.log(rsp));
+        }
+        fetchData();
+    }, [])
+
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const handleFileChange = (e: any) => {
+        const file = e.target.files[0];
+        setSelectedFile(file);
+    };
 
     return (
         <div className='ContentMain'>
             <div className="header">
-                <h1>Progress</h1>
+                <h1>{article ? `${article.demandeur} --> ${article.Designation}` : 'No Achat Found'}</h1>
             </div>
-            <div style={{ gap: "1.44rem", paddingInline: "11.75rem" }} className="main">
-                <div className="inMain">
-                    <div className="progress">
-                        <div className="prog">
-                            <div className="view">
-                                <statusAchat.DA.img />
-                                <div style={{ background: statusAchat.DA.line, }} className="lineV"></div>
+            {
+                article &&
+                <div style={{ gap: "1.44rem", paddingInline: "11.75rem" }} className="main">
+                    <div className="inMain">
+                        <div className="progress">
+                            <div className="prog">
+                                <div className="view">
+                                    <statusAchat.DA.img />
+                                    <div style={{ background: statusAchat.DA.line, }} className="lineV"></div>
+                                </div>
+                                <h1>Demande d’achat</h1>
+                                <h2 className='status' style={{ color: statusAchat.DA.color }}>{statusAchat.DA.status}</h2>
                             </div>
-                            <h1>Demande d’achat</h1>
-                            <h2 className='status' style={{ color: statusAchat.DA.color }}>{statusAchat.DA.status}</h2>
+                            <div className="prog">
+                                <div className="view">
+                                    <statusAchat.BC.img />
+                                    <div style={{ background: statusAchat.BC.line, }} className="lineV"></div>
+                                </div>
+                                <h1>Bande de commande</h1>
+                                <h2 className='status' style={{ color: statusAchat.BC.color }}>{statusAchat.BC.status}</h2>
+                            </div>
+                            <div className="prog">
+                                <div className="view">
+                                    <statusAchat.BL.img />
+                                    <div style={{ background: statusAchat.BL.line, }} className="lineV"></div>
+                                </div>
+                                <h1>Bande de livraison</h1>
+                                <h2 className='status' style={{ color: statusAchat.BL.color }}>{statusAchat.BL.status}</h2>
+                            </div>
+                            <div className="prog">
+                                <div className="view">
+                                    <statusAchat.OB.img />
+                                </div>
+                                <h1>Observation</h1>
+                                <h2 className='status' style={{ color: statusAchat.OB.color }}>{statusAchat.OB.status}</h2>
+                            </div>
                         </div>
-                        <div className="prog">
-                            <div className="view">
-                                <statusAchat.BC.img />
-                                <div style={{ background: statusAchat.BC.line, }} className="lineV"></div>
+                        <div className="inputsProg">
+                            <div className="inputCommande" style={{ width: "40rem" }}>
+                                <div className="label">DA *</div>
+                                <div className="inputText">
+                                    <input onChange={(e: any) => {
+                                        const newD = e.target.value;
+                                    }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                </div>
                             </div>
-                            <h1>Bande de commande</h1>
-                            <h2 className='status' style={{ color: statusAchat.BC.color }}>{statusAchat.BC.status}</h2>
-                        </div>
-                        <div className="prog">
-                            <div className="view">
-                                <statusAchat.BL.img />
-                                <div style={{ background: statusAchat.BL.line, }} className="lineV"></div>
+                            <div className="inputCommande" style={{ width: "40rem" }}>
+                                <div className="label">Date DA *</div>
+                                <div className="inputText">
+                                    <input onChange={(e: any) => {
+                                        const newD = e.target.value;
+                                    }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                </div>
                             </div>
-                            <h1>Bande de livraison</h1>
-                            <h2 className='status' style={{ color: statusAchat.BL.color }}>{statusAchat.BL.status}</h2>
-                        </div>
-                        <div className="prog">
-                            <div className="view">
-                                <statusAchat.OB.img />
+                            <div className="FileChange">
+                                <button onClick={() => document.getElementById('file-upload').click()}>
+                                    Browse
+                                </button>
+                                <label htmlFor="file-upload" className="custom-file-label">
+                                    {selectedFile ? selectedFile.name : ''}
+                                </label>
+                                <input
+                                    type="file"
+                                    id="file-upload"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                    accept="application/pdf"
+                                />
                             </div>
-                            <h1>Observation</h1>
-                            <h2 className='status' style={{ color: statusAchat.OB.color }}>{statusAchat.OB.status}</h2>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
+
         </div>
     )
 }

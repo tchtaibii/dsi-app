@@ -34,15 +34,27 @@ class AchatFilterSerializer(serializers.Serializer):
     situation_d_achat = serializers.IntegerField(required=False)
     typeDarticle = serializers.CharField(max_length=100, required=False)
     reste = serializers.BooleanField(required=False)
-    isComplete = serializers.BooleanField(required=False)
+    isComplet = serializers.BooleanField(required=False)
 
 
 class ProgressSerializer(serializers.Serializer):
-    class Meta:
-        model = Achat
-        fields = (
-            'DA',
-            'BC',
-            'BL',
-            'isComplete'
-        )
+    DA = serializers.CharField()
+    BC = serializers.CharField()
+    BL = serializers.CharField()
+    isComplet = serializers.BooleanField()
+    Designation = serializers.CharField()
+    demandeur = serializers.CharField()
+
+class PostDaSerializer(serializers.Serializer):
+    DA = serializers.IntegerField(required=True)
+    DateDA = serializers.DateTimeField(required=True)
+
+class PostBCSerializer(serializers.Serializer):
+    BC = serializers.IntegerField(required=True)
+    DateBC = serializers.DateTimeField(required=True)
+    FileBC = serializers.FileField(required=True)
+
+class PostBLSerializer(serializers.Serializer):
+    BL = serializers.IntegerField(required=True)
+    DateBL = serializers.DateTimeField(required=True)
+    FileBL = serializers.FileField(required=True)

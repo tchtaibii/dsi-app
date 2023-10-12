@@ -107,13 +107,13 @@ const Achats = () => {
     const Situation = (sda: number) => {
         switch (sda) {
             case 1:
-                return "Non livré";
+                return "Nouveau";
             case 2:
-                return "Non validé"
+                return "En cours de traitement"
             case 3:
-                return "livré"
+                return "En cours de livraison"
             case 4:
-                return "Livraison en cours "
+                return "Livré"
             case 5:
                 return "Livraison partielle"
         }
@@ -295,8 +295,8 @@ const Achats = () => {
                                         reste: !state.reste
                                     }))
                                     console.log(typeDachat)
-                                }} type="checkbox" name="Sauf les commandes avec Reste" id="" checked={queryParams.reste} />
-                                <h4>Sauf les commandes avec Reste</h4>
+                                }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.reste} />
+                                <h4>commande livré partiellement</h4>
                             </div>
                         </div>
                         <div className="row">
@@ -308,7 +308,7 @@ const Achats = () => {
                                     }))
                                     console.log(typeDachat)
                                 }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
-                                <h4>Livré</h4>
+                                <h4>DA terminé</h4>
                             </div>
                         </div>
                         <div style={{ flexDirection: 'row-reverse' }} className="row">
@@ -352,7 +352,7 @@ const Achats = () => {
                                 <p style={{ width: '15%' }}>Entité</p>
                                 <p style={{ width: '25%' }}>Désignation</p>
                                 <p style={{ width: '16%' }}>Date de la commande</p>
-                                <p style={{ width: '9%' }}>DA</p>
+                                <p style={{ width: '7%' }}>DA</p>
                                 <p style={{ width: '10%' }}>Etat d’order</p>
                             </div>
 
@@ -365,8 +365,8 @@ const Achats = () => {
                                         <p style={{ width: '14.3%' }}>{e.entité}</p>
                                         <p style={{ width: '23.6%' }}>{e.article__designation}</p>
                                         <p style={{ width: '15.3%' }}>{e.DateDeCommande}</p>
-                                        <p style={{ width: '8%' }}>{e.DA ? e.DA : "------"}</p>
-                                        <div style={{ width: '16%' }} className="etatCont">
+                                        <p style={{ width: '6%' }}>{e.DA ? e.DA : "------"}</p>
+                                        <div style={{ width: '19%' }} className="etatCont">
                                             <div style={{
                                                 backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "rgba(180, 51, 22, 0.50)"
                                                     : e.situation_d_achat === 3 ? "rgba(67, 168, 32, 0.32)"

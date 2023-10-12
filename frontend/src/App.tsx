@@ -61,10 +61,10 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="achats" element={<Achats />} />
-                    <Route path="commandes" element={<Commandes />} />
+                    {/* <Route path="commandes" element={<Commandes />} /> */}
                     <Route path="achat/:id" element={<Achat />} />
                     <Route path="AddCommande" element={<AddCommande />} />
-                    <Route path="progress/:id" element={<Progress />} />
+                    <Route path="commandes/:id" element={<Progress />} />
                     {/* <Route path="Profile/id" element={<Profile />} />
               <Route path="Products" element={<Products />} />
               <Route path="Product/:id" element={<Product />} />
@@ -74,7 +74,7 @@ function App() {
                     {/* <Route path="Achats" element={<Achats />} /> */}
                     {/* <Route path="Commandes" element={<Commandes />} /> */}
                     {/* <Route path="Customer" element={<Customer />} /> */}
-                    <Route path="customer" element={<Customer />} />
+                    {/* <Route path="customer" element={<Customer />} /> */}
                   </Routes>
                 </div>
               </div>
