@@ -22,44 +22,6 @@
             .rowchecks {
                 display: flex;
                 gap: 9rem;
-
-                .checkboxs {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    width: 9.5rem;
-
-                    input[type=checkbox] {
-                        width: 1.5rem;
-                        height: 1.5rem;
-                        border: 0.06rem solid $primary-color;
-                        border-radius: 0.3rem;
-                        cursor: pointer;
-                        appearance: none;
-                        transition: background-color 700ms ease-in-out;
-
-                        &:hover {
-                            background-color: $dark-color;
-                        }
-
-                        &:checked {
-                            background-color: $dark-color;
-                            background-image: url('../assets/checkbox.svg');
-                            background-position: center;
-                            background-repeat: no-repeat;
-                            background-size: 70%;
-
-                        }
-                    }
-
-                    h3 {
-                        color: rgba(186, 186, 186, 0.70);
-                        font-size: 1.5rem;
-                        font-style: normal;
-                        font-weight: 200;
-                        line-height: normal;
-                    }
-                }
             }
 
         }

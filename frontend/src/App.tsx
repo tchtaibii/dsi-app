@@ -6,6 +6,7 @@ import Achats from './Achats/Achats'
 import Achat from './Achat/Achat'
 import Commandes from './Commandes/Commandes'
 import AddCommande from './AddCommande/AddCommande'
+import Progress from './Progress/Progress'
 // import Orders from './Orders/Orders'
 // import Products from './Products/Products'
 // import Product from './Product/Product'
@@ -63,6 +64,7 @@ function App() {
                     <Route path="commandes" element={<Commandes />} />
                     <Route path="achat/:id" element={<Achat />} />
                     <Route path="AddCommande" element={<AddCommande />} />
+                    <Route path="progress/:id" element={<Progress />} />
                     {/* <Route path="Profile/id" element={<Profile />} />
               <Route path="Products" element={<Products />} />
               <Route path="Product/:id" element={<Product />} />

@@ -57,13 +57,15 @@ const Achats = () => {
         situation_d_achat: number | null;
         typeDarticle: string | null;
         reste: boolean;
-        isLivre : boolean;
+        isComplet: boolean;
     }
     const [achats, setAchats] = useState<any[]>([])
 
     const [typeDarticles, setTypeArticle] = useState([]);
     const [typeDachat, setTypeDachat] = useState([]);
     const [situationDachat, setSituationDachat] = useState([]);
+    const [isFilter, setFilter] = useState<boolean>(false)
+
 
     let navigate = useNavigate();
 
@@ -75,23 +77,13 @@ const Achats = () => {
         situation_d_achat: null,
         typeDarticle: null,
         reste: false,
-        isLivre : false
+        isComplet: false
     });
 
     useEffect(() => {
         const fetchData = async () => {
-            const nonNullParams: QueryParams | any = {};
-
-            Object.keys(queryParams).forEach((key) => {
-                if (queryParams[key as keyof QueryParams] !== null) {
-                    nonNullParams[key as keyof QueryParams] = queryParams[key as keyof QueryParams];
-                }
-            });
-
             try {
-                const Commandes = await axios.get('/achats/get/commandes/', {
-                    params: nonNullParams,
-                });
+                const Commandes = await axios.get('/achats/get/commandes/');
                 setAchats(Commandes.data.reverse());
                 const typeart = await axios.get('/achats/get/types_article');
                 setTypeArticle(typeart.data);
@@ -107,6 +99,11 @@ const Achats = () => {
         fetchData();
     }, []);
 
+
+    useEffect(() => {
+        console.log(queryParams)
+    }, [queryParams]);
+
     const Situation = (sda: number) => {
         switch (sda) {
             case 1:
@@ -121,44 +118,227 @@ const Achats = () => {
                 return "Livraison partielle"
         }
     }
+    const TypeDachat = (sda: number) => {
+        switch (sda) {
+            case 1:
+                return "Contrat Cadre";
+            case 2:
+                return "Achat Direct"
+            case 3:
+                return "Achat d'offre"
+            case 4:
+                return "Achat en ligne"
+        }
+    }
+    const [isFilterTypeAchat, setFilterAchat] = useState<boolean>(false);
+    const [isFilterTypeArt, setFilterArt] = useState<boolean>(false);
+    const [isFiltersit, setFilterSit] = useState<boolean>(false);
+
     return (
         <div className='ContentMain'>
-            <div className="filter">
-                <div className="filterBox">
-                    <div className="header">
-                        <h1>Filter</h1>
-                        <div style={{ cursor: 'pointer' }}><ExitSvg /></div>
-                    </div>
-                    <div className="row">
-                        <div className="inputCommande" >
-                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
-                                <input type="text" placeholder="Type D’achat" />
+            {
+                isFilter &&
+                <div className="filter">
+                    <div className="filterBox">
+                        <div className="header">
+                            <h1>Filter</h1>
+                            <div onClick={() => {
+                                setFilter(false)
+                            }} style={{ cursor: 'pointer' }}><ExitSvg /></div>
+                        </div>
+                        <div className="row">
+                            <div className="inputCommande" >
+                                <div className="inputText" onClick={() => {
+                                    setFilterAchat((state: boolean) => !state)
+                                    if (isFilterTypeArt)
+                                        setFilterArt(false)
+                                    if (isFiltersit)
+                                        setFilterSit(false)
+                                }} style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                    <input type="text" placeholder="Type D’achat" style={{ cursor: "pointer", caretColor: '#212332' }} value={queryParams.typeDachat ? TypeDachat(queryParams.typeDachat) : "Type d'achat"} />
+                                </div>
+                                {
+                                    isFilterTypeAchat &&
+                                    <div className="typeFilter">
+                                        {
+                                            typeDachat.length > 0 ?
+                                                typeDachat.map((e: any) => (
+                                                    <div onClick={() => {
+                                                        setQueryParams((state: any) => ({
+                                                            ...state,
+                                                            typeDachat: e.id
+                                                        }))
+                                                        setFilterAchat(false);
+                                                    }} className="typeCont">
+                                                        {e.type}
+                                                    </div>
+                                                ))
+                                                :
+                                                <div style={{ cursor: "initial" }} className="typeCont">
+                                                    No Type Found
+                                                </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div className="inputCommande" >
+                                <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                    <input type="text" onChange={(e: any) => {
+                                        const value = e.target.value;
+                                        setQueryParams((state: any) => ({
+                                            ...state,
+                                            DA: value
+                                        }))
+                                    }} placeholder="Entrez code DA" />
+                                </div>
                             </div>
                         </div>
-                        <div className="inputCommande" >
-                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
-                                <input type="text" placeholder="Entrez code DA" />
+                        <div className="row">
+                            <div className="inputCommande" >
+                                <div className="inputText" onClick={() => {
+                                    setFilterArt((state: boolean) => !state)
+                                    if (isFilterTypeAchat)
+                                        setFilterAchat(false)
+                                    if (isFiltersit)
+                                        setFilterSit(false)
+                                }} style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                    <input type="text" placeholder="Type de Désignation" style={{ cursor: "pointer", caretColor: '#212332' }} value={queryParams.typeDarticle ? queryParams.typeDarticle : "Type de Désignation"} />
+                                </div>
+                                {
+                                    isFilterTypeArt &&
+                                    <div className="typeFilter">
+                                        {
+                                            typeDarticles.length > 0 ?
+                                                typeDarticles.map((e: any) => (
+                                                    <div onClick={() => {
+                                                        setQueryParams((state: any) => ({
+                                                            ...state,
+                                                            typeDarticle: e.type
+                                                        }))
+                                                        setFilterArt(false);
+                                                    }} className="typeCont">
+                                                        {e.type}
+                                                    </div>
+                                                ))
+                                                :
+                                                <div style={{ cursor: "initial" }} className="typeCont">
+                                                    No Type Found
+                                                </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div className="inputCommande" >
+                                <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                    <input type="text" onChange={(e: any) => {
+                                        const value = e.target.value;
+                                        setQueryParams((state: any) => ({
+                                            ...state,
+                                            BC: value
+                                        }))
+                                    }} placeholder="Entrez code BC" />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="inputCommande" >
-                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
-                                <input type="text" placeholder="Type de Désignation" />
+                        <div className="row">
+                            <div className="inputCommande" >
+                                <div className="inputText" onClick={() => {
+                                    setFilterSit((state: boolean) => !state)
+                                    if (isFilterTypeAchat)
+                                        setFilterAchat(false)
+                                    if (isFilterTypeArt)
+                                        setFilterArt(false)
+                                }} style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                    <input type="text" placeholder="Situation d'achat" style={{ cursor: "pointer", caretColor: '#212332' }} value={queryParams.situation_d_achat ? Situation(queryParams.situation_d_achat) : "Situation d'achat"} />
+                                </div>
+                                {
+                                    isFiltersit &&
+                                    <div className="typeFilter">
+                                        {
+                                            situationDachat.length > 0 ?
+                                                situationDachat.map((e: any) => (
+                                                    <div onClick={() => {
+                                                        setQueryParams((state: any) => ({
+                                                            ...state,
+                                                            situation_d_achat: e.id
+                                                        }))
+                                                        setFilterSit(false);
+                                                    }} className="typeCont">
+                                                        {e.situation}
+                                                    </div>
+                                                ))
+                                                :
+                                                <div style={{ cursor: "initial" }} className="typeCont">
+                                                    No Situation Found
+                                                </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div className="inputCommande" >
+                                <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
+                                    <input type="text" onChange={(e: any) => {
+                                        const value = e.target.value;
+                                        setQueryParams((state: any) => ({
+                                            ...state,
+                                            BL: value
+                                        }))
+                                    }} placeholder="Entrez code BL" />
+                                </div>
                             </div>
                         </div>
-                        <div className="inputCommande" >
-                            <div className="inputText" style={{ background: "#212332", border: "0.06rem solid #B43316" }}>
-                                <input type="text" placeholder="Entrez code BC" />
+                        <div className="row">
+                            <div className="checkboxs" style={{ width: '100%' }}>
+                                <input onChange={() => {
+                                    setQueryParams((state: any) => ({
+                                        ...state,
+                                        reste: !state.reste
+                                    }))
+                                    console.log(typeDachat)
+                                }} type="checkbox" name="Sauf les commandes avec Reste" id="" checked={queryParams.reste} />
+                                <h4>Sauf les commandes avec Reste</h4>
                             </div>
+                        </div>
+                        <div className="row">
+                            <div className="checkboxs" style={{ width: '100%' }}>
+                                <input onChange={() => {
+                                    setQueryParams((state: any) => ({
+                                        ...state,
+                                        isComplet: !state.isComplet
+                                    }))
+                                    console.log(typeDachat)
+                                }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
+                                <h4>Livré</h4>
+                            </div>
+                        </div>
+                        <div style={{ flexDirection: 'row-reverse' }} className="row">
+                            <button onClick={async () => {
+                                const nonNullParams: QueryParams | any = {};
+                                Object.keys(queryParams).forEach((key) => {
+                                    if (queryParams[key as keyof QueryParams] !== null) {
+                                        nonNullParams[key as keyof QueryParams] = queryParams[key as keyof QueryParams];
+                                    }
+                                });
+                                try {
+                                    const Commandes = await axios.get('/achats/get/commandes/', {
+                                        params: nonNullParams,
+                                    });
+                                    setAchats(Commandes.data.reverse())
+                                }
+                                catch (error) {
+                                    console.error('Error:', error);
+                                }
+                            }}>Submit</button>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
             <div className="header">
-                <h1>Add Command</h1>
+                <h1>Achats</h1>
                 <div className="header2">
-                    <button style={{ width: "6.625rem", borderRadius: "1rem", backgroundColor: "#2A2D3E", border: "0.06rem solid #BABABA", display: 'flex', gap: "0.3rem", color: "#BABABA", fontSize: '1rem' }}>
+                    <button onClick={() => {
+                        setFilter(true)
+                    }} style={{ width: "6.625rem", borderRadius: "1rem", backgroundColor: "#2A2D3E", border: "0.06rem solid #BABABA", display: 'flex', gap: "0.3rem", color: "#BABABA", fontSize: '1rem' }}>
                         <FilterSvg />
                         filter</button>
                 </div>

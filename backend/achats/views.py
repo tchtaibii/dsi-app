@@ -1,10 +1,11 @@
+from rest_framework.decorators import api_view
 from .models import Achat
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Achat, TypeDachat, TypeDArticle, Article, SituationDachat
-from .serializers import AchatSerializer, AchatFilterSerializer
+from .serializers import AchatSerializer, AchatFilterSerializer, ProgressSerializer
 from .permissions import IsManagerAchatPermission
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
@@ -13,6 +14,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 import logging
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 
 logger = logging.getLogger(__name__)
@@ -108,10 +110,12 @@ def add_commande(request):
 
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
-@api_view(['GET'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
+    achats_list = []  # Define an empty list
+
     try:
         achats = Achat.objects.all()
         params = request.query_params
@@ -130,15 +134,15 @@ def get_commandes(request):
             achats = achats.filter(article__type=params['typeDarticle'])
         if 'reste' in params and params['reste'].lower() == 'true':
             achats = achats.filter(reste__gt=0)
-        if 'isLivre' in params and params['isLivre'].lower() == 'true':
-            achats = achats.filter(
-                ~Q(situation_d_achat__situation=params['Livré']))
+        if 'isComplet' in params and params['isComplet'].lower() == 'true':
+            achats = achats.filter(isComplet=False)  # Fixed this line
         achats = achats.select_related('article').values(
-            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation')
+            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation', 'isComplete')
         achats_list = list(achats)
         print(achats_list)
     except Exception as e:
         print(e)
+
     return JsonResponse(achats_list, safe=False)
 
 
@@ -179,3 +183,13 @@ def get_situation_achat(request):
     types = types.values('id', 'situation')
     types_list = list(types)
     return JsonResponse(types_list, safe=False)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_progress(request, id):
+    achat = get_object_or_404(Achat, id=id)
+    serializer = ProgressSerializer(achat)
+    serializer = AchatSerializer(achat)
+    return Response(serializer.data)

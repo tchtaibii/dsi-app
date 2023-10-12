@@ -66,6 +66,7 @@ class Achat(models.Model):
     BL_File = models.FileField(upload_to='uploads/BL', null=True, blank=True)
     reste = models.IntegerField(blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
+    isComplet = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.DateDeCommande)

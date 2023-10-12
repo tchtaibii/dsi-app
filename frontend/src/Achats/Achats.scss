@@ -30,6 +30,16 @@
     align-items: center;
     display: flex;
     margin-bottom: 0.4rem;
+    transition: all 500ms ease-in-out;
+    border-right: 0.06rem solid $dark-color;
+    border-bottom: 0.03rem solid $dark-color;
+
+    &:hover {
+        background: $dark2-color;
+        border-right: 0.06rem solid $primary-color;
+        border-bottom: 0.03rem solid $primary-color;
+    }
+
     // justify-content: space-between;
 
     p {
@@ -95,7 +105,7 @@
 
     .filterBox {
         width: 68.375rem;
-        height: 39.6875rem;
+        height: fit-content;
         border-radius: 1.25rem;
         border: 0.07px solid #B43316;
         background: #2A2D3E;
@@ -111,6 +121,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.87rem;
+
             h1 {
                 font-size: 2rem;
                 font-style: normal;
@@ -123,7 +134,41 @@
 }
 
 
-.row{
+.row {
     display: flex;
     justify-content: space-between;
+}
+
+.inputCommande {
+    position: relative;
+}
+
+.typeFilter {
+    position: absolute;
+    left: 0;
+    top: 4.2rem;
+    width: 100%;
+    z-index: 8888888;
+    border: 0.06rem solid rgb(180, 51, 22);
+    border-radius: 1.5rem;
+    background-color: rgb(33, 35, 50);
+    min-height: 2rem;
+    height: fit-content;
+    max-height: 30rem;
+    overflow-y: auto;
+
+    .typeCont {
+        width: 100%;
+        padding: 1rem 1.88rem;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        cursor: pointer;
+        transition: all 500ms ease-in-out;
+
+        &:hover {
+            background-color: $dark-color;
+        }
+    }
 }
