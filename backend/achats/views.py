@@ -1,3 +1,7 @@
+from django.conf import settings
+import io
+from .serializers import ProgressPostSerializer, FileSerializer
+import base64
 from rest_framework.decorators import api_view
 from .models import Achat
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -5,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Achat, TypeDachat, TypeDArticle, Article, SituationDachat
-from .serializers import AchatSerializer, AchatFilterSerializer, ProgressSerializer, PostDaSerializer, PostBCSerializer, PostBLSerializer
+from .serializers import AchatSerializer, AchatFilterSerializer, ProgressSerializer, PostDaSerializer, PostBCSerializer, PostBLSerializer, ProgressPostSerializer, PostOBSerializer
 from .permissions import IsManagerAchatPermission
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
@@ -16,87 +20,182 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import os
-
+from django.http import HttpResponse
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 
-@swagger_auto_schema(methods=['post'], request_body=PostDaSerializer)
+class CustomObject:
+    def __init__(self, code, date, is_, file):
+        self.code = code
+        self.date = date
+        self.is_ = is_
+        self.file = file
+
+
+@api_view(['GET'])
+def download_file(request, fl):
+    try:
+        if fl is not None or fl.size > 0:
+            file_path = '/app/static/files/'
+            with open(file_path + fl + '.pdf', 'rb') as file:
+                response = HttpResponse(
+                    file.read(), content_type='application/pdf')
+                # Replace with the actual file name
+                response['Content-Disposition'] = 'attachment; filename="' + fl + '.pdf"'
+
+            return response
+    except FileNotFoundError:
+        return Response({"message": "File not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def ExcelExportView(request):
+    achats_list = []  # Define an empty list
+    try:
+        achats = Achat.objects.all()
+        params = request.query_params
+        if 'typeDachat' in params:
+            achats = achats.filter(typeDachat=params['typeDachat'])
+        if 'DA' in params:
+            achats = achats.filter(DA=params['DA'])
+        if 'BC' in params:
+            achats = achats.filter(BC=params['BC'])
+        if 'BL' in params:
+            achats = achats.filter(BL=params['BL'])
+        if 'situation_d_achat' in params:
+            achats = achats.filter(
+                situation_d_achat=params['situation_d_achat'])
+        if 'typeDarticle' in params:
+            achats = achats.filter(article__type=params['typeDarticle'])
+        if 'reste' in params and params['reste'].lower() == 'true':
+            achats = achats.filter(reste__gt=0)
+        if 'isComplet' in params and params['isComplet'].lower() == 'true':
+            achats = achats.filter(isComplet=False)  # Fixed this line
+        achats = achats.select_related('article').values(
+            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation', 'isComplet')
+        df = pd.DataFrame(list(achats.values()))
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="output.xlsx"'
+        df.to_excel(response, index=False, engine='openpyxl')
+        return response
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+MAX_FILE_SIZE = 10 * 1024 * 1024
+
+
+@swagger_auto_schema(methods=['post'], request_body=ProgressPostSerializer)
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
-def post_da(request, id):
+def progress(request, id):
     try:
         data = request.data
-        serializer = PostDaSerializer(data=data)
-        if serializer.is_valid():
-            DA = serializer.validated_data['DA']
-            DateDA = serializer.validated_data['DateDA']
-            achat = Achat.objects.get(id=id)
-            achat.DA = DA
-            achat.DateDA = DateDA
-            achat.situation_d_achat = SituationDachat.objects.get(id=2)
-            achat.save()
-            return Response({"message": "Data is valid. Process it."})
-        return Response(serializer.errors, status=400)
+        is_ = data.get('is_')
+        # Access file directly from request data
+        file_data = request.data.get('file')
+        if is_ == 'DA':
+            serializer = PostDaSerializer(data=data)
+            if serializer.is_valid():
+                DA = serializer.validated_data['code']
+                DateDA = serializer.validated_data['date']
+                achat = Achat.objects.get(id=id)
+                achat.DA = DA
+                achat.DateDA = DateDA
+                achat.situation_d_achat = SituationDachat.objects.get(id=2)
+                achat.save()
+                return Response({"message": "Data is valid. Process it."})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif is_ == 'BC':
+            file_serializer = FileSerializer(data={'file': file_data})
+            file_serializer.is_valid(raise_exception=True)
+            if file_data:
+                if file_data.size > MAX_FILE_SIZE:
+                    return Response({"error": "File size exceeds the limit"}, status=status.HTTP_400_BAD_REQUEST)
+                file_data = file_data.split(',', 1)[1]
+                decoded_file = base64.b64decode(file_data)
+                file_object = io.BytesIO(decoded_file)
+                print('hekllo')
+                # Assuming 'MEDIA_ROOT' is your media directory
+                file_path = os.path.join(
+                    settings.MEDIA_ROOT, f"{data['code']}.pdf")
+                with open(file_path, 'wb') as f:
+                    f.write(file_object.getbuffer())
+            serializer = PostBCSerializer(data=data)
+            if serializer.is_valid():
+                BC = serializer.validated_data['code']
+                DateBC = serializer.validated_data['date']
+                achat = Achat.objects.get(id=id)
+                achat.BC = BC
+                achat.DateBC = DateBC
+                achat.BC_File = file_path  # Save the file path to the model field
+                achat.situation_d_achat = SituationDachat.objects.get(id=3)
+                achat.save()
+                return Response({"message": "Data is valid. Process it."})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif is_ == 'BL':
+            file_serializer = FileSerializer(data={'file': file_data})
+            file_serializer.is_valid(raise_exception=True)
+            if file_data:
+                if file_data.size > MAX_FILE_SIZE:
+                    return Response({"error": "File size exceeds the limit"}, status=status.HTTP_400_BAD_REQUEST)
+                file_data = file_data.split(',', 1)[1]
+                decoded_file = base64.b64decode(file_data)
+                file_object = io.BytesIO(decoded_file)
+                # Assuming 'MEDIA_ROOT' is your media directory
+                file_path = os.path.join(
+                    settings.MEDIA_ROOT, f"{data['code']}.pdf")
+                with open(file_path, 'wb') as f:
+                    f.write(file_object.getbuffer())
+            serializer = PostBLSerializer(data=data)
+            if serializer.is_valid():
+                BL = serializer.validated_data['code']
+                DateBL = serializer.validated_data['date']
+                reste = serializer.validated_data['reste']
+                achat = Achat.objects.get(id=id)
+                achat.BL = BL
+                achat.DateBL = DateBL
+                achat.BL_File = file_path  # Save the file path to the model field
+                achat.reste = reste
+                if int(data.get('reste')) <= 0:
+                    achat.situation_d_achat = SituationDachat.objects.get(id=4)
+                else:
+                    achat.situation_d_achat = SituationDachat.objects.get(id=5)
+                achat.save()
+                return Response({"message": "Data is valid. Process it."})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif is_ == 'OB':
+            serializer = PostOBSerializer(data=data)
+            print(data)
+            if serializer.is_valid():
+                print('hello')
+                OB = serializer.validated_data['code']
+                reste = serializer.validated_data['reste']
+                achat = Achat.objects.get(id=id)
+                achat.observation = OB
+                achat.reste = reste
+                if int(data.get('reste')) <= 0:
+                    achat.situation_d_achat = SituationDachat.objects.get(id=4)
+                    achat.isComplet = True
+                else:
+                    achat.situation_d_achat = SituationDachat.objects.get(id=5)
+                achat.save()
+                return Response({"message": "Data is valid. Process it."})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response('error', status=status.HTTP_400_BAD_REQUEST)
+
     except Exception as e:
-        return Response({"message": str(e)}, status=500)
-
-
-@swagger_auto_schema(methods=['post'], request_body=PostBCSerializer)
-@api_view(['POST'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
-@throttle_classes([UserRateThrottle])
-def post_bc(request, id):
-    try:
-        data = request.data
-        serializer = PostBCSerializer(data=data)
-        if serializer.is_valid():
-            BC = serializer.validated_data['BC']
-            DateBC = serializer.validated_data['DateBC']
-            FileBC = serializer.validated_data['FileBC']
-            allowed_extensions = ['.pdf']
-            file_extension = os.path.splitext(FileBC.name)[1].lower()
-            if file_extension not in allowed_extensions:
-                return Response({"message": "Invalid file extension. Allowed extension are: .pdf"}, status=400)
-            achat = Achat.objects.get(id=id)
-            achat.BC = BC
-            achat.DateBC = DateBC
-            achat.BC_File = FileBC
-            achat.situation_d_achat = SituationDachat.objects.get(id=3)
-            achat.save()
-            return Response({"message": "Data is valid. Process it."})
-        return Response(serializer.errors, status=400)
-    except Exception as e:
-        return Response({"message": str(e)}, status=500)
-
-
-@swagger_auto_schema(methods=['post'], request_body=PostBLSerializer)
-@api_view(['POST'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
-@throttle_classes([UserRateThrottle])
-def post_bc(request, id):
-    try:
-        data = request.data
-        serializer = PostBLSerializer(data=data)
-        if serializer.is_valid():
-            BL = serializer.validated_data['BL']
-            DateBL = serializer.validated_data['DateBL']
-            FileBL = serializer.validated_data['FileBL']
-            allowed_extensions = ['.pdf']
-            file_extension = os.path.splitext(FileBL.name)[1].lower()
-            if file_extension not in allowed_extensions:
-                return Response({"message": "Invalid file extension. Allowed extension are: .pdf"}, status=400)
-            achat = Achat.objects.get(id=id)
-            achat.BL = BL
-            achat.DateBL = DateBL
-            achat.BL_File = FileBL
-            achat.situation_d_achat = SituationDachat.objects.get(id=3)
-            achat.save()
-            return Response({"message": "Data is valid. Process it."})
-        return Response(serializer.errors, status=400)
-    except Exception as e:
-        return Response({"message": str(e)}, status=500)
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @swagger_auto_schema(methods=['post'], request_body=AchatSerializer)
@@ -145,20 +244,18 @@ def add_commande(request):
             designation = article_.get('designation')
             type_article = article_.get('type')
             fourniseur = article_.get('fourniseur')
-            prix_estimatif = None
+            prix_estimatif = article_.get('prix_estimatif')
             if (designation is not None and isinstance(designation, str)) and (type_article is not None and isinstance(type_article, str)) \
-                    and (fourniseur is not None and isinstance(fourniseur, str)):
+                    and (fourniseur is not None and isinstance(fourniseur, str) and (prix_estimatif is not None and isinstance(prix_estimatif, str))):
                 typearticle, created = TypeDArticle.objects.get_or_create(
                     type=type_article)
-                if article_.get('prix_estimatif') is not None and isinstance(article_.get('prix_estimatif'), int):
-                    prix_estimatif = article_.get('prix_estimatif')
                 try:
                     article = Article(
                         code=code,
                         designation=designation,
                         type=typearticle,
                         fourniseur=fourniseur,
-                        prix_estimatif=prix_estimatif
+                        prix_estimatif=int(prix_estimatif)
                     )
                     article.save()
                 except Exception as e:
@@ -282,6 +379,7 @@ def get_progress(request, id):
         'BL': achat.BL,
         'isComplet': achat.isComplet,
         'Designation': achat.article.designation,
-        'demandeur': achat.demandeur
+        'demandeur': achat.demandeur,
+        'reste': achat.reste
     })
     return Response(serializer.data)

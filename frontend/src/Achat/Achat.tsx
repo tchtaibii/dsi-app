@@ -48,7 +48,9 @@ const Achat = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get(`/achats/get/achat/${id}`).then((rsp: any) => setData(rsp.data))
+            await axios.get(`/achats/get/achat/${id}`).then((rsp: any) => {
+                setData(rsp.data)
+            })
         }
         fetchData();
     }, [])
@@ -129,20 +131,23 @@ const Achat = () => {
                                         <td className="ValueTd">{Data.DateBC ? Data.DateBC : "-----"}</td>
                                     </tr>
                                     <tr>
+                                        <td className="keyTd">BC Document</td>
+                                        <td className="ValueTd">
+                                            {
+                                                Data.BC ? <button onClick={async () => {
+                                                    await axios.get(`/achats/download_file/${Data.BC}`)
+                                                }}>Download</button> : "-----"
+                                            }
+
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td className="keyTd">{(Data.typeDachat === 1 ? "Contrat" : "Founisseur")}</td>
                                         <td className="ValueTd">{(Data.typeDachat === 1 ? (Data.article.contrat.name ? Data.article.contrat.name : "-----") : (Data.article.fourniseur ? Data.article.fourniseur : "-----"))}</td>
                                     </tr>
                                     <tr>
                                         <td className="keyTd">Type d'achat</td>
                                         <td className="ValueTd">{TypeDachat(Data.typeDachat)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Situation d'achat</td>
-                                        <td className="ValueTd">{Situation(Data.situation_d_achat)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Observation</td>
-                                        <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
                                     </tr>
                                     <tr>
                                         <td className="keyTd">BL</td>
@@ -153,8 +158,27 @@ const Achat = () => {
                                         <td className="ValueTd">{Data.DateBL ? Data.DateBL : "-----"}</td>
                                     </tr>
                                     <tr>
+                                        <td className="keyTd">BL Document</td>
+                                        <td className="ValueTd">
+                                            {
+                                                Data.BL ? <button onClick={async () => {
+                                                    await axios.get(`/achats/download_file/${Data.BL}`)
+                                                }}>Download</button> : "-----"
+                                            }
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="keyTd">Situation d'achat</td>
+                                        <td className="ValueTd">{Situation(Data.situation_d_achat)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="keyTd">Observation</td>
+                                        <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
+                                    </tr>
+                                    <tr>
                                         <td className="keyTd lastTd">Reste</td>
-                                        <td className="ValueTd lastTd">{Data.reste ? Data.reste : "-----"}</td>
+                                        <td className="ValueTd lastTd">{Data.reste !== null ? Data.reste : "-----"}</td>
                                     </tr>
                                 </tbody>
                             </table>

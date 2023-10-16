@@ -31,7 +31,19 @@ const PendingSvg = () => (
         width: "5.34744rem",
         height: "5.27344rem"
     }} width={86} height={85} viewBox="0 0 86 85" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="42.8078" cy="42.1875" rx="42.7795" ry="42.1875" fill="#A2CFFE" fillOpacity="0.5" />
+        <ellipse cx="42.8078" cy="42.1875" rx="42.7795" ry="42.1875" fill="#A2CFFE">
+        </ellipse>
+    </svg>
+
+)
+
+
+const UploadSvg = () => (
+    <svg style={{
+        width: "1.4375rem",
+        height: "1.74556rem"
+    }} width={23} height={28} viewBox="0 0 23 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.57143 21.3571H16.4286V11.5H23L11.5 0L0 11.5H6.57143V21.3571ZM0 24.6428H23V27.9286H0V24.6428Z" fill="#F1F1F1" />
     </svg>
 
 )
@@ -39,6 +51,7 @@ const PendingSvg = () => (
 interface AChat {
     Designation: string;
     demandeur: string;
+    reste: number;
 }
 
 const Achats = () => {
@@ -56,24 +69,34 @@ const Achats = () => {
         BC: {
             img: PendingSvg,
             status: 'Pending',
-            color: "rgba(162, 207, 254, 0.50)",
-            line: "rgba(162, 207, 254, 0.50)"
+            color: "#A2CFFE",
+            line: "#A2CFFE"
         },
         BL: {
             img: PendingSvg,
             status: 'Pending',
-            color: "rgba(162, 207, 254, 0.50)",
-            line: "rgba(162, 207, 254, 0.50)"
+            color: "#A2CFFE",
+            line: "#A2CFFE"
         },
         OB: {
             img: PendingSvg,
             status: 'Pending',
-            color: "rgba(162, 207, 254, 0.50",
-            line: "rgba(162, 207, 254, 0.50)"
+            color: "#A2CFFE",
+            line: "#A2CFFE"
         },
     });
+    const [postData, setDataPost] = useState({
+        code: null,
+        date: null,
+        is_: null,
+        reste: 0
+    })
 
+    useEffect(() => {
+        console.log(postData)
+    }, [postData])
     const statusFunc = (obj: any) => {
+        setarticle({ Designation: obj.Designation, demandeur: obj.demandeur, reste: obj.reste });
         if (obj.isComplet === true) {
             setStatus({
                 DA: {
@@ -101,9 +124,13 @@ const Achats = () => {
                     line: "#008C76"
                 },
             })
+            setDataPost((state: any) => ({
+                ...state,
+                is_: 'DONE'
+            }))
             return;
         }
-        else if (obj.BL !== null) {
+        else if (obj.BL !== null && obj.BL.length > 0) {
             setStatus({
                 DA: {
                     img: ValidateSvg,
@@ -130,8 +157,12 @@ const Achats = () => {
                     line: "linear-gradient(90deg, #0468C8 50%, #6780A0 50%)"
                 },
             })
+            setDataPost((state: any) => ({
+                ...state,
+                is_: 'OB'
+            }))
         }
-        else if (obj.BC !== null) {
+        else if (obj.BC !== null && obj.BC.length > 0) {
             setStatus({
                 DA: {
                     img: ValidateSvg,
@@ -154,12 +185,16 @@ const Achats = () => {
                 OB: {
                     img: PendingSvg,
                     status: 'Pending',
-                    color: "rgba(162, 207, 254, 0.50)",
-                    line: "rgba(162, 207, 254, 0.50)"
+                    color: "#A2CFFE",
+                    line: "#A2CFFE"
                 }
             })
+            setDataPost((state: any) => ({
+                ...state,
+                is_: 'BL'
+            }))
         }
-        else if (obj.DA !== null) {
+        else if (obj.DA !== null && obj.DA.length > 0) {
             setStatus({
                 DA: {
                     img: ValidateSvg,
@@ -176,16 +211,20 @@ const Achats = () => {
                 BL: {
                     img: PendingSvg,
                     status: 'Pending',
-                    color: "rgba(162, 207, 254, 0.50)",
-                    line: "rgba(162, 207, 254, 0.50)"
+                    color: "#A2CFFE",
+                    line: "#A2CFFE"
                 },
                 OB: {
                     img: PendingSvg,
                     status: 'Pending',
-                    color: "rgba(162, 207, 254, 0.50)",
-                    line: "rgba(162, 207, 254, 0.50)"
+                    color: "#A2CFFE",
+                    line: "#A2CFFE"
                 }
             })
+            setDataPost((state: any) => ({
+                ...state,
+                is_: 'BC'
+            }))
         }
         else {
             setStatus({
@@ -198,32 +237,42 @@ const Achats = () => {
                 BC: {
                     img: PendingSvg,
                     status: 'Pending',
-                    color: "rgba(162, 207, 254, 0.50)",
-                    line: "rgba(162, 207, 254, 0.50)"
+                    color: "#A2CFFE",
+                    line: "#A2CFFE"
                 },
                 BL: {
                     img: PendingSvg,
                     status: 'Pending',
-                    color: "rgba(162, 207, 254, 0.50)",
-                    line: "rgba(162, 207, 254, 0.50)"
+                    color: "#A2CFFE",
+                    line: "#A2CFFE"
                 },
                 OB: {
                     img: PendingSvg,
                     status: 'Pending',
-                    color: "rgba(162, 207, 254, 0.50)",
-                    line: "rgba(162, 207, 254, 0.50)"
+                    color: "#A2CFFE",
+                    line: "#A2CFFE"
                 }
             })
+            setDataPost((state: any) => ({
+                ...state,
+                is_: 'DA'
+            }))
         }
-        setarticle({ Designation: obj.Designation, demandeur: obj.demandeur });
+
     }
 
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => statusFunc(rsp.data)).catch((rsp: any) => console.log(rsp));
+            await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => {
+                statusFunc(rsp.data)
+                console.log(rsp.data)
+            }).catch((rsp: any) => console.log(rsp));
         }
         fetchData();
     }, [])
+    useEffect(() => {
+        console.log('article', article)
+    }, [article])
 
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -231,6 +280,55 @@ const Achats = () => {
         const file = e.target.files[0];
         setSelectedFile(file);
     };
+
+    const handleButtonClick = async () => {
+        if (postData.is_ !== 'DA' && postData.is_ !== 'OB') {
+            const reader = new FileReader();
+            reader.onload = async (event: any) => {
+                const base64String = event.target.result;
+                const MAX_FILE_SIZE = 10485760;
+                if (base64String.size > MAX_FILE_SIZE) {
+                    // Handle file size exceeding the limit
+                    console.error('File size exceeds the limit');
+                    return;
+                }
+                await axios.post(`/achats/progress/${id}`, {
+                    file: base64String, // Include the base64String in the request
+                    code: postData.code, // Include other variables as needed
+                    date: postData.date,
+                    is_: postData.is_,
+                    reste: postData.reste
+                    // Include other variables as needed
+                })
+                    .then((response: any) => {
+                        // Handle the response from the server
+                    })
+                    .catch((error: any) => {
+                        // Handle any errors from the server
+                    });
+            };
+
+            // Replace 'selectedFile' with the file object you want to send
+            reader.readAsDataURL(selectedFile);
+        }
+        else {
+            if (postData.is_ === 'DA') {
+                await axios.post(`/achats/progress/${id}`, {
+                    code: postData.code, // Include other variables as needed
+                    date: postData.date,
+                    is_: postData.is_,
+                })
+            }
+            else {
+                await axios.post(`/achats/progress/${id}`, {
+                    code: postData.code, // Include other variables as needed
+                    reste: postData.reste,
+                    is_: postData.is_,
+                })
+            }
+        }
+    };
+
 
     return (
         <div className='ContentMain'>
@@ -255,7 +353,7 @@ const Achats = () => {
                                     <statusAchat.BC.img />
                                     <div style={{ background: statusAchat.BC.line, }} className="lineV"></div>
                                 </div>
-                                <h1>Bande de commande</h1>
+                                <h1>Bon de commande</h1>
                                 <h2 className='status' style={{ color: statusAchat.BC.color }}>{statusAchat.BC.status}</h2>
                             </div>
                             <div className="prog">
@@ -263,7 +361,7 @@ const Achats = () => {
                                     <statusAchat.BL.img />
                                     <div style={{ background: statusAchat.BL.line, }} className="lineV"></div>
                                 </div>
-                                <h1>Bande de livraison</h1>
+                                <h1>Bon de livraison</h1>
                                 <h2 className='status' style={{ color: statusAchat.BL.color }}>{statusAchat.BL.status}</h2>
                             </div>
                             <div className="prog">
@@ -274,43 +372,128 @@ const Achats = () => {
                                 <h2 className='status' style={{ color: statusAchat.OB.color }}>{statusAchat.OB.status}</h2>
                             </div>
                         </div>
-                        <div className="inputsProg">
-                            <div className="inputCommande" style={{ width: "40rem" }}>
-                                <div className="label">DA *</div>
-                                <div className="inputText">
-                                    <input onChange={(e: any) => {
-                                        const newD = e.target.value;
-                                    }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                        {
+                            postData.is_ !== 'DONE'
+                                ?
+                                <div className="inputsProg">
+                                    {
+                                        postData.is_ !== 'OB'
+                                            ?
+                                            <>
+                                                <div className="inputCommande" style={{ width: "40rem" }}>
+                                                    <div className="label">{postData.is_ + '*'}</div>
+                                                    <div className="inputText">
+                                                        <input onChange={(e: any) => {
+                                                            const newD = e.target.value;
+                                                            setDataPost((state: any) => ({
+                                                                ...state,
+                                                                code: newD
+                                                            }))
+                                                        }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                                    </div>
+                                                </div>
+                                                <div className="inputCommande" style={{ width: "40rem" }}>
+                                                    <div className="label">{`Date ${postData.is_
+                                                        } *`}</div>
+                                                    <div className="inputText">
+                                                        <input onChange={(e: any) => {
+                                                            const newD = e.target.value;
+                                                            setDataPost((state: any) => ({
+                                                                ...state,
+                                                                date: newD
+                                                            }))
+                                                        }} placeholder="ex: 10020319" type="date" name="Demandeur" id="" />
+                                                    </div>
+                                                </div>
+                                                {
+                                                    postData && postData.is_ === 'BL' &&
+                                                    <div className="inputCommande" style={{ width: "40rem" }}>
+                                                        <div className="label">{`Reste *`}</div>
+                                                        <div className="inputText">
+                                                            <input onChange={(e: any) => {
+                                                                const newD = e.target.value;
+                                                                setDataPost((state: any) => ({
+                                                                    ...state,
+                                                                    reste: newD
+                                                                }))
+                                                            }} placeholder="ex: 5" type="number" name="Reste" id="" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                                {
+                                                    postData && (postData.is_ === 'BC' || postData.is_ === 'BL') &&
+                                                    <div className="FileChange">
+                                                        <button onClick={() => document.getElementById('file-upload').click()}>
+                                                            <UploadSvg />
+                                                            Upload file
+                                                        </button>
+                                                        <label htmlFor="file-upload" className="custom-file-label">
+                                                            {selectedFile ? selectedFile.name : ''}
+                                                        </label>
+                                                        <input
+                                                            type="file"
+                                                            id="file-upload"
+                                                            className="hidden"
+                                                            onChange={handleFileChange}
+                                                            accept="application/pdf"
+                                                        />
+                                                    </div>
+                                                }
+                                            </>
+                                            :
+                                            <>
+                                                <div className="inputCommande" style={{ width: "40rem" }}>
+                                                    <div className="label">{'Observation' + '*'}</div>
+                                                    <div className="inputText textArea">
+                                                        <textarea onChange={(e: any) => {
+                                                            const newD = e.target.value;
+                                                            setDataPost((state: any) => ({
+                                                                ...state,
+                                                                code: newD
+                                                            }))
+                                                        }} placeholder='No more than 100 characters' maxLength="100" name="" id=""></textarea>
+                                                    </div>
+                                                </div>
+                                                {
+                                                    article.reste > 0 &&
+                                                    <div className="inputCommande" style={{ width: "40rem" }}>
+                                                        <div className="label">{`Reste *`}</div>
+                                                        <div className="inputText">
+                                                            <input onChange={(e: any) => {
+                                                                const newD = e.target.value;
+                                                                setDataPost((state: any) => ({
+                                                                    ...state,
+                                                                    reste: newD
+                                                                }))
+                                                            }} placeholder="ex: 5" type="number" name="Reste" id="" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </>
+                                    }
+                                    <div className="submitStep">
+                                        {
+                                            postData.is_ !== 'OB' && <div className='sendMail'>Envoyer un email</div>
+                                        }
+                                        <button onClick={async () => {
+                                            if (postData) {
+                                                if (postData.is_ === 'DA' && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0))
+                                                    return;
+                                                if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null)
+                                                    return;
+                                                handleButtonClick();
+                                                // window.location.reload()
+                                            }
+                                        }}
+                                            className='Next'>{postData.is_ !== 'OB' ? "Suivant" : "Submit"}</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="inputCommande" style={{ width: "40rem" }}>
-                                <div className="label">Date DA *</div>
-                                <div className="inputText">
-                                    <input onChange={(e: any) => {
-                                        const newD = e.target.value;
-                                    }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
-                                </div>
-                            </div>
-                            <div className="FileChange">
-                                <button onClick={() => document.getElementById('file-upload').click()}>
-                                    Browse
-                                </button>
-                                <label htmlFor="file-upload" className="custom-file-label">
-                                    {selectedFile ? selectedFile.name : ''}
-                                </label>
-                                <input
-                                    type="file"
-                                    id="file-upload"
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                    accept="application/pdf"
-                                />
-                            </div>
-                        </div>
+                                :
+                                <></>
+                        }
                     </div>
                 </div>
             }
-
         </div>
     )
 }

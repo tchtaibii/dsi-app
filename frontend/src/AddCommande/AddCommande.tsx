@@ -24,8 +24,6 @@ interface Commandes {
 
 function AddCommande() {
 
-
-
     const [statusCode, setStatus] = useState({
         color: "#AF4C4C",
         status: "Failed",

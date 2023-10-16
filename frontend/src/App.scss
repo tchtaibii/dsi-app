@@ -97,7 +97,7 @@
 
 button {
   all: none;
-  background-color: $primary-color;
+  background-color: $nav-color;
   padding: 0.5rem 0.8rem;
   display: flex;
   align-items: center;
@@ -117,7 +117,7 @@ button {
   }
 
   &:hover {
-    background-color: $primary-color-hover;
+    background-color: $primary-color-hover2;
     transform: scale(1);
   }
 }
@@ -128,7 +128,7 @@ button {
 
   &:hover {
     background-color: transparent;
-    color: $primary-color-hover;
+    color: $primary-color-hover2;
   }
 }
 

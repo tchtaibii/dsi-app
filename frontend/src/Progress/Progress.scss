@@ -67,12 +67,57 @@
     flex-direction: row;
     gap: 1rem;
     align-items: center;
+    width: 100%;
+
     .custom-file-label {
         color: $second-color;
+        font-size: 1rem;
         cursor: pointer;
     }
 
     .hidden {
         display: none;
+    }
+
+    button {
+        width: 11.0625rem;
+        height: 3.875rem;
+        border-radius: 1.25rem;
+        border-bottom: 0.06rem solid $back-color;
+        background: $nav-color;
+        color: $back-color;
+        font-size: 1.25rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        gap: 0.4rem;
+    }
+}
+
+.submitStep {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 2.2rem;
+    align-items: center;
+
+    .sendMail {
+        color: $nav-color;
+        text-align: center;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        cursor: pointer;
+        transition: all 500ms ease-in-out;
+        &:hover{
+            color: $primary-color-hover2;
+        }
+    }
+
+    button.Next {
+        width: 7.9855rem;
+        height: 3.75rem;
+
     }
 }

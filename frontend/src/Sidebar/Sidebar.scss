@@ -1,21 +1,24 @@
 @import '../tools.scss';
 
 
+
 .Sidebar {
     display: flex;
     flex-direction: column;
     height: 100%;
     background-color: $dark-color;
-    padding-left: 0.7rem;
-    padding-top: 2rem;
+    // padding-left: 0.7rem;
+    // padding-top: 2rem;
     padding-bottom: 1.94rem;
     justify-content: space-between;
+    box-shadow:  8px 0px 44px -16px rgba(0, 0, 0, 0.25);
 
     .top {
         width: 100%;
         display: flex;
         flex-direction: column;
         gap: 6rem;
+
 
         .burger {
             // margin-left: 1.22rem;
@@ -29,7 +32,7 @@
             transition: all 500ms ease-in-out;
 
             &:hover {
-                background-color: $back-color;
+                opacity: 0.4;
             }
         }
 
@@ -40,6 +43,8 @@
             text-decoration: none;
             width: 100%;
             padding-right: 0.5rem;
+            padding-left: 0.7rem;
+            padding-top: 2rem;
 
             a {
                 text-decoration: none;
@@ -78,13 +83,22 @@
 
 .nav-icon-act {
     background-color: $primary-color-hover;
-    color: $primary-color;   
+    color: $primary-color;
 
     svg path {
         fill: $primary-color;
         stroke: none;
     }
 }
-.logout{
+
+.logout {
     color: $primary-color;
+}
+
+
+.navCon {
+    background-color: $nav-color;
+    height: 5.95rem;
+    padding-left: 0.7rem;
+    padding-top: 1.5rem;
 }

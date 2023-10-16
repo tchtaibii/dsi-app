@@ -44,17 +44,39 @@ class ProgressSerializer(serializers.Serializer):
     isComplet = serializers.BooleanField()
     Designation = serializers.CharField()
     demandeur = serializers.CharField()
+    reste = serializers.IntegerField()
+
+
+class FileSerializer(serializers.Serializer):
+    file = serializers.CharField()
+
+
+class ProgressPostSerializer(serializers.Serializer):
+    code = serializers.CharField(required=False)
+    date = serializers.DateField(required=False)
+    is_ = serializers.CharField(required=True)
+    reste = serializers.CharField(required=False)
+    obs = serializers.CharField(required=False)
+
 
 class PostDaSerializer(serializers.Serializer):
-    DA = serializers.IntegerField(required=True)
-    DateDA = serializers.DateTimeField(required=True)
+    code = serializers.CharField(required=True)
+    date = serializers.DateTimeField(required=True)
+
 
 class PostBCSerializer(serializers.Serializer):
-    BC = serializers.IntegerField(required=True)
-    DateBC = serializers.DateTimeField(required=True)
-    FileBC = serializers.FileField(required=True)
+    code = serializers.CharField(required=True)
+    date = serializers.DateTimeField(required=True)
+    is_ = serializers.CharField(required=True)
+
 
 class PostBLSerializer(serializers.Serializer):
-    BL = serializers.IntegerField(required=True)
-    DateBL = serializers.DateTimeField(required=True)
-    FileBL = serializers.FileField(required=True)
+    code = serializers.CharField(required=True)
+    date = serializers.DateTimeField(required=True)
+    reste = serializers.IntegerField(required=True)
+    is_ = serializers.CharField(required=True)
+
+class PostOBSerializer(serializers.Serializer):
+    code = serializers.CharField(required=True)
+    reste = serializers.IntegerField(required=True)
+    is_ = serializers.CharField(required=True)
