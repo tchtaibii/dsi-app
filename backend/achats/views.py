@@ -120,7 +120,8 @@ def progress(request, id):
             file_serializer = FileSerializer(data={'file': file_data})
             file_serializer.is_valid(raise_exception=True)
             if file_data:
-                if file_data.size > MAX_FILE_SIZE:
+                print(len(file_data))
+                if len(file_data) > MAX_FILE_SIZE:
                     return Response({"error": "File size exceeds the limit"}, status=status.HTTP_400_BAD_REQUEST)
                 file_data = file_data.split(',', 1)[1]
                 decoded_file = base64.b64decode(file_data)
@@ -147,7 +148,7 @@ def progress(request, id):
             file_serializer = FileSerializer(data={'file': file_data})
             file_serializer.is_valid(raise_exception=True)
             if file_data:
-                if file_data.size > MAX_FILE_SIZE:
+                if len(file_data) > MAX_FILE_SIZE:
                     return Response({"error": "File size exceeds the limit"}, status=status.HTTP_400_BAD_REQUEST)
                 file_data = file_data.split(',', 1)[1]
                 decoded_file = base64.b64decode(file_data)

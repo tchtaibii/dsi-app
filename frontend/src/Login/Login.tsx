@@ -24,7 +24,7 @@ function Login({ setIsLogin }): { setIsLogin: any } {
   const HandleLogin = async () => {
     if (loginField.email && loginField.email.length > 0 && loginField.password && loginField.password.length > 0 && isValid) {
       try {
-        const response = await axios.post('http://localhost:8000/auth/login/', {
+        const response = await axios.post('http://10.32.80.237:8000/auth/login/', {
           "email": loginField.email,
           "password": loginField.password
         });

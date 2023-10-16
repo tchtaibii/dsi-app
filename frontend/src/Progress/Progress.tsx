@@ -482,7 +482,7 @@ const Achats = () => {
                                                 if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null)
                                                     return;
                                                 handleButtonClick();
-                                                // window.location.reload()
+                                                window.location.reload()
                                             }
                                         }}
                                             className='Next'>{postData.is_ !== 'OB' ? "Suivant" : "Submit"}</button>
