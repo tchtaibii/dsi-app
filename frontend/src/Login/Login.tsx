@@ -46,6 +46,11 @@ function Login({ setIsLogin }): { setIsLogin: any } {
       }
     }
   }
+  const handleKeyPress = (e:any) => {
+    if (e.key === 'Enter') {
+      HandleLogin();
+    }
+  };
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -71,7 +76,7 @@ function Login({ setIsLogin }): { setIsLogin: any } {
       <div style={{ width: '40.1385rem' }} className="inputCommande">
         <div className="label">Password </div>
         <div className="inputText">
-          <input onChange={(e: any) => {
+          <input onKeyPress={handleKeyPress} onChange={(e: any) => {
             const newD = e.target.value;
             setLogin((state: any) => ({
               ...state,
