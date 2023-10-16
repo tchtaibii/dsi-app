@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @swagger_auto_schema(methods=['post'], request_body=CustomUserSerializer)
 @api_view(['POST'])
-# @permission_classes([IsSuperuserPermission])
+@permission_classes([IsSuperuserPermission])
 @throttle_classes([UserRateThrottle])
 def user_registration(request):
     try:

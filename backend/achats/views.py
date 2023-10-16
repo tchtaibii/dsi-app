@@ -55,7 +55,7 @@ def download_file(request, fl):
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def ExcelExportView(request):
     achats_list = []  # Define an empty list
@@ -96,7 +96,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @swagger_auto_schema(methods=['post'], request_body=ProgressPostSerializer)
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def progress(request, id):
     try:
@@ -293,7 +293,7 @@ def add_commande(request):
 
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
@@ -331,7 +331,7 @@ def get_commandes(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_achat(request, id):
     achat = get_object_or_404(Achat, id=id)
@@ -340,7 +340,7 @@ def get_achat(request, id):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_types_article(request):
     types = TypeDArticle.objects.all()
@@ -350,7 +350,7 @@ def get_types_article(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_types_achat(request):
     types = TypeDachat.objects.all()
@@ -360,7 +360,7 @@ def get_types_achat(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_situation_achat(request):
     types = SituationDachat.objects.all()
@@ -370,7 +370,7 @@ def get_situation_achat(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_progress(request, id):
     achat = get_object_or_404(Achat, id=id)
