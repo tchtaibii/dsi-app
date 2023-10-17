@@ -16,5 +16,6 @@ urlpatterns = [
     path('download_file/<str:fl>', views.download_file, name='download-file'),
     path('situationDash/', views.dashboard_header, name='situation-dashboard'),
     path('pieChart/', views.dashboard_pie, name='Pie-dashboard'),
+    path('lineChart/', views.dashboard_line, name='Line-dashboard'),
     
 ]

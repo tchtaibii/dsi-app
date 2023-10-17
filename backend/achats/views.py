@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from django.conf import settings
 import io
 from .serializers import ProgressPostSerializer, FileSerializer
@@ -387,7 +388,7 @@ def get_progress(request, id):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_header(request):
     try:
@@ -413,7 +414,7 @@ def dashboard_header(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_pie(request):
     try:
@@ -429,3 +430,32 @@ def dashboard_pie(request):
         return Response(counts)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def dashboard_line(request):
+    try:
+        achats = Achat.objects.all()
+        achats = achats.filter(isComplet=False)
+        today = datetime.now().date()
+
+        eight_weeks_delta = timedelta(weeks=8)
+        eight_weeks_from_now = today - eight_weeks_delta
+        achats = achats.filter(DateBC__lt=eight_weeks_from_now)
+
+        result = []
+        for achat in achats:
+            weeks_count = ((today - achat.DateBC) / 7)
+            result.append(
+                {
+                    'achat_id': achat.id,
+                    'weeks_count': int(str(weeks_count).split()[0])
+                }
+            )
+
+        return Response(result)
+
+    except Exception as e:
+        return Response({'error': str(e)})

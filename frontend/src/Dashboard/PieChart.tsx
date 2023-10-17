@@ -21,13 +21,13 @@ function PieChart({ data }) {
 
     ];
     return (
-        <div style={{ width: '100%', height: '100%', transform: 'translate(-11rem, -5.9rem)' }}>
+        <div style={{transform: 'translateX(5rem)', width: '100%', marginTop: '-5rem', height: '100%', display: 'flex', alignItems: 'center' }}>
             <Chart
                 chartType="PieChart"
                 data={dataP}
                 options={options}
-                width={"115%"}
-                height={"120%"}
+                width={"105%"}
+                height={"130%"}
             />
         </div>
 

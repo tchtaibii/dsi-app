@@ -77,7 +77,9 @@
         border: 0.06rem solid $nav-color;
         transition: all 500ms ease-in-out;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        padding-top: 1rem;
+        // justify-content: center;
         align-items: center;
         position: relative;
 
@@ -91,9 +93,9 @@
             font-style: normal;
             font-weight: 600;
             line-height: normal;
-            position: absolute;
-            bottom: 10%;
-            left: 65%;
+            // position: absolute;
+            // bottom: 10%;
+            // left: 65%;
         }
 
     }

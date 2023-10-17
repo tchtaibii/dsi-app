@@ -171,7 +171,7 @@ const Achats = () => {
                                     if (isFiltersit)
                                         setFilterSit(false)
                                 }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
-                                    <input type="text" placeholder="Type D’achat" style={{ cursor: "pointer", caretColor: 'transparent' }} value={queryParams.typeDachat ? TypeDachat(queryParams.typeDachat) : "Type d'achat"} />
+                                    <input type="text" placeholder="Type D’achat" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.typeDachat ? TypeDachat(queryParams.typeDachat) : "Type d'achat"} />
                                 </div>
                                 {
                                     isFilterTypeAchat &&
@@ -180,7 +180,7 @@ const Achats = () => {
                                             {
                                                 typeDachat.length > 0 ?
                                                     typeDachat.map((e: any) => (
-                                                        <div onClick={() => {
+                                                        <div key={`${e.id}-typede--y`} onClick={() => {
                                                             setQueryParams((state: any) => ({
                                                                 ...state,
                                                                 typeDachat: e.id
@@ -221,7 +221,7 @@ const Achats = () => {
                                     if (isFiltersit)
                                         setFilterSit(false)
                                 }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
-                                    <input type="text" placeholder="Type de Désignation" style={{ cursor: "pointer", caretColor: 'transparent' }} value={queryParams.typeDarticle ? queryParams.typeDarticle : "Type de Désignation"} />
+                                    <input type="text" placeholder="Type de Désignation" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.typeDarticle ? queryParams.typeDarticle : "Type de Désignation"} />
                                 </div>
                                 {
                                     isFilterTypeArt &&
@@ -229,8 +229,8 @@ const Achats = () => {
                                         <div className="contType">
                                             {
                                                 typeDarticles.length > 0 ?
-                                                    typeDarticles.map((e: any) => (
-                                                        <div onClick={() => {
+                                                    typeDarticles.map((e: any, index: number) => (
+                                                        <div key={`${id}-type-${e.type}`} onClick={() => {
                                                             setQueryParams((state: any) => ({
                                                                 ...state,
                                                                 typeDarticle: e.type
@@ -271,7 +271,7 @@ const Achats = () => {
                                     if (isFilterTypeArt)
                                         setFilterArt(false)
                                 }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
-                                    <input type="text" placeholder="Situation d'achat" style={{ cursor: "pointer", caretColor: 'transparent' }} value={queryParams.situation_d_achat ? Situation(queryParams.situation_d_achat) : "Situation d'achat"} />
+                                    <input type="text" placeholder="Situation d'achat" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.situation_d_achat ? Situation(queryParams.situation_d_achat) : "Situation d'achat"} />
                                 </div>
                                 {
                                     isFiltersit &&
@@ -280,7 +280,7 @@ const Achats = () => {
                                             {
                                                 situationDachat.length > 0 ?
                                                     situationDachat.map((e: any) => (
-                                                        <div onClick={() => {
+                                                        <div key={`${e.id}-situation`} onClick={() => {
                                                             setQueryParams((state: any) => ({
                                                                 ...state,
                                                                 situation_d_achat: e.id
@@ -348,6 +348,7 @@ const Achats = () => {
                                         params: nonNullParams,
                                     });
                                     setAchats(Commandes.data.reverse())
+                                    setFilter(false)
                                 }
                                 catch (error) {
                                     console.error('Error:', error);
@@ -384,7 +385,7 @@ const Achats = () => {
                                 achats.map((e: any, i: number) => (
                                     <div onClick={() => {
                                         navigate(`/achat/${e.id}`)
-                                    }} style={{ cursor: 'pointer' }} id={'achat-' + i} className="rowAchats">
+                                    }} style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
                                         <p style={{ width: '14.5%' }}>{e.demandeur}</p>
                                         <p style={{ width: '14.3%' }}>{e.entité}</p>
                                         <p style={{ width: '23.6%' }}>{e.article__designation}</p>

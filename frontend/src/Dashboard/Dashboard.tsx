@@ -3,6 +3,7 @@ import axios from '../Interceptor';
 import './Dashboard.scss';
 import { useNavigate } from 'react-router-dom'
 import ChartPie from './PieChart'
+import LinePie from './LineCharts'
 
 const Nouveau = () => (
     <svg style={{
@@ -49,7 +50,10 @@ const BoxDash = ({ title, color, icon, data }) => {
     const navigate = useNavigate()
     return (
         <div onClick={() => {
-            navigate(`/achats/${icon}`)
+            var id = icon;
+            if (id === 4)
+                id = 5;
+            navigate(`/achats/${id}`)
         }} className="dashBox" style={{ cursor: 'pointer', borderColor: color + '1)' }}>
             <div className="iconBox">
                 <div style={{ background: color + '0.3)' }} className="icon">
@@ -76,10 +80,13 @@ const Dashboard = () => {
         livre: 0,
         non_livre: 0,
     })
+    const [dataLine, setDataLine] = useState([])
+
     useEffect(() => {
         const fetchData = async () => {
             await axios.get('/achats/situationDash/').then((rsp: any) => setBoxData(rsp.data))
             await axios.get('/achats/pieChart/').then((rsp: any) => setDataPie(rsp.data))
+            await axios.get('/achats/lineChart/').then((rsp: any) => setDataLine(rsp.data))
 
         }
         fetchData();
@@ -98,8 +105,12 @@ const Dashboard = () => {
                 </div>
                 <div className="col2">
                     <div className="pieChart">
-                        <h1>Demande d'achat</h1>
+                        <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>
                         <ChartPie data={pieData} />
+                    </div>
+                    <div className="pieChart">
+                        <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "BC en retard")}</h1>
+                        <LinePie data={dataLine} />
                     </div>
                 </div>
             </div>
