@@ -3,6 +3,7 @@ import './Progress.scss';
 import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
 import { useNavigate, useParams } from "react-router-dom";
+import Error from '../Error'
 
 const ValidateSvg = () => (
     <svg style={{
@@ -12,8 +13,6 @@ const ValidateSvg = () => (
         <ellipse cx="42.7795" cy="42.1875" rx="42.7795" ry="42.1875" fill="#008C76" />
         <path d="M33.7768 52.7591L22.0576 41.2021L18.0669 45.1098L33.7768 60.6023L67.501 27.3448L63.5384 23.437L33.7768 52.7591Z" fill="#F1F1F1" />
     </svg>
-
-
 )
 
 const ProgressSvg = () => (
@@ -283,7 +282,7 @@ const Achats = () => {
     };
 
     const handleButtonClick = async () => {
-        if (postData.is_ !== 'DA' && postData.is_ !== 'OB') {
+        if (postData.is_ !== 'DA' && postData.is_ !== 'OB' && selectedFile) {
             const reader = new FileReader();
             reader.onload = async (event: any) => {
                 const base64String = event.target.result;
@@ -300,39 +299,90 @@ const Achats = () => {
                     is_: postData.is_,
                     reste: postData.reste
                     // Include other variables as needed
-                })
-                    .then((response: any) => {
-                        // Handle the response from the server
+                }).then((response: any) => {
+                    window.location.reload()
+                }).catch((error: any) => {
+                    setStatuss({
+                        color: "#AF4C4C",
+                        status: "Failed!",
+                        text: "Wrong Inputs",
+                        is: true
                     })
-                    .catch((error: any) => {
-                        // Handle any errors from the server
-                    });
+                });
             };
-
-            // Replace 'selectedFile' with the file object you want to send
             reader.readAsDataURL(selectedFile);
         }
-        else {
+        else if (postData.is_ === 'DA' || postData.is_ === 'OB') {
             if (postData.is_ === 'DA') {
+
                 await axios.post(`/achats/progress/${id}`, {
                     code: postData.code, // Include other variables as needed
                     date: postData.date,
                     is_: postData.is_,
+                }).then((response: any) => {
+                    window.location.reload()
                 })
+                    .catch((error: any) => {
+                        setStatuss({
+                            color: "#AF4C4C",
+                            status: "Failed!",
+                            text: "Wrong Inputs",
+                            is: true
+                        })
+                    });
             }
             else {
                 await axios.post(`/achats/progress/${id}`, {
                     code: postData.code, // Include other variables as needed
                     reste: postData.reste,
                     is_: postData.is_,
-                })
+                }).then((response: any) => {
+                    window.location.reload()
+                }).catch((error: any) => {
+                    setStatuss({
+                        color: "#AF4C4C",
+                        status: "Failed!",
+                        text: "Wrong Inputs",
+                        is: true
+                    })
+                    console.log('8585')
+                });
             }
         }
+        else {
+            setStatuss({
+                color: "#AF4C4C",
+                status: "Failed!",
+                text: "Wrong Inputs",
+                is: true
+            })
+        }
     };
+    const [statusCode, setStatuss] = useState({
+        color: "#AF4C4C",
+        status: "Failed",
+        text: "Wrong Inputs",
+        is: false
+    })
+    useEffect(() => {
+        if (statusCode.is) {
+            const timer = setTimeout(() => {
+                setStatuss((state) => ({
+                    ...state,
+                    is: false
+                }))
+            }, 5000)
+            return () => clearTimeout(timer);
+        }
+    }, [statusCode])
 
 
     return (
         <div className='ContentMain'>
+            {
+                statusCode.is &&
+                <Error statusCode={statusCode} setStatus={setStatuss} />
+            }
             <div className="header">
                 <h1>{article ? `${article.demandeur} --> ${article.Designation}` : 'No Achat Found'}</h1>
             </div>
@@ -478,12 +528,26 @@ const Achats = () => {
                                         }
                                         <button onClick={async () => {
                                             if (postData) {
-                                                if (postData.is_ === 'DA' && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0))
+                                                if (postData.is_ === 'DA' && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0)) {
+                                                    setStatuss({
+                                                        color: "#AF4C4C",
+                                                        status: "Failed!",
+                                                        text: "Wrong Inputs",
+                                                        is: true
+                                                    })
                                                     return;
-                                                if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null)
+                                                }
+                                                if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null) {
+                                                    setStatuss({
+                                                        color: "#AF4C4C",
+                                                        status: "Failed!",
+                                                        text: "Wrong Inputs",
+                                                        is: true
+                                                    })
                                                     return;
+                                                }
                                                 handleButtonClick();
-                                                window.location.reload()
+
                                             }
                                         }}
                                             className='Next'>{postData.is_ !== 'OB' ? "Suivant" : "Submit"}</button>

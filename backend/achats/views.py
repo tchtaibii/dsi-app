@@ -117,21 +117,21 @@ def progress(request, id):
                 return Response({"message": "Data is valid. Process it."})
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif is_ == 'BC':
-            file_serializer = FileSerializer(data={'file': file_data})
-            file_serializer.is_valid(raise_exception=True)
             if file_data:
-                print(len(file_data))
+                file_serializer = FileSerializer(data={'file': file_data})
+                file_serializer.is_valid(raise_exception=True)
                 if len(file_data) > MAX_FILE_SIZE:
                     return Response({"error": "File size exceeds the limit"}, status=status.HTTP_400_BAD_REQUEST)
                 file_data = file_data.split(',', 1)[1]
                 decoded_file = base64.b64decode(file_data)
                 file_object = io.BytesIO(decoded_file)
-                print('hekllo')
                 # Assuming 'MEDIA_ROOT' is your media directory
                 file_path = os.path.join(
                     settings.MEDIA_ROOT, f"{data['code']}.pdf")
                 with open(file_path, 'wb') as f:
                     f.write(file_object.getbuffer())
+            else:
+                return Response({"error": "File isn't exist!"}, status=status.HTTP_400_BAD_REQUEST)
             serializer = PostBCSerializer(data=data)
             if serializer.is_valid():
                 BC = serializer.validated_data['code']
@@ -384,3 +384,48 @@ def get_progress(request, id):
         'reste': achat.reste
     })
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def dashboard_header(request):
+    try:
+        n = 0
+        ect = 0
+        ecl = 0
+        lp = 0
+        achats = Achat.objects.all()
+        achats = achats.filter(isComplet=False)
+        n = achats.filter(situation_d_achat=1).count()
+        ect = achats.filter(situation_d_achat=2).count()
+        ecl = achats.filter(situation_d_achat=3).count()
+        lp = achats.filter(situation_d_achat=5).count()
+        counts = {
+            "n": n,
+            "ect": ect,
+            "ecl": ecl,
+            "lp": lp
+        }
+        return Response(counts)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def dashboard_pie(request):
+    try:
+        v = 0
+        nv = 0
+        achats = Achat.objects.all()
+        nv = achats.filter(isComplet=False).count()
+        v = achats.filter(isComplet=True).count()
+        counts = {
+            "livre": v,
+            "non_livre": nv,
+        }
+        return Response(counts)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

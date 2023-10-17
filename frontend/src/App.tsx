@@ -60,7 +60,7 @@ function App() {
                 <div className="content">
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="achats" element={<Achats />} />
+                    <Route path="achats/:id?" element={<Achats />} />
                     {/* <Route path="commandes" element={<Commandes />} /> */}
                     <Route path="achat/:id" element={<Achat />} />
                     <Route path="AddCommande" element={<AddCommande />} />

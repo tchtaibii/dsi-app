@@ -14,4 +14,7 @@ urlpatterns = [
     path('progress/<str:id>', views.progress, name='post-progress'),
     path('excelExport/', views.ExcelExportView, name='excel-export'),
     path('download_file/<str:fl>', views.download_file, name='download-file'),
+    path('situationDash/', views.dashboard_header, name='situation-dashboard'),
+    path('pieChart/', views.dashboard_pie, name='Pie-dashboard'),
+    
 ]

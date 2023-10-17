@@ -2,7 +2,7 @@ import './Achats.scss';
 
 import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 const ValidateSvg = () => (
@@ -46,7 +46,7 @@ const ExitSvg = () => (
 )
 
 const Achats = () => {
-
+    const { id } = useParams()
     interface QueryParams {
         typeDachat: number | null;
         DA: string | null;
@@ -72,7 +72,7 @@ const Achats = () => {
         DA: null,
         BC: null,
         BL: null,
-        situation_d_achat: null,
+        situation_d_achat: id ? id : null,
         typeDarticle: null,
         reste: false,
         isComplet: false
@@ -81,7 +81,15 @@ const Achats = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const Commandes = await axios.get('/achats/get/commandes/');
+                const nonNullParams: QueryParams | any = {};
+                Object.keys(queryParams).forEach((key) => {
+                    if (queryParams[key as keyof QueryParams] !== null) {
+                        nonNullParams[key as keyof QueryParams] = queryParams[key as keyof QueryParams];
+                    }
+                });
+                const Commandes = await axios.get('/achats/get/commandes/', {
+                    params: nonNullParams,
+                });
                 setAchats(Commandes.data.reverse());
                 const typeart = await axios.get('/achats/get/types_article');
                 setTypeArticle(typeart.data);

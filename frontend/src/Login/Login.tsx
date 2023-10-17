@@ -2,6 +2,7 @@ import './Login.scss';
 import logo from '../assets/logoL.png'
 import axios from '../Interceptor'
 import { useEffect, useState } from 'react';
+import Error from '../Error'
 
 
 interface Field {
@@ -20,6 +21,24 @@ function Login({ setIsLogin }): { setIsLogin: any } {
     password: ""
   })
   const [isValid, setIsValid] = useState(false);
+
+  const [statusCode, setStatus] = useState({
+    color: "#AF4C4C",
+    status: "Failed",
+    text: "Wrong Inputs",
+    is: false
+  })
+  useEffect(() => {
+    if (statusCode.is) {
+      const timer = setTimeout(() => {
+        setStatus((state) => ({
+          ...state,
+          is: false
+        }))
+      }, 5000)
+      return () => clearTimeout(timer);
+    }
+  }, [statusCode])
 
   const HandleLogin = async () => {
     if (loginField.email && loginField.email.length > 0 && loginField.password && loginField.password.length > 0 && isValid) {
@@ -41,12 +60,16 @@ function Login({ setIsLogin }): { setIsLogin: any } {
         // For example, you can navigate to another page
         // history.push('/dashboard');
       } catch (error) {
-        // Handle login error, e.g., display an error message
-        console.error('Login failed:', error);
+        setStatus({
+          color: "#AF4C4C",
+          status: "Failed!",
+          text: "Wrong Inputs",
+          is: true
+        })
       }
     }
   }
-  const handleKeyPress = (e:any) => {
+  const handleKeyPress = (e: any) => {
     if (e.key === 'Enter') {
       HandleLogin();
     }
@@ -60,6 +83,10 @@ function Login({ setIsLogin }): { setIsLogin: any } {
 
   return (
     <div className='Login'>
+      {
+        statusCode.is &&
+        <Error statusCode={statusCode} setStatus={setStatus} />
+      }
       <img src={logo} />
       <div style={{ width: '40.1385rem' }} className="inputCommande">
         <div className="label">Email </div>
