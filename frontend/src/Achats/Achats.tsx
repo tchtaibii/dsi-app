@@ -45,6 +45,15 @@ const ExitSvg = () => (
     </svg>
 
 )
+const DownloadSvg = () => (
+    <svg style={{
+        width: "1.1875rem",
+        height: "1.44194rem"
+    }} width={19} height={24} viewBox="0 0 19 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 8.14285H13.5714V0H5.42857V8.14285H0L9.5 17.6429L19 8.14285ZM0 20.3571V23.0714H19V20.3571H0Z" fill="white" />
+    </svg>
+
+)
 
 const Achats = () => {
     const { id } = useParams()
@@ -78,26 +87,43 @@ const Achats = () => {
         reste: false,
         isComplet: false
     });
-
+    const [fileData, setFileData] = useState<any>(null);
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const nonNullParams: QueryParams | any = {};
+                const nonNullParams = {};
                 Object.keys(queryParams).forEach((key) => {
-                    if (queryParams[key as keyof QueryParams] !== null) {
-                        nonNullParams[key as keyof QueryParams] = queryParams[key as keyof QueryParams];
+                    if (queryParams[key] !== null) {
+                        nonNullParams[key] = queryParams[key];
                     }
                 });
-                const Commandes = await axios.get('/achats/get/commandes/', {
+
+                const commandsResponse = await axios.get('/achats/get/commandes/', {
                     params: nonNullParams,
                 });
-                setAchats(Commandes.data.reverse());
-                const typeart = await axios.get('/achats/get/types_article');
-                setTypeArticle(typeart.data);
-                const typedach = await axios.get('/achats/get/types_achats');
-                setTypeDachat(typedach.data);
-                const situation = await axios.get('/achats/get/situations_article');
-                setSituationDachat(situation.data);
+
+                const fileResponse = await axios.get('/achats/excelExport/', {
+                    params: nonNullParams,
+                    responseType: 'blob', // Important for handling binary data
+                });
+
+                const disposition = fileResponse.headers['content-disposition'];
+                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                const filename = matches ? matches[1].replace(/['"]/g, '') : '';
+
+                const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                setFileData({ data: url, name: filename });
+                setAchats(commandsResponse.data.reverse());
+
+                const typeArticleResponse = await axios.get('/achats/get/types_article');
+                setTypeArticle(typeArticleResponse.data);
+
+                const typeDachatResponse = await axios.get('/achats/get/types_achats');
+                setTypeDachat(typeDachatResponse.data);
+
+                const situationResponse = await axios.get('/achats/get/situations_article');
+                setSituationDachat(situationResponse.data);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -352,6 +378,28 @@ const Achats = () => {
                                         });
                                         setAchats(Commandes.data.reverse())
                                         setFilter(false)
+                                        const fileResponse = await axios.get('/achats/excelExport/', {
+                                            params: nonNullParams,
+                                            responseType: 'blob', // Important for handling binary data
+                                        });
+
+                                        const disposition = fileResponse.headers['content-disposition'];
+                                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                                        const filename = matches ? matches[1].replace(/['"]/g, '') : '';
+
+                                        const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                                        const url = window.URL.createObjectURL(blob);
+                                        setFileData({ data: url, name: filename });
+                                        setAchats(commandsResponse.data.reverse());
+
+                                        const typeArticleResponse = await axios.get('/achats/get/types_article');
+                                        setTypeArticle(typeArticleResponse.data);
+
+                                        const typeDachatResponse = await axios.get('/achats/get/types_achats');
+                                        setTypeDachat(typeDachatResponse.data);
+
+                                        const situationResponse = await axios.get('/achats/get/situations_article');
+                                        setSituationDachat(situationResponse.data);
                                     }
                                     catch (error) {
                                         console.error('Error:', error);
@@ -363,12 +411,22 @@ const Achats = () => {
                 }
                 <div className="header">
                     <h1>Achats</h1>
-                    <div className="header2">
+                    <div className="header2" style={{ flexDirection: 'row' }}>
                         <button onClick={() => {
                             setFilter(true)
                         }} style={{ width: "6.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                             <FilterSvg />
                             filter</button>
+                        <button onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = fileData.data;
+                            link.setAttribute('download', fileData.name);
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
+                            <DownloadSvg />
+                            Donwload Exel</button>
                     </div>
                 </div>
                 <div style={{ gap: "1.44rem" }} className="main">

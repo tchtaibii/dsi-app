@@ -1,3 +1,4 @@
+import xlsxwriter
 from datetime import datetime, timedelta
 from django.conf import settings
 import io
@@ -36,6 +37,9 @@ class CustomObject:
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+@api_view(['GET'])
 def download_file(request, fl):
     try:
         if fl is not None or fl.size > 0:
@@ -56,40 +60,93 @@ def download_file(request, fl):
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def ExcelExportView(request):
     achats_list = []  # Define an empty list
-    try:
-        achats = Achat.objects.all()
-        params = request.query_params
-        if 'typeDachat' in params:
-            achats = achats.filter(typeDachat=params['typeDachat'])
-        if 'DA' in params:
-            achats = achats.filter(DA=params['DA'])
-        if 'BC' in params:
-            achats = achats.filter(BC=params['BC'])
-        if 'BL' in params:
-            achats = achats.filter(BL=params['BL'])
-        if 'situation_d_achat' in params:
-            achats = achats.filter(
-                situation_d_achat=params['situation_d_achat'])
-        if 'typeDarticle' in params:
-            achats = achats.filter(article__type=params['typeDarticle'])
-        if 'reste' in params and params['reste'].lower() == 'true':
-            achats = achats.filter(reste__gt=0)
-        if 'isComplet' in params and params['isComplet'].lower() == 'true':
-            achats = achats.filter(isComplet=False)  # Fixed this line
-        achats = achats.select_related('article').values(
-            'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation', 'isComplet')
-        df = pd.DataFrame(list(achats.values()))
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="output.xlsx"'
-        df.to_excel(response, index=False, engine='openpyxl')
-        return response
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    achats = Achat.objects.all()
+    params = request.query_params
+    if 'typeDachat' in params:
+        achats = achats.filter(typeDachat=params['typeDachat'])
+    if 'DA' in params:
+        achats = achats.filter(DA=params['DA'])
+    if 'BC' in params:
+        achats = achats.filter(BC=params['BC'])
+    if 'BL' in params:
+        achats = achats.filter(BL=params['BL'])
+    if 'situation_d_achat' in params:
+        achats = achats.filter(
+            situation_d_achat=params['situation_d_achat'])
+    if 'typeDarticle' in params:
+        achats = achats.filter(article__type=params['typeDarticle'])
+    if 'reste' in params and params['reste'].lower() == 'true':
+        achats = achats.filter(reste__gt=0)
+    if 'isComplet' in params and params['isComplet'].lower() == 'true':
+        achats = achats.filter(isComplet=False)  # Fixed this line
+    achats = achats.select_related('article__contrat', 'article__type', 'typeDachat', 'situation_d_achat').values(
+        'demandeur', 'entité', 'DateDeCommande', 'quantité', 'typeDachat__type', 'ligne_bugetaire', 'DA', 'DateDA', 'BC', 'DateBC', 'BL', 'DateBL', 'situation_d_achat__situation', 'article__designation', 'article__code', 'article__fourniseur', 'article__prix_estimatif', 'article__contrat__name', 'article__type__type', 'observation', 'reste')
+
+    achats_list = list(achats)  # Convert queryset to list
+    # Create a list of dictionaries including the related fields
+    achats_with_related_fields = []
+    for achat in achats_list:
+        temp = {
+            'Demandeur': achat['demandeur'],
+            'Entité': achat['entité'],
+            'Type': achat['article__type__type'],
+            # "Code d'article": achat['article__code'],
+            'Code d\'article': achat['article__code'] if achat['typeDachat__type'] == 'Contrat Cadre' else '',
+            'Désignation': achat['article__designation'],
+            'Quantité': achat['quantité'],
+            'Ligne budgétaire': achat['ligne_bugetaire'],
+            'Date De Commande': achat['DateDeCommande'],
+            'DA': achat['DA'],
+            'Date DA': achat['DateDA'],
+            'BC': achat['BC'],
+            'Date BC': achat['DateBC'],
+            'Contrat': achat['article__contrat__name'] if achat['typeDachat__type'] == 'Contrat Cadre' else '',
+            # 'Contrat': achat['article__contrat__name'],
+            # 'Fournisseur': achat['article__fourniseur'],
+            'Fournisseur': achat['article__fourniseur'] if achat['typeDachat__type'] != 'Contrat Cadre' else '',
+            "Type d'achat": achat['typeDachat__type'],
+            # 'Prix estimatif': achat['article__prix_estimatif'],
+            'Prix estimatif': achat['article__prix_estimatif'] if achat['typeDachat__type'] != 'Contrat Cadre' else '',
+            "Situation d'achat": achat['situation_d_achat__situation'],
+            'BL': achat['BL'],
+            'Date BL': achat['DateBL'],
+            'Reste': achat['reste'],
+            'Observation': achat['observation'],
+        }
+        achats_with_related_fields.append(temp)
+
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(achats_with_related_fields)
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="' + \
+        current_date_time + '.xlsx"'
+
+    writer = pd.ExcelWriter(response, engine='xlsxwriter')
+
+    # Convert the dataframe to an XlsxWriter Excel object.
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+
+    # Get the xlsxwriter workbook and worksheet objects.
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+
+    # Set the column width and format the cells to wrap text.
+    for i, col in enumerate(df.columns):
+        column_len = max(df[col].astype(str).map(len).max(), len(col))
+        # Adding extra space for padding
+        worksheet.set_column(i, i, column_len + 2)
+        worksheet.set_column(i, i, None, None, {'text_wrap': True})
+
+    # Save the workbook.
+    workbook.close()
+
+    return response
 
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -303,7 +360,6 @@ def get_commandes(request):
     try:
         achats = Achat.objects.all()
         params = request.query_params
-        print(params)
         if 'typeDachat' in params:
             achats = achats.filter(typeDachat=params['typeDachat'])
         if 'DA' in params:
@@ -452,7 +508,7 @@ def dashboard_line(request):
                 {
                     'achat_id': achat.id,
                     'weeks_count': int(str(weeks_count).split()[0]),
-                    'achat_DA' : achat.DA,
+                    'achat_DA': achat.DA,
                 }
             )
 

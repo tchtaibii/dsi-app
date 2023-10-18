@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'achats',
     'corsheaders',
+    'xlsxwriter',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
