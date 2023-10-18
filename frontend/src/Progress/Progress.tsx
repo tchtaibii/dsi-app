@@ -3,6 +3,7 @@ import './Progress.scss';
 import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
 import { useNavigate, useParams } from "react-router-dom";
+import Loading from '../Loading/Loading';
 import Error from '../Error'
 
 const ValidateSvg = () => (
@@ -267,6 +268,7 @@ const Achats = () => {
                 statusFunc(rsp.data)
                 console.log(rsp.data)
             }).catch((rsp: any) => console.log(rsp));
+            setLoading(true)
         }
         fetchData();
     }, [])
@@ -375,191 +377,193 @@ const Achats = () => {
             return () => clearTimeout(timer);
         }
     }, [statusCode])
+    const [isLoading, setLoading] = useState(false)
 
 
     return (
-        <div className='ContentMain'>
-            {
-                statusCode.is &&
-                <Error statusCode={statusCode} setStatus={setStatuss} />
-            }
-            <div className="header">
-                <h1>{article ? `${article.demandeur} --> ${article.Designation}` : 'No Achat Found'}</h1>
-            </div>
-            {
-                article &&
-                <div style={{ gap: "1.44rem", paddingInline: "11.75rem" }} className="main">
-                    <div className="inMain">
-                        <div className="progress">
-                            <div className="prog">
-                                <div className="view">
-                                    <statusAchat.DA.img />
-                                    <div style={{ background: statusAchat.DA.line, }} className="lineV"></div>
-                                </div>
-                                <h1>Demande d’achat</h1>
-                                <h2 className='status' style={{ color: statusAchat.DA.color }}>{statusAchat.DA.status}</h2>
-                            </div>
-                            <div className="prog">
-                                <div className="view">
-                                    <statusAchat.BC.img />
-                                    <div style={{ background: statusAchat.BC.line, }} className="lineV"></div>
-                                </div>
-                                <h1>Bon de commande</h1>
-                                <h2 className='status' style={{ color: statusAchat.BC.color }}>{statusAchat.BC.status}</h2>
-                            </div>
-                            <div className="prog">
-                                <div className="view">
-                                    <statusAchat.BL.img />
-                                    <div style={{ background: statusAchat.BL.line, }} className="lineV"></div>
-                                </div>
-                                <h1>Bon de livraison</h1>
-                                <h2 className='status' style={{ color: statusAchat.BL.color }}>{statusAchat.BL.status}</h2>
-                            </div>
-                            <div className="prog">
-                                <div className="view">
-                                    <statusAchat.OB.img />
-                                </div>
-                                <h1>Observation</h1>
-                                <h2 className='status' style={{ color: statusAchat.OB.color }}>{statusAchat.OB.status}</h2>
-                            </div>
-                        </div>
-                        {
-                            postData.is_ !== 'DONE'
-                                ?
-                                <div className="inputsProg">
-                                    {
-                                        postData.is_ !== 'OB'
-                                            ?
-                                            <>
-                                                <div className="inputCommande" style={{ width: "40rem" }}>
-                                                    <div className="label">{postData.is_ + '*'}</div>
-                                                    <div className="inputText">
-                                                        <input onChange={(e: any) => {
-                                                            const newD = e.target.value;
-                                                            setDataPost((state: any) => ({
-                                                                ...state,
-                                                                code: newD
-                                                            }))
-                                                        }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
-                                                    </div>
-                                                </div>
-                                                <div className="inputCommande" style={{ width: "40rem" }}>
-                                                    <div className="label">{`Date ${postData.is_
-                                                        } *`}</div>
-                                                    <div className="inputText">
-                                                        <input onChange={(e: any) => {
-                                                            const newD = e.target.value;
-                                                            setDataPost((state: any) => ({
-                                                                ...state,
-                                                                date: newD
-                                                            }))
-                                                        }} placeholder="ex: 10020319" type="date" name="Demandeur" id="" />
-                                                    </div>
-                                                </div>
-                                                {
-                                                    postData && postData.is_ === 'BL' &&
-                                                    <div className="inputCommande" style={{ width: "40rem" }}>
-                                                        <div className="label">{`Reste *`}</div>
-                                                        <div className="inputText">
-                                                            <input onChange={(e: any) => {
-                                                                const newD = e.target.value;
-                                                                setDataPost((state: any) => ({
-                                                                    ...state,
-                                                                    reste: newD
-                                                                }))
-                                                            }} placeholder="ex: 5" type="number" name="Reste" id="" />
-                                                        </div>
-                                                    </div>
-                                                }
-                                                {
-                                                    postData && (postData.is_ === 'BC' || postData.is_ === 'BL') &&
-                                                    <div className="FileChange">
-                                                        <button onClick={() => document.getElementById('file-upload').click()}>
-                                                            <UploadSvg />
-                                                            Upload file
-                                                        </button>
-                                                        <label htmlFor="file-upload" className="custom-file-label">
-                                                            {selectedFile ? selectedFile.name : ''}
-                                                        </label>
-                                                        <input
-                                                            type="file"
-                                                            id="file-upload"
-                                                            className="hidden"
-                                                            onChange={handleFileChange}
-                                                            accept="application/pdf"
-                                                        />
-                                                    </div>
-                                                }
-                                            </>
-                                            :
-                                            <>
-                                                <div className="inputCommande" style={{ width: "40rem" }}>
-                                                    <div className="label">{'Observation' + '*'}</div>
-                                                    <div className="inputText textArea">
-                                                        <textarea onChange={(e: any) => {
-                                                            const newD = e.target.value;
-                                                            setDataPost((state: any) => ({
-                                                                ...state,
-                                                                code: newD
-                                                            }))
-                                                        }} placeholder='No more than 100 characters' maxLength="100" name="" id=""></textarea>
-                                                    </div>
-                                                </div>
-                                                {
-                                                    article.reste > 0 &&
-                                                    <div className="inputCommande" style={{ width: "40rem" }}>
-                                                        <div className="label">{`Reste *`}</div>
-                                                        <div className="inputText">
-                                                            <input onChange={(e: any) => {
-                                                                const newD = e.target.value;
-                                                                setDataPost((state: any) => ({
-                                                                    ...state,
-                                                                    reste: newD
-                                                                }))
-                                                            }} placeholder="ex: 5" type="number" name="Reste" id="" />
-                                                        </div>
-                                                    </div>
-                                                }
-                                            </>
-                                    }
-                                    <div className="submitStep">
-                                        {
-                                            postData.is_ !== 'OB' && <div className='sendMail'>Envoyer un email</div>
-                                        }
-                                        <button onClick={async () => {
-                                            if (postData) {
-                                                if (postData.is_ === 'DA' && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0)) {
-                                                    setStatuss({
-                                                        color: "#AF4C4C",
-                                                        status: "Failed!",
-                                                        text: "Wrong Inputs",
-                                                        is: true
-                                                    })
-                                                    return;
-                                                }
-                                                if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null) {
-                                                    setStatuss({
-                                                        color: "#AF4C4C",
-                                                        status: "Failed!",
-                                                        text: "Wrong Inputs",
-                                                        is: true
-                                                    })
-                                                    return;
-                                                }
-                                                handleButtonClick();
-
-                                            }
-                                        }}
-                                            className='Next'>{postData.is_ !== 'OB' ? "Suivant" : "Submit"}</button>
-                                    </div>
-                                </div>
-                                :
-                                <></>
-                        }
-                    </div>
+        !isLoading ? <Loading /> :
+            <div className='ContentMain'>
+                {
+                    statusCode.is &&
+                    <Error statusCode={statusCode} setStatus={setStatuss} />
+                }
+                <div className="header">
+                    <h1>{article ? `${article.demandeur} --> ${article.Designation}` : 'No Achat Found'}</h1>
                 </div>
-            }
-        </div>
+                {
+                    article &&
+                    <div style={{ gap: "1.44rem", paddingInline: "11.75rem" }} className="main">
+                        <div className="inMain">
+                            <div className="progress">
+                                <div className="prog">
+                                    <div className="view">
+                                        <statusAchat.DA.img />
+                                        <div style={{ background: statusAchat.DA.line, }} className="lineV"></div>
+                                    </div>
+                                    <h1>Demande d’achat</h1>
+                                    <h2 className='status' style={{ color: statusAchat.DA.color }}>{statusAchat.DA.status}</h2>
+                                </div>
+                                <div className="prog">
+                                    <div className="view">
+                                        <statusAchat.BC.img />
+                                        <div style={{ background: statusAchat.BC.line, }} className="lineV"></div>
+                                    </div>
+                                    <h1>Bon de commande</h1>
+                                    <h2 className='status' style={{ color: statusAchat.BC.color }}>{statusAchat.BC.status}</h2>
+                                </div>
+                                <div className="prog">
+                                    <div className="view">
+                                        <statusAchat.BL.img />
+                                        <div style={{ background: statusAchat.BL.line, }} className="lineV"></div>
+                                    </div>
+                                    <h1>Bon de livraison</h1>
+                                    <h2 className='status' style={{ color: statusAchat.BL.color }}>{statusAchat.BL.status}</h2>
+                                </div>
+                                <div className="prog">
+                                    <div className="view">
+                                        <statusAchat.OB.img />
+                                    </div>
+                                    <h1>Observation</h1>
+                                    <h2 className='status' style={{ color: statusAchat.OB.color }}>{statusAchat.OB.status}</h2>
+                                </div>
+                            </div>
+                            {
+                                postData.is_ !== 'DONE'
+                                    ?
+                                    <div className="inputsProg">
+                                        {
+                                            postData.is_ !== 'OB'
+                                                ?
+                                                <>
+                                                    <div className="inputCommande" style={{ width: "40rem" }}>
+                                                        <div className="label">{postData.is_ + '*'}</div>
+                                                        <div className="inputText">
+                                                            <input onChange={(e: any) => {
+                                                                const newD = e.target.value;
+                                                                setDataPost((state: any) => ({
+                                                                    ...state,
+                                                                    code: newD
+                                                                }))
+                                                            }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="inputCommande" style={{ width: "40rem" }}>
+                                                        <div className="label">{`Date ${postData.is_
+                                                            } *`}</div>
+                                                        <div className="inputText">
+                                                            <input onChange={(e: any) => {
+                                                                const newD = e.target.value;
+                                                                setDataPost((state: any) => ({
+                                                                    ...state,
+                                                                    date: newD
+                                                                }))
+                                                            }} placeholder="ex: 10020319" type="date" name="Demandeur" id="" />
+                                                        </div>
+                                                    </div>
+                                                    {
+                                                        postData && postData.is_ === 'BL' &&
+                                                        <div className="inputCommande" style={{ width: "40rem" }}>
+                                                            <div className="label">{`Reste *`}</div>
+                                                            <div className="inputText">
+                                                                <input onChange={(e: any) => {
+                                                                    const newD = e.target.value;
+                                                                    setDataPost((state: any) => ({
+                                                                        ...state,
+                                                                        reste: newD
+                                                                    }))
+                                                                }} placeholder="ex: 5" type="number" name="Reste" id="" />
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    {
+                                                        postData && (postData.is_ === 'BC' || postData.is_ === 'BL') &&
+                                                        <div className="FileChange">
+                                                            <button onClick={() => document.getElementById('file-upload').click()}>
+                                                                <UploadSvg />
+                                                                Upload file
+                                                            </button>
+                                                            <label htmlFor="file-upload" className="custom-file-label">
+                                                                {selectedFile ? selectedFile.name : ''}
+                                                            </label>
+                                                            <input
+                                                                type="file"
+                                                                id="file-upload"
+                                                                className="hidden"
+                                                                onChange={handleFileChange}
+                                                                accept="application/pdf"
+                                                            />
+                                                        </div>
+                                                    }
+                                                </>
+                                                :
+                                                <>
+                                                    <div className="inputCommande" style={{ width: "40rem" }}>
+                                                        <div className="label">{'Observation' + '*'}</div>
+                                                        <div className="inputText textArea">
+                                                            <textarea onChange={(e: any) => {
+                                                                const newD = e.target.value;
+                                                                setDataPost((state: any) => ({
+                                                                    ...state,
+                                                                    code: newD
+                                                                }))
+                                                            }} placeholder='No more than 100 characters' maxLength="100" name="" id=""></textarea>
+                                                        </div>
+                                                    </div>
+                                                    {
+                                                        article.reste > 0 &&
+                                                        <div className="inputCommande" style={{ width: "40rem" }}>
+                                                            <div className="label">{`Reste *`}</div>
+                                                            <div className="inputText">
+                                                                <input onChange={(e: any) => {
+                                                                    const newD = e.target.value;
+                                                                    setDataPost((state: any) => ({
+                                                                        ...state,
+                                                                        reste: newD
+                                                                    }))
+                                                                }} placeholder="ex: 5" type="number" name="Reste" id="" />
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </>
+                                        }
+                                        <div className="submitStep">
+                                            {
+                                                postData.is_ !== 'OB' && <div className='sendMail'>Envoyer un email</div>
+                                            }
+                                            <button onClick={async () => {
+                                                if (postData) {
+                                                    if (postData.is_ === 'DA' && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0)) {
+                                                        setStatuss({
+                                                            color: "#AF4C4C",
+                                                            status: "Failed!",
+                                                            text: "Wrong Inputs",
+                                                            is: true
+                                                        })
+                                                        return;
+                                                    }
+                                                    if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null) {
+                                                        setStatuss({
+                                                            color: "#AF4C4C",
+                                                            status: "Failed!",
+                                                            text: "Wrong Inputs",
+                                                            is: true
+                                                        })
+                                                        return;
+                                                    }
+                                                    handleButtonClick();
+
+                                                }
+                                            }}
+                                                className='Next'>{postData.is_ !== 'OB' ? "Suivant" : "Submit"}</button>
+                                        </div>
+                                    </div>
+                                    :
+                                    <></>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
     )
 }
 export default Achats

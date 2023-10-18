@@ -3,6 +3,8 @@ import './Achat.scss';
 import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
 import { useParams, useNavigate } from 'react-router-dom';
+import Loading from '../Loading/Loading';
+
 
 const Edits = () => (
     <svg style={{
@@ -51,142 +53,149 @@ const Achat = () => {
             await axios.get(`/achats/get/achat/${id}`).then((rsp: any) => {
                 setData(rsp.data)
             })
+            setLoading(true);
         }
         fetchData();
     }, [])
 
     const navigate = useNavigate()
+    const [isLoading, setLoading] = useState(false)
 
     return (
-        <div className='ContentMain'>
-            {
-                Data !== null ?
-                    <>
-                        <div style={{ justifyContent: "flex-start", gap: '1rem', alignItems: 'center' }} className="header">
-                            <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur} --> ${Data.article.type}`}</h1>
-                            <div onClick={() => {
-                                navigate(`/commandes/${id}`)
-                            }} className="Edits"><Edits /></div>
-                        </div>
-                        <div className="main">
-                            <table style={{ borderCollapse: "none", borderSpacing: "0" }} className="TableAchat">
-                                <tbody>
-                                    <tr>
-                                        <td className="keyTd">Demandeur</td>
-                                        <td className="ValueTd">{Data.demandeur}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Entité</td>
-                                        <td className="ValueTd">{Data.entité}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Type</td>
-                                        <td className="ValueTd">{Data.article.type}</td>
-                                    </tr>
-                                    {
-                                        Data.typeDachat === 1 &&
+
+
+        !isLoading ? <Loading /> :
+            <div className='ContentMain'>
+                {
+                    Data !== null ?
+                        <>
+                            <div style={{ justifyContent: "flex-start", gap: '1rem', alignItems: 'center' }} className="header">
+                                <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur} --> ${Data.article.type}`}</h1>
+                                <div onClick={() => {
+                                    navigate(`/commandes/${id}`)
+                                }} className="Edits"><Edits /></div>
+                            </div>
+                            <div className="main">
+                                <table style={{ borderCollapse: "none", borderSpacing: "0" }} className="TableAchat">
+                                    <tbody>
                                         <tr>
-                                            <td className="keyTd">Code d'article</td>
-                                            <td className="ValueTd">{Data.article.code}</td>
+                                            <td className="keyTd">Demandeur</td>
+                                            <td className="ValueTd">{Data.demandeur}</td>
                                         </tr>
-                                    }
-                                    <tr>
-                                        <td className="keyTd">Désignation</td>
-                                        <td className="ValueTd">{Data.article.designation}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Quantité</td>
-                                        <td className="ValueTd">{Data.quantité}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Ligne budgétaire</td>
-                                        <td className="ValueTd">{Data.ligne_bugetaire}</td>
-                                    </tr>
-                                    {
-                                        Data.typeDachat !== 1 &&
                                         <tr>
-                                            <td className="keyTd">Prix estimatif</td>
-                                            <td className="ValueTd">{Data.prix_estimatif ? Data.prix_estimatif : '-----'}</td>
+                                            <td className="keyTd">Entité</td>
+                                            <td className="ValueTd">{Data.entité}</td>
                                         </tr>
-                                    }
+                                        <tr>
+                                            <td className="keyTd">Type</td>
+                                            <td className="ValueTd">{Data.article.type}</td>
+                                        </tr>
+                                        {
+                                            Data.typeDachat === 1 &&
+                                            <tr>
+                                                <td className="keyTd">Code d'article</td>
+                                                <td className="ValueTd">{Data.article.code}</td>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <td className="keyTd">Désignation</td>
+                                            <td className="ValueTd">{Data.article.designation}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Quantité</td>
+                                            <td className="ValueTd">{Data.quantité}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Ligne budgétaire</td>
+                                            <td className="ValueTd">{Data.ligne_bugetaire}</td>
+                                        </tr>
+                                        {
+                                            Data.typeDachat !== 1 &&
+                                            <tr>
+                                                <td className="keyTd">Prix estimatif</td>
+                                                <td className="ValueTd">{Data.prix_estimatif ? Data.prix_estimatif : '-----'}</td>
+                                            </tr>
+                                        }
 
-                                    <tr>
-                                        <td className="keyTd">Date de la commande</td>
-                                        <td className="ValueTd">{Data.DateDeCommande}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">DA</td>
-                                        <td className="ValueTd">{Data.DA ? Data.DA : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Date DA</td>
-                                        <td className="ValueTd">{Data.DateDA ? Data.DateDA : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">BC</td>
-                                        <td className="ValueTd">{Data.BC ? Data.BC : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Date BC</td>
-                                        <td className="ValueTd">{Data.DateBC ? Data.DateBC : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">BC Document</td>
-                                        <td className="ValueTd">
-                                            {
-                                                Data.BC ? <button onClick={async () => {
-                                                    await axios.get(`/achats/download_file/${Data.BC}`)
-                                                }}>Download</button> : "-----"
-                                            }
+                                        <tr>
+                                            <td className="keyTd">Date de la commande</td>
+                                            <td className="ValueTd">{Data.DateDeCommande}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">DA</td>
+                                            <td className="ValueTd">{Data.DA ? Data.DA : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Date DA</td>
+                                            <td className="ValueTd">{Data.DateDA ? Data.DateDA : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">BC</td>
+                                            <td className="ValueTd">{Data.BC ? Data.BC : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Date BC</td>
+                                            <td className="ValueTd">{Data.DateBC ? Data.DateBC : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">BC Document</td>
+                                            <td className="ValueTd">
+                                                {
+                                                    Data.BC ? <button onClick={async () => {
+                                                        await axios.get(`/achats/download_file/${Data.BC}`)
+                                                    }}>Download</button> : "-----"
+                                                }
 
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">{(Data.typeDachat === 1 ? "Contrat" : "Founisseur")}</td>
-                                        <td className="ValueTd">{(Data.typeDachat === 1 ? (Data.article.contrat.name ? Data.article.contrat.name : "-----") : (Data.article.fourniseur ? Data.article.fourniseur : "-----"))}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Type d'achat</td>
-                                        <td className="ValueTd">{TypeDachat(Data.typeDachat)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">BL</td>
-                                        <td className="ValueTd">{Data.BL ? Data.BL : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Date BL</td>
-                                        <td className="ValueTd">{Data.DateBL ? Data.DateBL : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">BL Document</td>
-                                        <td className="ValueTd">
-                                            {
-                                                Data.BL ? <button onClick={async () => {
-                                                    await axios.get(`/achats/download_file/${Data.BL}`)
-                                                }}>Download</button> : "-----"
-                                            }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">{(Data.typeDachat === 1 ? "Contrat" : "Founisseur")}</td>
+                                            <td className="ValueTd">{(Data.typeDachat === 1 ? (Data.article.contrat.name ? Data.article.contrat.name : "-----") : (Data.article.fourniseur ? Data.article.fourniseur : "-----"))}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Type d'achat</td>
+                                            <td className="ValueTd">{TypeDachat(Data.typeDachat)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">BL</td>
+                                            <td className="ValueTd">{Data.BL ? Data.BL : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Date BL</td>
+                                            <td className="ValueTd">{Data.DateBL ? Data.DateBL : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">BL Document</td>
+                                            <td className="ValueTd">
+                                                {
+                                                    Data.BL ? <button onClick={async () => {
+                                                        await axios.get(`/achats/download_file/${Data.BL}`)
+                                                    }}>Download</button> : "-----"
+                                                }
 
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Situation d'achat</td>
-                                        <td className="ValueTd">{Situation(Data.situation_d_achat)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd">Observation</td>
-                                        <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="keyTd lastTd">Reste</td>
-                                        <td className="ValueTd lastTd">{Data.reste !== null ? Data.reste : "-----"}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </>
-                    : <h1 style={{ fontSize: '1.5rem' }}>Achat Not Found</h1>
-            }
-        </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Situation d'achat</td>
+                                            <td className="ValueTd">{Situation(Data.situation_d_achat)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">Observation</td>
+                                            <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd lastTd">Reste</td>
+                                            <td className="ValueTd lastTd">{Data.reste !== null ? Data.reste : "-----"}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                        : <h1 style={{ fontSize: '1.5rem' }}>Achat Not Found</h1>
+                }
+            </div>
+
+
     )
 }
 export default Achat

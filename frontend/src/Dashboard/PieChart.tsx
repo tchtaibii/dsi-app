@@ -27,7 +27,7 @@ function PieChart({ data }) {
                 data={dataP}
                 options={options}
                 width={"105%"}
-                height={"130%"}
+                height={"120%"}
             />
         </div>
 

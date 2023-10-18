@@ -4,19 +4,24 @@ import { useNavigate } from 'react-router-dom'
 
 const ApexChart = ({ data }) => {
     const [lineData, setData] = useState([])
+    const [CategoData, setCatego] = useState([])
     useEffect(() => {
         setData(() => (
             data.map((e: any) => (
                 e.weeks_count
             ))
         ))
-        console.log(data)
+        setCatego(() => (
+            data.map((e: any) => (
+                e.achat_DA
+            ))
+        ))
     }, [data])
     const navigate = useNavigate()
 
     const options = {
         xaxis: {
-            categories: ["Slight delay", "Delayed", "Overdue"]
+            categories: CategoData
         },
         colors: ['#F44336', '#FFFF', '#FFFF'],
         chart: {

@@ -4,6 +4,7 @@ import './Dashboard.scss';
 import { useNavigate } from 'react-router-dom'
 import ChartPie from './PieChart'
 import LinePie from './LineCharts'
+import Loading from '../Loading/Loading';
 
 const Nouveau = () => (
     <svg style={{
@@ -81,40 +82,46 @@ const Dashboard = () => {
         non_livre: 0,
     })
     const [dataLine, setDataLine] = useState([])
+    const [isLoading, setLoading] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
             await axios.get('/achats/situationDash/').then((rsp: any) => setBoxData(rsp.data))
             await axios.get('/achats/pieChart/').then((rsp: any) => setDataPie(rsp.data))
             await axios.get('/achats/lineChart/').then((rsp: any) => setDataLine(rsp.data))
-
+            setLoading(true);
         }
         fetchData();
     }, [])
     return (
-        <div className='ContentMain'>
-            <div className="header">
-                <h1>Dashboard</h1>
-            </div>
-            <div className="main">
-                <div className="dash-col">
-                    <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
-                    <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
-                    <BoxDash title={"En cours de livraison"} data={boxData.ecl} color={"rgba(243, 198, 39,"} icon={3} />
-                    <BoxDash title={"Livraison partielle"} data={boxData.lp} color={"rgba(72, 156, 255,"} icon={4} />
-                </div>
-                <div className="col2">
-                    <div className="pieChart">
-                        <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>
-                        <ChartPie data={pieData} />
+        <>
+            {
+                !isLoading ? <Loading /> :
+                    <div className='ContentMain'>
+                        <div className="header">
+                            <h1>Dashboard</h1>
+                        </div>
+                        <div className="main" style={{padding: 0}}>
+                            <div className="dash-col">
+                                <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
+                                <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
+                                <BoxDash title={"En cours de livraison"} data={boxData.ecl} color={"rgba(243, 198, 39,"} icon={3} />
+                                <BoxDash title={"Livraison partielle"} data={boxData.lp} color={"rgba(72, 156, 255,"} icon={4} />
+                            </div>
+                            <div className="col2">
+                                <div className="pieChart">
+                                    <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>
+                                    <ChartPie data={pieData} />
+                                </div>
+                                <div className="pieChart">
+                                    <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "Bon de Livraison en retard")}</h1>
+                                    <LinePie data={dataLine} />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="pieChart">
-                        <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "BC en retard")}</h1>
-                        <LinePie data={dataLine} />
-                    </div>
-                </div>
-            </div>
-        </div>
+            }
+        </>
     )
 }
 export default Dashboard

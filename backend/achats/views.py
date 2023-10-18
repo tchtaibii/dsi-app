@@ -451,7 +451,8 @@ def dashboard_line(request):
             result.append(
                 {
                     'achat_id': achat.id,
-                    'weeks_count': int(str(weeks_count).split()[0])
+                    'weeks_count': int(str(weeks_count).split()[0]),
+                    'achat_DA' : achat.DA,
                 }
             )
 
