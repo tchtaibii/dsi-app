@@ -51,7 +51,6 @@ function Login({ setIsLogin }): { setIsLogin: any } {
         const accessToken = response.data.access;
 
         // Set the access token in local storage
-        console.log(response)
         localStorage.setItem('access_token', accessToken);
         setIsLogin(true);
         window.location.reload();

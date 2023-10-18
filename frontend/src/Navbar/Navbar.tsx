@@ -30,9 +30,6 @@ const Search = () => (
 const Navbar = () => {
     const data = useRecoilValue(myData)
 
-    useEffect(()=>{
-        console.log('data : ',data)
-    },[data])
     return (
         <div className='Navbar'>
             <div className="navLeft">

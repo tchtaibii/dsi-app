@@ -92,10 +92,6 @@ const Achats = () => {
         is_: null,
         reste: 0
     })
-
-    useEffect(() => {
-        console.log(postData)
-    }, [postData])
     const statusFunc = (obj: any) => {
         setarticle({ Designation: obj.Designation, demandeur: obj.demandeur, reste: obj.reste });
         if (obj.isComplet === true) {
@@ -266,15 +262,11 @@ const Achats = () => {
         const fetchData = async () => {
             await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => {
                 statusFunc(rsp.data)
-                console.log(rsp.data)
-            }).catch((rsp: any) => console.log(rsp));
+            })
             setLoading(true)
         }
         fetchData();
     }, [])
-    useEffect(() => {
-        console.log('article', article)
-    }, [article])
 
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -347,7 +339,6 @@ const Achats = () => {
                         text: "Wrong Inputs",
                         is: true
                     })
-                    console.log('8585')
                 });
             }
         }

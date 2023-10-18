@@ -235,9 +235,7 @@ def progress(request, id):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif is_ == 'OB':
             serializer = PostOBSerializer(data=data)
-            print(data)
             if serializer.is_valid():
-                print('hello')
                 OB = serializer.validated_data['code']
                 reste = serializer.validated_data['reste']
                 achat = Achat.objects.get(id=id)
@@ -274,7 +272,6 @@ def add_commande(request):
         date_obj = datetime.strptime(DateDeCommande, "%Y-%m-%d")
         Type_d_achat = data.get('typeDachat')
         article_ = data.get('article')
-        print(data)
         if not ((demandeur is not None and isinstance(demandeur, str))
                 and (entité is not None and isinstance(entité, str))
                 and (ligne_bugetaire is not None and isinstance(ligne_bugetaire, str))
@@ -290,14 +287,11 @@ def add_commande(request):
                 try:
                     article = Article.objects.filter(code=code).first()
                 except Article.DoesNotExist:
-                    print('here 1')
                     return Response({'message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                print('here 2')
                 return Response("2 Error Data", status=status.HTTP_400_BAD_REQUEST)
         else:
             now = datetime.now()
-            # Format the current time as a string
             timestamp = now.strftime("%Y%m%d%H%M%S")
             code = 'DSI' + timestamp
             designation = article_.get('designation')
@@ -308,46 +302,35 @@ def add_commande(request):
                     and (fourniseur is not None and isinstance(fourniseur, str) and (prix_estimatif is not None and isinstance(prix_estimatif, str))):
                 typearticle, created = TypeDArticle.objects.get_or_create(
                     type=type_article)
-                try:
-                    article = Article(
-                        code=code,
-                        designation=designation,
-                        type=typearticle,
-                        fourniseur=fourniseur,
-                        prix_estimatif=int(prix_estimatif)
-                    )
-                    article.save()
-                except Exception as e:
-                    print(e)
+                article = Article(
+                    code=code,
+                    designation=designation,
+                    type=typearticle,
+                    fourniseur=fourniseur,
+                    prix_estimatif=int(prix_estimatif)
+                )
+                article.save()
             else:
-                print('here 3')
                 return Response("3 Error Data", status=status.HTTP_400_BAD_REQUEST)
         situation = SituationDachat.objects.get(id=1)
         Type_d_achat_instance = TypeDachat.objects.get(id=Type_d_achat)
-        try:
-            achat = Achat(
-                article=article,
-                demandeur=demandeur,
-                entité=entité,
-                ligne_bugetaire=ligne_bugetaire,
-                quantité=quantité,
-                DateDeCommande=date_obj,
-                typeDachat=Type_d_achat_instance,  # Assign the instance, not the integer
-                situation_d_achat=situation
-            )
-        except Exception as e:
-            print(f"Error: {str(e)}")
+        achat = Achat(
+            article=article,
+            demandeur=demandeur,
+            entité=entité,
+            ligne_bugetaire=ligne_bugetaire,
+            quantité=quantité,
+            DateDeCommande=date_obj,
+            typeDachat=Type_d_achat_instance,  # Assign the instance, not the integer
+            situation_d_achat=situation
+        )
         try:
             achat.save()
         except Exception as e:
-            print('here 4')
             return Response({'**message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
-        print('here 5')
         return Response("ok", status=status.HTTP_201_CREATED)
     except Exception as e:
-        print('here 6')
         return Response({'message': 'Article not found.'}, status=status.HTTP_400_BAD_REQUEST)
-    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
@@ -380,10 +363,8 @@ def get_commandes(request):
         achats = achats.select_related('article').values(
             'demandeur', 'entité', 'DateDeCommande', 'DA', 'situation_d_achat', 'id', 'article__designation', 'isComplet')
         achats_list = list(achats)
-        print(achats_list)
     except Exception as e:
-        print(e)
-
+        return JsonResponse(achats_list, safe=False)
     return JsonResponse(achats_list, safe=False)
 
 

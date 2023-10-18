@@ -133,11 +133,6 @@ const Achats = () => {
         fetchData();
     }, []);
 
-
-    useEffect(() => {
-        console.log(queryParams)
-    }, [queryParams]);
-
     const Situation = (sda: number) => {
         switch (sda) {
             case 1:
@@ -347,7 +342,6 @@ const Achats = () => {
                                             ...state,
                                             reste: !state.reste
                                         }))
-                                        console.log(typeDachat)
                                     }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.reste} />
                                     <h4>commande livré partiellement</h4>
                                 </div>
@@ -359,7 +353,6 @@ const Achats = () => {
                                             ...state,
                                             isComplet: !state.isComplet
                                         }))
-                                        console.log(typeDachat)
                                     }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
                                     <h4>DA terminé</h4>
                                 </div>

@@ -28,7 +28,6 @@ const ApexChart = ({ data }) => {
             events: {
                 markerClick: function (event, chartContext, { seriesIndex, dataPointIndex, config }) {
                     const id = data[dataPointIndex].achat_id
-                    console.log(data[dataPointIndex])
                     navigate(`/achat/${id}`)
                 }
             }

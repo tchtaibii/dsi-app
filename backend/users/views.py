@@ -69,7 +69,6 @@ def user_registration(request):
 @require_http_methods(["POST"])
 @api_view(['POST'])
 def user_login(request):
-    print('helo')
     try:
         email = request.data.get('email')
         password = request.data.get('password')

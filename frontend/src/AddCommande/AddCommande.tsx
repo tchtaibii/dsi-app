@@ -56,7 +56,6 @@ function AddCommande() {
                 && achat.article.fourniseur &&
                 achat.article.fourniseur.length > 0
             ) {
-                console.log('heelooe')
                 setSubmit(false);
             }
             else
@@ -64,7 +63,6 @@ function AddCommande() {
         }
         else
             setSubmit(true)
-        console.log('tipouwa', achat)
     }, [achat, typeDachat, achat.article])
 
     const handleSubmit = async () => {
@@ -73,7 +71,6 @@ function AddCommande() {
             typeDachat
         }))
         await axios.post('/achats/add/', achat).then((rsp: any) => {
-            console.log(rsp)
             setStatus({
                 color: "#4CAF50",
                 status: "Success!",
@@ -133,14 +130,12 @@ function AddCommande() {
                                 <div className="checkboxs">
                                     <input onChange={() => {
                                         setType(1)
-                                        console.log(typeDachat)
                                     }} type="checkbox" name="Contrat Cadre" id="" checked={typeDachat === 1} />
                                     <h4>Contrat cadre</h4>
                                 </div>
                                 <div className="checkboxs">
                                     <input onChange={() => {
                                         setType(3)
-                                        console.log(typeDachat)
                                     }} type="checkbox" checked={typeDachat === 3} name="Achat d’offre" id="" />
                                     <h4>Achat d’offre</h4>
                                 </div>
@@ -149,14 +144,12 @@ function AddCommande() {
                                 <div className="checkboxs">
                                     <input type="checkbox" onChange={() => {
                                         setType(2)
-                                        console.log(typeDachat)
                                     }} checked={typeDachat === 2} name="Achat Direct" id="" />
                                     <h4>Achat Direct</h4>
                                 </div>
                                 <div className="checkboxs">
                                     <input type="checkbox" onChange={() => {
                                         setType(4)
-                                        console.log(typeDachat)
                                     }} checked={typeDachat === 4} name="Achat d’offre" id="" />
                                     <h4>Achat en ligne</h4>
                                 </div>
