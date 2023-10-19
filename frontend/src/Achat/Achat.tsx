@@ -53,9 +53,9 @@ const Achat = () => {
             await axios.get(`/achats/get/achat/${id}`).then((rsp: any) => {
                 setData(rsp.data)
             })
-            setLoading(true);
         }
         fetchData();
+        setLoading(true);
     }, [])
 
     const navigate = useNavigate()
@@ -70,7 +70,7 @@ const Achat = () => {
                     Data !== null ?
                         <>
                             <div style={{ justifyContent: "flex-start", gap: '1rem', alignItems: 'center' }} className="header">
-                                <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur} --> ${Data.article.type}`}</h1>
+                                <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur}`}</h1>
                                 <div onClick={() => {
                                     navigate(`/commandes/${id}`)
                                 }} className="Edits"><Edits /></div>
@@ -87,36 +87,9 @@ const Achat = () => {
                                             <td className="ValueTd">{Data.entité}</td>
                                         </tr>
                                         <tr>
-                                            <td className="keyTd">Type</td>
-                                            <td className="ValueTd">{Data.article.type}</td>
-                                        </tr>
-                                        {
-                                            Data.typeDachat === 1 &&
-                                            <tr>
-                                                <td className="keyTd">Code d'article</td>
-                                                <td className="ValueTd">{Data.article.code}</td>
-                                            </tr>
-                                        }
-                                        <tr>
-                                            <td className="keyTd">Désignation</td>
-                                            <td className="ValueTd">{Data.article.designation}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="keyTd">Quantité</td>
-                                            <td className="ValueTd">{Data.quantité}</td>
-                                        </tr>
-                                        <tr>
                                             <td className="keyTd">Ligne budgétaire</td>
                                             <td className="ValueTd">{Data.ligne_bugetaire}</td>
                                         </tr>
-                                        {
-                                            Data.typeDachat !== 1 &&
-                                            <tr>
-                                                <td className="keyTd">Prix estimatif</td>
-                                                <td className="ValueTd">{Data.prix_estimatif ? Data.prix_estimatif : '-----'}</td>
-                                            </tr>
-                                        }
-
                                         <tr>
                                             <td className="keyTd">Date de la commande</td>
                                             <td className="ValueTd">{Data.DateDeCommande}</td>
@@ -149,10 +122,6 @@ const Achat = () => {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td className="keyTd">{(Data.typeDachat === 1 ? "Contrat" : "Founisseur")}</td>
-                                            <td className="ValueTd">{(Data.typeDachat === 1 ? (Data.article.contrat.name ? Data.article.contrat.name : "-----") : (Data.article.fourniseur ? Data.article.fourniseur : "-----"))}</td>
-                                        </tr>
-                                        <tr>
                                             <td className="keyTd">Type d'achat</td>
                                             <td className="ValueTd">{TypeDachat(Data.typeDachat)}</td>
                                         </tr>
@@ -182,10 +151,6 @@ const Achat = () => {
                                         <tr>
                                             <td className="keyTd">Observation</td>
                                             <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="keyTd lastTd">Reste</td>
-                                            <td className="ValueTd lastTd">{Data.reste !== null ? Data.reste : "-----"}</td>
                                         </tr>
                                     </tbody>
                                 </table>

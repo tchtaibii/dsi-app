@@ -17,13 +17,15 @@ class TypeDArticle(models.Model):
 
 
 class Article(models.Model):
-    code = models.CharField(max_length=30, primary_key=True)
+    code = models.CharField(max_length=30, null=True, blank=True)
     designation = models.TextField(null=True, blank=True)
     contrat = models.ForeignKey(
         'Contrat', on_delete=models.PROTECT, null=True, blank=True)
-    type = models.ForeignKey('TypeDArticle', on_delete=models.PROTECT, null=True, blank=True)
+    type = models.ForeignKey(
+        'TypeDArticle', on_delete=models.PROTECT, null=True, blank=True)
     fourniseur = models.CharField(max_length=60, null=True, blank=True)
     prix_estimatif = models.IntegerField(blank=True, null=True)
+
     def __str__(self):
         return self.designation
 
@@ -45,12 +47,20 @@ class SituationDachat(models.Model):
 
 
 class Achat(models.Model):
+    quantité = models.IntegerField(null=False, blank=False)
+    reste = models.IntegerField(blank=True, null=True)
+    article = models.ForeignKey(
+        'Article', on_delete=models.PROTECT, null=False, blank=False)
+
+    def __str__(self):
+        return self.designation
+
+
+class Achats(models.Model):
     demandeur = models.CharField(max_length=70, blank=False, null=False)
     entité = models.CharField(max_length=30, blank=False, null=False)
-    article = models.ForeignKey(
-        'Article', on_delete=models.PROTECT, null=False, blank=False, to_field='code')
+    achat = models.ManyToManyField('Achat')
     ligne_bugetaire = models.CharField(max_length=30, null=False, blank=False)
-    quantité = models.IntegerField(null=False, blank=False)
     DateDeCommande = models.DateField(null=False, blank=False)
     DA = models.CharField(max_length=30, null=True, blank=True)
     DateDA = models.DateField(null=True, blank=True)
@@ -64,7 +74,6 @@ class Achat(models.Model):
     BL = models.CharField(max_length=30, null=True, blank=True)
     DateBL = models.DateField(null=True, blank=True)
     BL_File = models.FileField(upload_to='uploads/BL', null=True, blank=True)
-    reste = models.IntegerField(blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
     isComplet = models.BooleanField(default=False)
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Achat, Article, Contrat
+from .models import Achat, Article, Contrat, Achats
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -24,6 +24,37 @@ class AchatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achat
         fields = '__all__'
+
+
+class AchatTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Achats
+        # fields = '__all__'
+        exclude = ('achat',)
+
+class AchatsSerializer(serializers.ModelSerializer):
+    achat = AchatSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Achats
+        fields = '__all__'
+
+
+class AchatsGSerializer(serializers.Serializer):
+    demandeur = serializers.CharField()
+    entite = serializers.CharField()
+    ligne_budgetaire = serializers.CharField()
+    DateDeCommande = serializers.DateField()
+    typeDachat = serializers.IntegerField()
+    achats = serializers.ListField(child=serializers.DictField())
+
+
+# class AchatsSerializer(serializers.ModelSerializer):
+#     achat = AchatSerializer()
+
+#     class Meta:
+#         model = Achats
+#         fields = '__all__'
 
 
 class AchatFilterSerializer(serializers.Serializer):
@@ -75,6 +106,7 @@ class PostBLSerializer(serializers.Serializer):
     date = serializers.DateTimeField(required=True)
     reste = serializers.IntegerField(required=True)
     is_ = serializers.CharField(required=True)
+
 
 class PostOBSerializer(serializers.Serializer):
     code = serializers.CharField(required=True)

@@ -6,6 +6,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import Loading from '../Loading/Loading';
 
 
+const MoreArrowSvg = () => (
+    <svg style={{
+        width: "1.5rem",
+        height: "1.375rem"
+    }} width={22} height={24} viewBox="0 0 22 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 16.7272V10.1816L11 17.4545L7.55787e-05 10.1816V16.7272L11 24.0001L22 16.7272Z" fill="#BD391B" />
+        <path d="M22 6.54559V0L11 7.27288L7.55787e-05 0V6.54559L11 13.8185L22 6.54559Z" fill="#BD391B" />
+    </svg>
+
+)
+
 const ValidateSvg = () => (
     <svg style={{ width: '2.875rem', height: '2.875rem' }} width={46} height={46} viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx={23} cy="22.6817" rx={23} ry="22.6817" fill="#008C76" />
@@ -57,6 +68,94 @@ const DownloadSvg = () => (
 
 const Achats = () => {
     const { id } = useParams()
+
+
+
+
+    const AchatCl = ({ achats }) => {
+        const [showMore, setMore] = useState(false)
+        return (
+            <div className="achatCf">
+                {
+                    achats.map((e: any, i: number) => (
+                        <div onClick={() => {
+                            navigate(`/achat/${e.id}`)
+                        }} style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
+                            <div className="roww">
+                                <p style={{ width: '14.5%' }}>{e.demandeur}</p>
+                                <p style={{ width: '14.3%' }}>{e.entité}</p>
+                                <p style={{ width: '23.6%' }}>{TypeDachat(e.typeDachat)}</p>
+                                <p style={{ width: '16.3%' }}>{e.DateDeCommande}</p>
+                                <p style={{ width: '12%' }}>{e.DA ? e.DA : "------"}</p>
+                                <div style={{ width: '15%' }} className="etatCont">
+                                    <div style={{
+                                        backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "rgba(180, 51, 22, 0.50)"
+                                            : e.situation_d_achat === 4 ? "rgba(67, 168, 32, 0.32)"
+                                                : "rgb(234 214 9 / 32%)")
+                                    }} className="etat">
+                                        <div style={{
+                                            width: "0.7rem",
+                                            height: "0.7rem",
+                                            backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)"),
+                                            borderRadius: "50%"
+                                        }} className="pointEtat"></div>
+                                        <p style={{ color: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)") }}>{Situation(e.situation_d_achat)}</p>
+                                    </div>
+                                </div>
+
+                                <div className="btnAchat">
+                                    {/* <InfoSvg /> */}
+                                    {!e.isComplet ? <TikTak /> : <ValidateSvg />}
+                                </div>
+                            </div>
+                            {
+                                showMore &&
+                                <div className="achatArr">
+                                    <div className="headerMain" style={{ paddingRight: "0rem" }}>
+                                        <p style={{ width: '45%', color: '#BD391B' }}>Designation</p>
+                                        <p style={{ width: '10%', color: '#BD391B' }}>Type</p>
+                                        <p style={{ width: '14%', color: '#BD391B' }}>{e.typeDachat === 1 ? "Code d’article" : "Prix Estimatif"}</p>
+                                        <p style={{ width: '18%', color: '#BD391B' }}>{e.typeDachat === 1 ? "Contrat" : "Fournisseur"}</p>
+                                        <p style={{ width: '8%', color: '#BD391B' }}>Quantité</p>
+                                        <p style={{ width: 'fit-content', color: '#BD391B' }}>Reste</p>
+                                    </div>
+                                    <div className="achatZ">
+
+                                        {
+                                            e.achat && e.achat.map((ele: any) => {
+                                                return (
+                                                    <div className="achatSD">
+
+                                                        <p style={{ width: '45%' }}>{ele.article.designation}</p>
+                                                        <p style={{ width: '10%' }}>{ele.article.type}</p>
+                                                        <p style={{ width: '14%' }}>{e.typeDachat === 1 ? ele.article.code : ele.article.prix_estimatif}</p>
+                                                        <p style={{ width: '18%' }}>{e.typeDachat === 1 ? ele.article.contrat.name : ele.article.fourniseur}</p>
+                                                        <p style={{ width: '8%' }}>{ele.quantité}</p>
+                                                        <p style={{ width: 'fit-content' }}>{ele.reste}</p>
+                                                    </div>
+                                                )
+                                            })
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    ))
+                }
+                <div onClick={() => {
+                    setMore((state:any) => (!state))
+                }} className="More">
+                    <MoreArrowSvg />
+                </div>
+            </div>
+
+        )
+    }
+
+
+
+
     interface QueryParams {
         typeDachat: number | null;
         DA: string | null;
@@ -101,19 +200,19 @@ const Achats = () => {
                 const commandsResponse = await axios.get('/achats/get/commandes/', {
                     params: nonNullParams,
                 });
+                console.log(commandsResponse)
+                // const fileResponse = await axios.get('/achats/excelExport/', {
+                //     params: nonNullParams,
+                //     responseType: 'blob', // Important for handling binary data
+                // });
 
-                const fileResponse = await axios.get('/achats/excelExport/', {
-                    params: nonNullParams,
-                    responseType: 'blob', // Important for handling binary data
-                });
+                // const disposition = fileResponse.headers['content-disposition'];
+                // const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                // const filename = matches ? matches[1].replace(/['"]/g, '') : '';
 
-                const disposition = fileResponse.headers['content-disposition'];
-                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                const filename = matches ? matches[1].replace(/['"]/g, '') : '';
-
-                const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = window.URL.createObjectURL(blob);
-                setFileData({ data: url, name: filename });
+                // const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                // const url = window.URL.createObjectURL(blob);
+                // setFileData({ data: url, name: filename });
                 setAchats(commandsResponse.data.reverse());
 
                 const typeArticleResponse = await axios.get('/achats/get/types_article');
@@ -410,7 +509,7 @@ const Achats = () => {
                         }} style={{ width: "6.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                             <FilterSvg />
                             filter</button>
-                        <button onClick={() => {
+                        {/* <button onClick={() => {
                             const link = document.createElement('a');
                             link.href = fileData.data;
                             link.setAttribute('download', fileData.name);
@@ -419,7 +518,7 @@ const Achats = () => {
                             document.body.removeChild(link);
                         }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                             <DownloadSvg />
-                            Donwload Exel</button>
+                            Donwload Exel</button> */}
                     </div>
                 </div>
                 <div style={{ gap: "1.44rem" }} className="main">
@@ -429,45 +528,14 @@ const Achats = () => {
                                 <div className="headerMain">
                                     <p style={{ width: '15%' }}>Demandeur</p>
                                     <p style={{ width: '15%' }}>Entité</p>
-                                    <p style={{ width: '25%' }}>Désignation</p>
+                                    <p style={{ width: '25%' }}>Type d'achat</p>
                                     <p style={{ width: '17%' }}>Date de la commande</p>
                                     <p style={{ width: '13%' }}>DA</p>
                                     <p style={{ width: '15%' }}>Etat d’order</p>
                                 </div>
                                 <div className="achatsCL">
-                                    {
-                                        achats.map((e: any, i: number) => (
-                                            <div onClick={() => {
-                                                navigate(`/achat/${e.id}`)
-                                            }} style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
-                                                <p style={{ width: '14.5%' }}>{e.demandeur}</p>
-                                                <p style={{ width: '14.3%' }}>{e.entité}</p>
-                                                <p style={{ width: '23.6%' }}>{e.article__designation}</p>
-                                                <p style={{ width: '16.3%' }}>{e.DateDeCommande}</p>
-                                                <p style={{ width: '12%' }}>{e.DA ? e.DA : "------"}</p>
-                                                <div style={{ width: '15%' }} className="etatCont">
-                                                    <div style={{
-                                                        backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "rgba(180, 51, 22, 0.50)"
-                                                            : e.situation_d_achat === 4 ? "rgba(67, 168, 32, 0.32)"
-                                                                : "rgb(234 214 9 / 32%)")
-                                                    }} className="etat">
-                                                        <div style={{
-                                                            width: "0.7rem",
-                                                            height: "0.7rem",
-                                                            backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)"),
-                                                            borderRadius: "50%"
-                                                        }} className="pointEtat"></div>
-                                                        <p style={{ color: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)") }}>{Situation(e.situation_d_achat)}</p>
-                                                    </div>
-                                                </div>
+                                    <AchatCl achats={achats} />
 
-                                                <div className="btnAchat">
-                                                    {/* <InfoSvg /> */}
-                                                    {!e.isComplet ? <TikTak /> : <ValidateSvg />}
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
                                 </div>
 
                             </>

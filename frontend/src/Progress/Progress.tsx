@@ -92,6 +92,8 @@ const Achats = () => {
         is_: null,
         reste: 0
     })
+    const [mailtoLink, setMailtoLink] = useState('')
+
     const statusFunc = (obj: any) => {
         setarticle({ Designation: obj.Designation, demandeur: obj.demandeur, reste: obj.reste });
         if (obj.isComplet === true) {
@@ -190,6 +192,10 @@ const Achats = () => {
                 ...state,
                 is_: 'BL'
             }))
+            const email = 'recipient@example.com';
+            const subject = 'Hello!';
+            const body = 'This is the body of the email.';
+            setMailtoLink(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
         else if (obj.DA !== null && obj.DA.length > 0) {
             setStatus({
@@ -222,6 +228,10 @@ const Achats = () => {
                 ...state,
                 is_: 'BC'
             }))
+            const email = 'recipient@example.com';
+            const subject = 'Hello!';
+            const body = 'This is the body of the email.';
+            setMailtoLink(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
         else {
             setStatus({
@@ -254,6 +264,10 @@ const Achats = () => {
                 ...state,
                 is_: 'DA'
             }))
+            const email = 'recipient@example.com';
+            const subject = 'Hello!';
+            const body = 'This is the body of the email.';
+            setMailtoLink(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
 
     }
@@ -519,7 +533,11 @@ const Achats = () => {
                                         }
                                         <div className="submitStep">
                                             {
-                                                postData.is_ !== 'OB' && <div className='sendMail'>Envoyer un email</div>
+                                                postData.is_ !== 'OB' && <div className='sendMail'>
+                                                    <a href={mailtoLink}>
+                                                        Envoyer un email
+                                                    </a>
+                                                </div>
                                             }
                                             <button onClick={async () => {
                                                 if (postData) {
