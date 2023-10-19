@@ -222,24 +222,45 @@ function AddCommande() {
         setAchat((state: Commandes) => ({ ...state, achats: AChats }))
     }, [AChats])
     useEffect(() => {
-        if (typeDachat >= 1 && typeDachat <= 4 && achat.demandeur.length > 0  && achat.entité.length > 0 && achat.ligne_bugetaire.length > 0 && achat.achats.length > 0) {
+        if (
+            typeDachat >= 1 &&
+            typeDachat <= 4 &&
+            achat.demandeur.length > 0 &&
+            achat.DateDeCommande.length > 0 &&
+            achat.entité.length > 0 &&
+            achat.ligne_bugetaire.length > 0 &&
+            achat.achats.length > 0
+        ) {
+            let isSubmitRequired = false;
             if (typeDachat === 1) {
-                AChats.map((e: Article) => {
-                    if (!(e.code && e.code.length > 0 && e.quantité >= 1))
-                        setSubmit(true);
-                })
+                AChats.forEach((e: Article) => {
+                    if (!e.code || e.code.length < 0 || e.quantité < 1) {
+                        isSubmitRequired = true;
+                    }
+                });
+            } else {
+                AChats.forEach((e: Article) => {
+                    if (
+                        !(
+                            e.designation &&
+                            e.designation.length > 0 &&
+                            e.type &&
+                            e.type.length > 0 &&
+                            e.fourniseur &&
+                            e.fourniseur.length > 0 &&
+                            e.quantité >= 1
+                        )
+                    ) {
+                        isSubmitRequired = true;
+                    }
+                });
             }
-            else {
-                AChats.map((e: Article) => {
-                    if (!(e.designation && e.designation.length > 0 && e.type && e.type.length > 0 && e.fourniseur && e.fourniseur.length > 0 && e.quantité >= 1))
-                        setSubmit(true);
-                })
-            }
-            setSubmit(false)
+            setSubmit(isSubmitRequired);
+        } else {
+            setSubmit(true);
         }
-        else
-            setSubmit(true)
-    }, [achat, typeDachat])
+    }, [achat, typeDachat]);
+
 
     const handleSubmit = async () => {
         setAchat((state: any) => ({
