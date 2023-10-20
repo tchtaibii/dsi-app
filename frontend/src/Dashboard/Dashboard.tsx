@@ -101,7 +101,7 @@ const Dashboard = () => {
                         <div className="header">
                             <h1>Dashboard</h1>
                         </div>
-                        <div className="main" style={{padding: 0}}>
+                        <div className="main" style={{ padding: 0 }}>
                             <div className="dash-col">
                                 <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
                                 <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
@@ -114,8 +114,8 @@ const Dashboard = () => {
                                     <ChartPie data={pieData} />
                                 </div>
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "Bon de Livraison en retard")}</h1>
-                                    <LinePie data={dataLine} />
+                                    <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "Livraison en retard")}</h1>
+                                    <LinePie data={dataLine.length > 0 ? dataLine : []} />
                                 </div>
                             </div>
                         </div>

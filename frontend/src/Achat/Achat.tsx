@@ -114,7 +114,7 @@ const Achat = () => {
                                             <td className="keyTd">BC Document</td>
                                             <td className="ValueTd">
                                                 {
-                                                    Data.BC ? <button onClick={async () => {
+                                                    Data.BC_File && Data.BC ? <button onClick={async () => {
                                                         await axios.get(`/achats/download_file/${Data.BC}`)
                                                     }}>Download</button> : "-----"
                                                 }
@@ -137,7 +137,7 @@ const Achat = () => {
                                             <td className="keyTd">BL Document</td>
                                             <td className="ValueTd">
                                                 {
-                                                    Data.BL ? <button onClick={async () => {
+                                                    Data.BL_File && Data.BL ? <button onClick={async () => {
                                                         await axios.get(`/achats/download_file/${Data.BL}`)
                                                     }}>Download</button> : "-----"
                                                 }

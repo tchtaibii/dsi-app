@@ -7,12 +7,12 @@ const ApexChart = ({ data }) => {
     const [CategoData, setCatego] = useState([])
     useEffect(() => {
         setData(() => (
-            data.map((e: any) => (
+            data && data.map((e: any) => (
                 e.weeks_count
             ))
         ))
         setCatego(() => (
-            data.map((e: any) => (
+            data && data.map((e: any) => (
                 e.achat_DA
             ))
         ))
@@ -27,8 +27,11 @@ const ApexChart = ({ data }) => {
         chart: {
             events: {
                 markerClick: function (event, chartContext, { seriesIndex, dataPointIndex, config }) {
-                    const id = data[dataPointIndex].achat_id
-                    navigate(`/achat/${id}`)
+                    if (data) {
+                        const id = data[dataPointIndex].achat_id
+                        navigate(`/achat/${id}`)
+                    }
+
                 }
             }
         }

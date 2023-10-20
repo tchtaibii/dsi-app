@@ -32,6 +32,7 @@ class AchatTSerializer(serializers.ModelSerializer):
         # fields = '__all__'
         exclude = ('achat',)
 
+
 class AchatsSerializer(serializers.ModelSerializer):
     achat = AchatSerializer(many=True, read_only=True)
 
@@ -43,7 +44,7 @@ class AchatsSerializer(serializers.ModelSerializer):
 class AchatsGSerializer(serializers.Serializer):
     demandeur = serializers.CharField()
     entite = serializers.CharField()
-    ligne_budgetaire = serializers.CharField()
+    ligne_bugetaire = serializers.CharField()
     DateDeCommande = serializers.DateField()
     typeDachat = serializers.IntegerField()
     achats = serializers.ListField(child=serializers.DictField())
@@ -68,14 +69,21 @@ class AchatFilterSerializer(serializers.Serializer):
     isComplet = serializers.BooleanField(required=False)
 
 
+class ProgAchatSerializer(serializers.ModelSerializer):
+    designation = serializers.CharField(source='article.designation')
+
+    class Meta:
+        model = Achat
+        fields = ['designation', 'reste', 'id']
+
+
 class ProgressSerializer(serializers.Serializer):
     DA = serializers.CharField()
     BC = serializers.CharField()
     BL = serializers.CharField()
     isComplet = serializers.BooleanField()
-    Designation = serializers.CharField()
     demandeur = serializers.CharField()
-    reste = serializers.IntegerField()
+    achats = ProgAchatSerializer(many=True)
 
 
 class FileSerializer(serializers.Serializer):
@@ -101,14 +109,20 @@ class PostBCSerializer(serializers.Serializer):
     is_ = serializers.CharField(required=True)
 
 
+class ResteItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    designation = serializers.CharField()
+    reste = serializers.CharField()
+
+
 class PostBLSerializer(serializers.Serializer):
     code = serializers.CharField(required=True)
     date = serializers.DateTimeField(required=True)
-    reste = serializers.IntegerField(required=True)
+    reste = ResteItemSerializer(many=True)
     is_ = serializers.CharField(required=True)
-
+    fournisseur = serializers.CharField(required=True)
 
 class PostOBSerializer(serializers.Serializer):
     code = serializers.CharField(required=True)
-    reste = serializers.IntegerField(required=True)
+    reste = ResteItemSerializer(many=True)
     is_ = serializers.CharField(required=True)

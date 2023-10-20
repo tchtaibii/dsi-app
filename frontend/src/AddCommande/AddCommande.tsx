@@ -9,7 +9,6 @@ interface Article {
     code?: string,
     designation?: string,
     type?: string,
-    fourniseur?: string,
     prix_estimatif?: number
     quantité: number
 }
@@ -143,27 +142,6 @@ const ArticleFields = ({ achat, typeDachat, title, number, setAchats }) => {
                             </div>
                         </div>
                         <div className="inputCommande">
-                            <div className="label">Fournisseur</div>
-                            <div className="inputText">
-                                <input onChange={(e: any) => {
-                                    const newD = e.target.value;
-                                    setAchats((state: Article[]) =>
-                                        state.map((item: Article, index) => {
-                                            if (index === number - 1) {
-                                                return {
-                                                    ...item,
-                                                    fourniseur: newD,
-                                                };
-                                            }
-                                            return item;
-                                        })
-                                    );
-                                }} placeholder="Ex: AROCOM" type="text" name="Fournisseur" id="" />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="inputsCommande">
-                        <div className="inputCommande">
                             <div className="label">Quantité *</div>
                             <div className="inputText">
                                 <input onChange={(e: any) => {
@@ -196,7 +174,6 @@ function AddCommande() {
                 code: "",
                 designation: "",
                 type: "",
-                fourniseur: "",
                 prix_estimatif: 0,
                 quantité: 0
             }
@@ -231,10 +208,18 @@ function AddCommande() {
             achat.ligne_bugetaire.length > 0 &&
             achat.achats.length > 0
         ) {
+
             let isSubmitRequired = false;
             if (typeDachat === 1) {
+
                 AChats.forEach((e: Article) => {
-                    if (!e.code || e.code.length < 0 || e.quantité < 1) {
+                    if (
+                        !(
+                            e.code &&
+                            e.code.length > 0 &&
+                            e.quantité >= 1
+                        )
+                    ) {
                         isSubmitRequired = true;
                     }
                 });
@@ -246,8 +231,6 @@ function AddCommande() {
                             e.designation.length > 0 &&
                             e.type &&
                             e.type.length > 0 &&
-                            e.fourniseur &&
-                            e.fourniseur.length > 0 &&
                             e.quantité >= 1
                         )
                     ) {
@@ -323,7 +306,6 @@ function AddCommande() {
                     code: "",
                     designation: "",
                     type: "",
-                    fourniseur: "",
                     prix_estimatif: 0,
                     quantité: 0
                 }])

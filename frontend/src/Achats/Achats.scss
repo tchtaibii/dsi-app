@@ -15,7 +15,7 @@
         font-weight: 600;
         line-height: normal;
         width: 16%;
-        
+
 
     }
 }
@@ -53,35 +53,17 @@
 .achatCf {
     height: fit-content;
     position: relative;
-
-    .More {
-        position: relative;
-        z-index: 111;
-        width: 3.5rem;
-        height: 3.5rem;
-        border-radius: 50%;
-        background-color: $dark-color;
-        border: 0.06rem solid $nav-color;
-        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transform: translateY(-60%);
-        left: 50%;
-        overflow-y: visible;
-        cursor: pointer;
-        transition: all 500ms ease-in-out;
-
-        &:hover {
-            scale: (1.006);
-        }
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 5rem;
 }
 
 .rowAchats {
     border-radius: 1.25rem;
     background: $dark-color ;
     width: 100%;
+    margin-bottom: 5rem;
 
     // height: 6.4rem;
 
@@ -92,6 +74,29 @@
     transition: all 500ms ease-in-out;
     border: 0.06rem solid $nav-color;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+    .More {
+        position: absolute;
+        z-index: 111;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background-color: $dark-color;
+        border: 0.06rem solid $nav-color;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform: translateY(240%);
+        // left: 50%;
+        overflow-y: visible;
+        cursor: pointer;
+        transition: all 500ms ease-in-out;
+
+        &:hover {
+            scale: (1.006);
+        }
+    }
 
     .roww {
         width: 100%;
@@ -111,12 +116,14 @@
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        .achatZ{
+
+        .achatZ {
             display: flex;
             flex-direction: column;
             width: 100%;
             gap: 1rem;
-            .achatSD{
+
+            .achatSD {
                 display: flex;
                 flex-direction: row;
                 padding-left: 1.5rem;

@@ -50,9 +50,7 @@ const UploadSvg = () => (
 )
 
 interface AChat {
-    Designation: string;
     demandeur: string;
-    reste: number;
 }
 
 const Achats = () => {
@@ -86,16 +84,19 @@ const Achats = () => {
             line: "#A2CFFE"
         },
     });
+    const [Reste, setReste] = useState<any[]>([])
+    const [OldReste, OldsetReste] = useState<any[]>([])
     const [postData, setDataPost] = useState({
         code: null,
         date: null,
         is_: null,
-        reste: 0
+        fournisseur: null,
+        reste: []
     })
-    const [mailtoLink, setMailtoLink] = useState('')
-
     const statusFunc = (obj: any) => {
-        setarticle({ Designation: obj.Designation, demandeur: obj.demandeur, reste: obj.reste });
+        setarticle({ demandeur: obj.demandeur });
+        setReste(obj.achats);
+
         if (obj.isComplet === true) {
             setStatus({
                 DA: {
@@ -192,10 +193,6 @@ const Achats = () => {
                 ...state,
                 is_: 'BL'
             }))
-            const email = 'recipient@example.com';
-            const subject = 'Hello!';
-            const body = 'This is the body of the email.';
-            setMailtoLink(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
         else if (obj.DA !== null && obj.DA.length > 0) {
             setStatus({
@@ -228,10 +225,6 @@ const Achats = () => {
                 ...state,
                 is_: 'BC'
             }))
-            const email = 'recipient@example.com';
-            const subject = 'Hello!';
-            const body = 'This is the body of the email.';
-            setMailtoLink(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
         else {
             setStatus({
@@ -264,18 +257,24 @@ const Achats = () => {
                 ...state,
                 is_: 'DA'
             }))
-            const email = 'recipient@example.com';
-            const subject = 'Hello!';
-            const body = 'This is the body of the email.';
-            setMailtoLink(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
         }
 
     }
+    useEffect(() => {
+        console.log(Reste)
+        setDataPost((state: any) => ({ ...state, reste: Reste }));
+    }, [Reste])
+
+    useEffect(() => {
+        console.log(OldReste)
+    }, [OldReste])
 
     useEffect(() => {
         const fetchData = async () => {
             await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => {
                 statusFunc(rsp.data)
+                OldsetReste(rsp.data.achats.filter((item: any) => item.reste !== 0));
+                console.log(rsp.data)
             })
             setLoading(true)
         }
@@ -290,35 +289,39 @@ const Achats = () => {
     };
 
     const handleButtonClick = async () => {
-        if (postData.is_ !== 'DA' && postData.is_ !== 'OB' && selectedFile) {
-            const reader = new FileReader();
-            reader.onload = async (event: any) => {
-                const base64String = event.target.result;
-                const MAX_FILE_SIZE = 10485760;
-                if (base64String.size > MAX_FILE_SIZE) {
-                    // Handle file size exceeding the limit
-                    console.error('File size exceeds the limit');
-                    return;
+        if (postData.is_ !== 'DA' && postData.is_ !== 'OB') {
+            var base64String = null;
+            if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = async (event: any) => {
+                    base64String = event.target.result;
+                    const MAX_FILE_SIZE = 10485760;
+                    if (base64String.size > MAX_FILE_SIZE) {
+                        // Handle file size exceeding the limit
+                        console.error('File size exceeds the limit');
+                        return;
+                    }
+                    reader.readAsDataURL(selectedFile);
                 }
-                await axios.post(`/achats/progress/${id}`, {
-                    file: base64String, // Include the base64String in the request
-                    code: postData.code, // Include other variables as needed
-                    date: postData.date,
-                    is_: postData.is_,
-                    reste: postData.reste
-                    // Include other variables as needed
-                }).then((response: any) => {
-                    window.location.reload()
-                }).catch((error: any) => {
-                    setStatuss({
-                        color: "#AF4C4C",
-                        status: "Failed!",
-                        text: "Wrong Inputs",
-                        is: true
-                    })
-                });
-            };
-            reader.readAsDataURL(selectedFile);
+            }
+            await axios.post(`/achats/progress/${id}`, {
+                file: base64String, // Include the base64String in the request
+                code: postData.code, // Include other variables as needed
+                date: postData.date,
+                is_: postData.is_,
+                reste: postData.reste,
+                ...(postData.fournisseur !== null ? { fournisseur: postData.fournisseur } : {})
+                // Include other variables as needed
+            }).then((response: any) => {
+                window.location.reload()
+            }).catch((error: any) => {
+                setStatuss({
+                    color: "#AF4C4C",
+                    status: "Failed!",
+                    text: "Wrong Inputs",
+                    is: true
+                })
+            })
         }
         else if (postData.is_ === 'DA' || postData.is_ === 'OB') {
             if (postData.is_ === 'DA') {
@@ -393,7 +396,7 @@ const Achats = () => {
                     <Error statusCode={statusCode} setStatus={setStatuss} />
                 }
                 <div className="header">
-                    <h1>{article ? `${article.demandeur} --> ${article.Designation}` : 'No Achat Found'}</h1>
+                    <h1>{article ? `${article.demandeur}` : 'No Achat Found'}</h1>
                 </div>
                 {
                     article &&
@@ -452,6 +455,21 @@ const Achats = () => {
                                                             }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
                                                         </div>
                                                     </div>
+                                                    {
+                                                        postData.is_ === 'BL' &&
+                                                        <div className="inputCommande" style={{ width: "40rem" }}>
+                                                            <div className="label">{'Fournisseur *'}</div>
+                                                            <div className="inputText">
+                                                                <input onChange={(e: any) => {
+                                                                    const newD = e.target.value;
+                                                                    setDataPost((state: any) => ({
+                                                                        ...state,
+                                                                        fournisseur: newD
+                                                                    }))
+                                                                }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                                            </div>
+                                                        </div>
+                                                    }
                                                     <div className="inputCommande" style={{ width: "40rem" }}>
                                                         <div className="label">{`Date ${postData.is_
                                                             } *`}</div>
@@ -465,21 +483,6 @@ const Achats = () => {
                                                             }} placeholder="ex: 10020319" type="date" name="Demandeur" id="" />
                                                         </div>
                                                     </div>
-                                                    {
-                                                        postData && postData.is_ === 'BL' &&
-                                                        <div className="inputCommande" style={{ width: "40rem" }}>
-                                                            <div className="label">{`Reste *`}</div>
-                                                            <div className="inputText">
-                                                                <input onChange={(e: any) => {
-                                                                    const newD = e.target.value;
-                                                                    setDataPost((state: any) => ({
-                                                                        ...state,
-                                                                        reste: newD
-                                                                    }))
-                                                                }} placeholder="ex: 5" type="number" name="Reste" id="" />
-                                                            </div>
-                                                        </div>
-                                                    }
                                                     {
                                                         postData && (postData.is_ === 'BC' || postData.is_ === 'BL') &&
                                                         <div className="FileChange">
@@ -515,30 +518,66 @@ const Achats = () => {
                                                         </div>
                                                     </div>
                                                     {
-                                                        article.reste > 0 &&
-                                                        <div className="inputCommande" style={{ width: "40rem" }}>
-                                                            <div className="label">{`Reste *`}</div>
-                                                            <div className="inputText">
-                                                                <input onChange={(e: any) => {
-                                                                    const newD = e.target.value;
-                                                                    setDataPost((state: any) => ({
-                                                                        ...state,
-                                                                        reste: newD
-                                                                    }))
-                                                                }} placeholder="ex: 5" type="number" name="Reste" id="" />
-                                                            </div>
-                                                        </div>
+                                                        postData.is_ === 'OB' &&
+                                                        OldReste.map((e: any, i: number) => {
+                                                            return (
+                                                                <div key={`${i}-designationR`} className="inputCommande" style={{ width: "40rem" }}>
+                                                                    <div className="label">{`${e.designation}`}</div>
+                                                                    <div className="inputText">
+                                                                        <input
+                                                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                                                                const newD = event.target.value;
+                                                                                setReste((state: any) =>
+                                                                                    state.map((a: any) => {
+                                                                                        if (a.id === e.id) {
+                                                                                            a.reste = newD;
+                                                                                        }
+                                                                                        return a;
+                                                                                    })
+                                                                                );
+                                                                            }}
+                                                                            placeholder="Reste : "
+                                                                            type="number"
+                                                                            name="Reste"
+                                                                            id=""
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        }
+                                                        )
                                                     }
+                                                    {
+                                                        postData.is_ === 'BL' &&
+                                                        OldReste.map((e: any, i: number) => (
+                                                            <div key={`${i}-designationR`} className="inputCommande" style={{ width: "40rem" }}>
+                                                                <div className="label">{`${e.designation}`}</div>
+                                                                <div className="inputText">
+                                                                    <input
+                                                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                                                            const newD = event.target.value;
+                                                                            setReste((state: any) =>
+                                                                                state.map((a: any) => {
+                                                                                    if (a.id === e.id) {
+                                                                                        a.reste = newD;
+                                                                                    }
+                                                                                    return a;
+                                                                                })
+                                                                            );
+                                                                        }}
+                                                                        placeholder="Reste : "
+                                                                        type="number"
+                                                                        name="Reste"
+                                                                        id=""
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    }
+
                                                 </>
                                         }
                                         <div className="submitStep">
-                                            {
-                                                postData.is_ !== 'OB' && <div className='sendMail'>
-                                                    <a href={mailtoLink}>
-                                                        Envoyer un email
-                                                    </a>
-                                                </div>
-                                            }
                                             <button onClick={async () => {
                                                 if (postData) {
                                                     if (postData.is_ === 'DA' && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0)) {
@@ -550,7 +589,7 @@ const Achats = () => {
                                                         })
                                                         return;
                                                     }
-                                                    if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0) && selectedFile === null) {
+                                                    if ((postData.is_ === 'BC' || postData.is_ === 'BL') && (postData.code === null || postData.code.length === 0) && (postData.date === null || postData.date.length === 0)) {
                                                         setStatuss({
                                                             color: "#AF4C4C",
                                                             status: "Failed!",

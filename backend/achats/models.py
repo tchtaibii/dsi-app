@@ -23,7 +23,6 @@ class Article(models.Model):
         'Contrat', on_delete=models.PROTECT, null=True, blank=True)
     type = models.ForeignKey(
         'TypeDArticle', on_delete=models.PROTECT, null=True, blank=True)
-    fourniseur = models.CharField(max_length=60, null=True, blank=True)
     prix_estimatif = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
@@ -51,7 +50,6 @@ class Achat(models.Model):
     reste = models.IntegerField(blank=True, null=True)
     article = models.ForeignKey(
         'Article', on_delete=models.PROTECT, null=False, blank=False)
-
     def __str__(self):
         return self.designation
 
@@ -76,6 +74,7 @@ class Achats(models.Model):
     BL_File = models.FileField(upload_to='uploads/BL', null=True, blank=True)
     observation = models.TextField(blank=True, null=True)
     isComplet = models.BooleanField(default=False)
-
+    fourniseur = models.CharField(max_length=60, null=True, blank=True)
+    
     def __str__(self):
         return str(self.DateDeCommande)

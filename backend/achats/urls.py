@@ -12,7 +12,7 @@ urlpatterns = [
     path('get/achat/<str:id>', views.get_achat, name='get-achats'),
     
     path('get/types_achats', views.get_types_achat, name='get-types-achats'),
-    path('get/types_article', views.get_types_article, name='get-types-articles'),
+    # path('get/types_article', views.get_types_article, name='get-types-articles'),
     path('get/situations_article', views.get_situation_achat,
          name='get-situation-achats'),
     path('getprogrss/<str:id>', views.get_progress, name='get-progress'),

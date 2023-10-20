@@ -8,8 +8,7 @@ import Loading from '../Loading/Loading';
 
 const MoreArrowSvg = () => (
     <svg style={{
-        width: "1.5rem",
-        height: "1.375rem"
+        width: "1.0rem"
     }} width={22} height={24} viewBox="0 0 22 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M22 16.7272V10.1816L11 17.4545L7.55787e-05 10.1816V16.7272L11 24.0001L22 16.7272Z" fill="#BD391B" />
         <path d="M22 6.54559V0L11 7.27288L7.55787e-05 0V6.54559L11 13.8185L22 6.54559Z" fill="#BD391B" />
@@ -66,96 +65,126 @@ const DownloadSvg = () => (
 
 )
 
-const Achats = () => {
-    const { id } = useParams()
+const Situation = (sda: number) => {
+    switch (sda) {
+        case 1:
+            return "Nouveau";
+        case 2:
+            return "EC de traitement"
+        case 3:
+            return "EC de livraison"
+        case 4:
+            return "Livré"
+        case 5:
+            return "Livraison partielle"
+    }
+}
+const TypeDachat = (sda: number) => {
+    switch (sda) {
+        case 1:
+            return "Contrat Cadre";
+        case 2:
+            return "Achat Direct"
+        case 3:
+            return "Achat d'offre"
+        case 4:
+            return "Achat en ligne"
+    }
+}
 
+const AChatU = ({ TypeDachat, e, i }) => {
+    const [showMore, setMore] = useState(false)
+    let navigate = useNavigate();
+    useEffect(() => {
+        console.log(e)
+    }, [e])
+    return (
+        <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
+            <div className="roww" onClick={() => {
+                navigate(`/achat/${e.id}`)
+            }} >
+                <p style={{ width: '14.5%' }}>{e.demandeur}</p>
+                <p style={{ width: '14.3%' }}>{e.entité}</p>
+                <p style={{ width: '23.6%' }}>{TypeDachat(e.typeDachat)}</p>
+                <p style={{ width: '16.3%' }}>{e.DateDeCommande}</p>
+                <p style={{ width: '12%' }}>{e.DA ? e.DA : "------"}</p>
+                <div style={{ width: '15%' }} className="etatCont">
+                    <div style={{
+                        backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "rgba(180, 51, 22, 0.50)"
+                            : e.situation_d_achat === 4 ? "rgba(67, 168, 32, 0.32)"
+                                : "rgb(234 214 9 / 32%)")
+                    }} className="etat">
+                        <div style={{
+                            width: "0.7rem",
+                            height: "0.7rem",
+                            backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)"),
+                            borderRadius: "50%"
+                        }} className="pointEtat"></div>
+                        <p style={{ color: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)") }}>{Situation(e.situation_d_achat)}</p>
+                    </div>
+                </div>
 
-
-
-    const AchatCl = ({ achats }) => {
-        const [showMore, setMore] = useState(false)
-        return (
-            <div className="achatCf">
-                {
-                    achats.map((e: any, i: number) => (
-                        <div onClick={() => {
-                            navigate(`/achat/${e.id}`)
-                        }} style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
-                            <div className="roww">
-                                <p style={{ width: '14.5%' }}>{e.demandeur}</p>
-                                <p style={{ width: '14.3%' }}>{e.entité}</p>
-                                <p style={{ width: '23.6%' }}>{TypeDachat(e.typeDachat)}</p>
-                                <p style={{ width: '16.3%' }}>{e.DateDeCommande}</p>
-                                <p style={{ width: '12%' }}>{e.DA ? e.DA : "------"}</p>
-                                <div style={{ width: '15%' }} className="etatCont">
-                                    <div style={{
-                                        backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "rgba(180, 51, 22, 0.50)"
-                                            : e.situation_d_achat === 4 ? "rgba(67, 168, 32, 0.32)"
-                                                : "rgb(234 214 9 / 32%)")
-                                    }} className="etat">
-                                        <div style={{
-                                            width: "0.7rem",
-                                            height: "0.7rem",
-                                            backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)"),
-                                            borderRadius: "50%"
-                                        }} className="pointEtat"></div>
-                                        <p style={{ color: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)") }}>{Situation(e.situation_d_achat)}</p>
-                                    </div>
-                                </div>
-
-                                <div className="btnAchat">
-                                    {/* <InfoSvg /> */}
-                                    {!e.isComplet ? <TikTak /> : <ValidateSvg />}
-                                </div>
-                            </div>
-                            {
-                                showMore &&
-                                <div className="achatArr">
-                                    <div className="headerMain" style={{ paddingRight: "0rem" }}>
-                                        <p style={{ width: '45%', color: '#BD391B' }}>Designation</p>
-                                        <p style={{ width: '10%', color: '#BD391B' }}>Type</p>
-                                        <p style={{ width: '14%', color: '#BD391B' }}>{e.typeDachat === 1 ? "Code d’article" : "Prix Estimatif"}</p>
-                                        <p style={{ width: '18%', color: '#BD391B' }}>{e.typeDachat === 1 ? "Contrat" : "Fournisseur"}</p>
-                                        <p style={{ width: '8%', color: '#BD391B' }}>Quantité</p>
-                                        <p style={{ width: 'fit-content', color: '#BD391B' }}>Reste</p>
-                                    </div>
-                                    <div className="achatZ">
-
-                                        {
-                                            e.achat && e.achat.map((ele: any) => {
-                                                return (
-                                                    <div className="achatSD">
-
-                                                        <p style={{ width: '45%' }}>{ele.article.designation}</p>
-                                                        <p style={{ width: '10%' }}>{ele.article.type}</p>
-                                                        <p style={{ width: '14%' }}>{e.typeDachat === 1 ? ele.article.code : ele.article.prix_estimatif}</p>
-                                                        <p style={{ width: '18%' }}>{e.typeDachat === 1 ? ele.article.contrat.name : ele.article.fourniseur}</p>
-                                                        <p style={{ width: '8%' }}>{ele.quantité}</p>
-                                                        <p style={{ width: 'fit-content' }}>{ele.reste}</p>
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
-                                </div>
-                            }
-
-                        </div>
-                    ))
-                }
-                <div onClick={() => {
-                    setMore((state:any) => (!state))
-                }} className="More">
-                    <MoreArrowSvg />
+                <div className="btnAchat">
+                    {/* <InfoSvg /> */}
+                    {!e.isComplet ? <TikTak /> : <ValidateSvg />}
                 </div>
             </div>
+            {
+                showMore &&
+                <div className="achatArr">
+                    <div className="headerMain" style={{ paddingRight: "0rem" }}>
+                        <p style={{ width: '45%', color: '#BD391B' }}>Designation</p>
+                        <p style={{ width: '10%', color: '#BD391B' }}>Type</p>
+                        <p style={{ width: '14%', color: '#BD391B' }}>{e.typeDachat === 1 ? "Code d’article" : "Prix Estimatif"}</p>
+                        <p style={{ width: '18%', color: '#BD391B' }}>{e.typeDachat === 1 ? "Contrat" : "Fournisseur"}</p>
+                        <p style={{ width: '8%', color: '#BD391B' }}>Quantité</p>
+                        <p style={{ width: 'fit-content', color: '#BD391B' }}>Reste</p>
+                    </div>
+                    <div className="achatZ">
 
-        )
-    }
+                        {
+                            e.achat && e.achat.map((ele: any) => {
+                                return (
+                                    <div className="achatSD">
+
+                                        <p style={{ width: '45%' }}>{ele.article.designation}</p>
+                                        <p style={{ width: '10%' }}>{ele.article.type}</p>
+                                        <p style={{ width: '14%' }}>{e.typeDachat === 1 ? ele.article.code : ele.article.prix_estimatif}</p>
+                                        <p style={{ width: '19%' }}>{e.typeDachat === 1 ? ele.article.contrat.name : e.fourniseur}</p>
+                                        <p style={{ width: '8%' }}>{ele.quantité}</p>
+                                        <p style={{ width: 'fit-content' }}>{e.situation_d_achat >= 4 ? ele.reste : '----'}</p>
+                                    </div>
+                                )
+                            })
+                        }
+                    </div>
+                </div>
+            }
+            <div onClick={() => {
+                setMore((state: any) => (!state))
+            }} className="More">
+                <MoreArrowSvg />
+            </div>
+        </div>
+    )
+}
+
+const AchatCl = ({ achats, TypeDachat }) => {
+    return (
+        <div className="achatCf">
+            {
+                achats.map((e: any, i: number) => (
+                    <AChatU key={`${i}-achatss`} e={e} i={i} TypeDachat={TypeDachat} />
+                ))
+            }
+        </div>
+
+    )
+}
 
 
-
-
+const Achats = () => {
+    const { id } = useParams()
     interface QueryParams {
         typeDachat: number | null;
         DA: string | null;
@@ -174,7 +203,6 @@ const Achats = () => {
     const [isFilter, setFilter] = useState<boolean>(false)
 
 
-    let navigate = useNavigate();
 
     const [queryParams, setQueryParams] = useState<QueryParams>({
         typeDachat: null,
@@ -214,10 +242,6 @@ const Achats = () => {
                 // const url = window.URL.createObjectURL(blob);
                 // setFileData({ data: url, name: filename });
                 setAchats(commandsResponse.data.reverse());
-
-                const typeArticleResponse = await axios.get('/achats/get/types_article');
-                setTypeArticle(typeArticleResponse.data);
-
                 const typeDachatResponse = await axios.get('/achats/get/types_achats');
                 setTypeDachat(typeDachatResponse.data);
 
@@ -232,32 +256,7 @@ const Achats = () => {
         fetchData();
     }, []);
 
-    const Situation = (sda: number) => {
-        switch (sda) {
-            case 1:
-                return "Nouveau";
-            case 2:
-                return "EC de traitement"
-            case 3:
-                return "EC de livraison"
-            case 4:
-                return "Livré"
-            case 5:
-                return "Livraison partielle"
-        }
-    }
-    const TypeDachat = (sda: number) => {
-        switch (sda) {
-            case 1:
-                return "Contrat Cadre";
-            case 2:
-                return "Achat Direct"
-            case 3:
-                return "Achat d'offre"
-            case 4:
-                return "Achat en ligne"
-        }
-    }
+
     const [isFilterTypeAchat, setFilterAchat] = useState<boolean>(false);
     const [isFilterTypeArt, setFilterArt] = useState<boolean>(false);
     const [isFiltersit, setFilterSit] = useState<boolean>(false);
@@ -338,56 +337,6 @@ const Achats = () => {
                             <div className="row">
                                 <div className="inputCommande" >
                                     <div className="inputText" onClick={() => {
-                                        setFilterArt((state: boolean) => !state)
-                                        if (isFilterTypeAchat)
-                                            setFilterAchat(false)
-                                        if (isFiltersit)
-                                            setFilterSit(false)
-                                    }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
-                                        <input type="text" placeholder="Type de Désignation" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.typeDarticle ? queryParams.typeDarticle : "Type de Désignation"} />
-                                    </div>
-                                    {
-                                        isFilterTypeArt &&
-                                        <div className="typeFilter">
-                                            <div className="contType">
-                                                {
-                                                    typeDarticles.length > 0 ?
-                                                        typeDarticles.map((e: any, index: number) => (
-                                                            <div key={`${id}-type-${e.type}`} onClick={() => {
-                                                                setQueryParams((state: any) => ({
-                                                                    ...state,
-                                                                    typeDarticle: e.type
-                                                                }))
-                                                                setFilterArt(false);
-                                                            }} className="typeCont">
-                                                                {e.type}
-                                                            </div>
-                                                        ))
-                                                        :
-                                                        <div style={{ cursor: "initial" }} className="typeCont">
-                                                            No Type Found
-                                                        </div>
-                                                }
-                                            </div>
-
-                                        </div>
-                                    }
-                                </div>
-                                <div className="inputCommande" >
-                                    <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }}>
-                                        <input type="text" onChange={(e: any) => {
-                                            const value = e.target.value;
-                                            setQueryParams((state: any) => ({
-                                                ...state,
-                                                BC: value
-                                            }))
-                                        }} placeholder="Entrez code BC" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="inputCommande" >
-                                    <div className="inputText" onClick={() => {
                                         setFilterSit((state: boolean) => !state)
                                         if (isFilterTypeAchat)
                                             setFilterAchat(false)
@@ -423,6 +372,28 @@ const Achats = () => {
                                     }
                                 </div>
                                 <div className="inputCommande" >
+                                    <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }}>
+                                        <input type="text" onChange={(e: any) => {
+                                            const value = e.target.value;
+                                            setQueryParams((state: any) => ({
+                                                ...state,
+                                                BC: value
+                                            }))
+                                        }} placeholder="Entrez code BC" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="checkboxs" style={{ width: '50%' }}>
+                                    <input onChange={() => {
+                                        setQueryParams((state: any) => ({
+                                            ...state,
+                                            reste: !state.reste
+                                        }))
+                                    }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.reste} />
+                                    <h4>commande livré partiellement</h4>
+                                </div>
+                                <div className="inputCommande" >
                                     <div className="inputText" style={{ background: "#F1F1F1", border: "0.06rem solid #B43316" }}>
                                         <input type="text" onChange={(e: any) => {
                                             const value = e.target.value;
@@ -434,19 +405,7 @@ const Achats = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="checkboxs" style={{ width: '100%' }}>
-                                    <input onChange={() => {
-                                        setQueryParams((state: any) => ({
-                                            ...state,
-                                            reste: !state.reste
-                                        }))
-                                    }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.reste} />
-                                    <h4>commande livré partiellement</h4>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="checkboxs" style={{ width: '100%' }}>
+                                <div className="checkboxs" style={{marginTop : '-2rem', width: '50%' }}>
                                     <input onChange={() => {
                                         setQueryParams((state: any) => ({
                                             ...state,
@@ -455,7 +414,6 @@ const Achats = () => {
                                     }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
                                     <h4>DA terminé</h4>
                                 </div>
-                            </div>
                             <div style={{ flexDirection: 'row-reverse' }} className="row">
                                 <button onClick={async () => {
                                     const nonNullParams: QueryParams | any = {};
@@ -534,7 +492,7 @@ const Achats = () => {
                                     <p style={{ width: '15%' }}>Etat d’order</p>
                                 </div>
                                 <div className="achatsCL">
-                                    <AchatCl achats={achats} />
+                                    <AchatCl TypeDachat={TypeDachat} achats={achats} />
 
                                 </div>
 

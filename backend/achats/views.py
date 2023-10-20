@@ -83,7 +83,7 @@ def ExcelExportView(request):
     if 'isComplet' in params and params['isComplet'].lower() == 'true':
         achats = achats.filter(isComplet=False)  # Fixed this line
     achats = achats.select_related('article__contrat', 'article__type', 'typeDachat', 'situation_d_achat').values(
-        'demandeur', 'entité', 'DateDeCommande', 'quantité', 'typeDachat__type', 'ligne_bugetaire', 'DA', 'DateDA', 'BC', 'DateBC', 'BL', 'DateBL', 'situation_d_achat__situation', 'article__designation', 'article__code', 'article__fourniseur', 'article__prix_estimatif', 'article__contrat__name', 'article__type__type', 'observation', 'reste')
+        'demandeur', 'entité', 'DateDeCommande', 'quantité', 'typeDachat__type', 'ligne_bugetaire', 'DA', 'DateDA', 'BC', 'DateBC', 'BL', 'DateBL', 'situation_d_achat__situation', 'article__designation', 'article__code', 'article__prix_estimatif', 'article__contrat__name', 'article__type__type', 'observation', 'reste')
 
     achats_list = list(achats)  # Convert queryset to list
     # Create a list of dictionaries including the related fields
@@ -158,6 +158,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 def progress(request, id):
     try:
         data = request.data
+        ResteCount = 0
         is_ = data.get('is_')
         # Access file directly from request data
         file_data = request.data.get('file')
@@ -187,8 +188,6 @@ def progress(request, id):
                     settings.MEDIA_ROOT, f"{data['code']}.pdf")
                 with open(file_path, 'wb') as f:
                     f.write(file_object.getbuffer())
-            else:
-                return Response({"error": "File isn't exist!"}, status=status.HTTP_400_BAD_REQUEST)
             serializer = PostBCSerializer(data=data)
             if serializer.is_valid():
                 BC = serializer.validated_data['code']
@@ -196,15 +195,17 @@ def progress(request, id):
                 achat = Achats.objects.get(id=id)
                 achat.BC = BC
                 achat.DateBC = DateBC
-                achat.BC_File = file_path  # Save the file path to the model field
+                if file_data:
+                    achat.BC_File = file_path
+                print('dkhlat hna')
                 achat.situation_d_achat = SituationDachat.objects.get(id=3)
                 achat.save()
                 return Response({"message": "Data is valid. Process it."})
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif is_ == 'BL':
-            file_serializer = FileSerializer(data={'file': file_data})
-            file_serializer.is_valid(raise_exception=True)
             if file_data:
+                file_serializer = FileSerializer(data={'file': file_data})
+                file_serializer.is_valid(raise_exception=True)
                 if len(file_data) > MAX_FILE_SIZE:
                     return Response({"error": "File size exceeds the limit"}, status=status.HTTP_400_BAD_REQUEST)
                 file_data = file_data.split(',', 1)[1]
@@ -216,16 +217,27 @@ def progress(request, id):
                 with open(file_path, 'wb') as f:
                     f.write(file_object.getbuffer())
             serializer = PostBLSerializer(data=data)
+            print(data)
             if serializer.is_valid():
                 BL = serializer.validated_data['code']
+                fournisseur = serializer.validated_data['fournisseur']
                 DateBL = serializer.validated_data['date']
-                reste = serializer.validated_data['reste']
+                reste_data = serializer.validated_data['reste']
                 achat = Achats.objects.get(id=id)
                 achat.BL = BL
+                achat.fourniseur = fournisseur
                 achat.DateBL = DateBL
-                achat.BL_File = file_path  # Save the file path to the model field
-                achat.reste = reste
-                if int(data.get('reste')) <= 0:
+                if file_data:
+                    achat.BL_File = file_path
+                for item in reste_data:
+                    achat_id = item['id']
+                    new_reste = int(item['reste'])
+                    if new_reste > 0:
+                        ResteCount = ResteCount + 1
+                    achat_obj = Achat.objects.get(id=achat_id)
+                    achat_obj.reste = new_reste
+                    achat_obj.save()
+                if ResteCount == 0:
                     achat.situation_d_achat = SituationDachat.objects.get(id=4)
                 else:
                     achat.situation_d_achat = SituationDachat.objects.get(id=5)
@@ -236,11 +248,19 @@ def progress(request, id):
             serializer = PostOBSerializer(data=data)
             if serializer.is_valid():
                 OB = serializer.validated_data['code']
-                reste = serializer.validated_data['reste']
+                reste_data = serializer.validated_data['reste']
                 achat = Achats.objects.get(id=id)
                 achat.observation = OB
-                achat.reste = reste
-                if int(data.get('reste')) <= 0:
+                for item in reste_data:
+                    achat_id = item['id']
+                    new_reste = int(item['reste'])
+                    print(new_reste)
+                    if new_reste > 0:
+                        ResteCount = ResteCount + 1
+                    achat_obj = Achat.objects.get(id=achat_id)
+                    achat_obj.reste = new_reste
+                    achat_obj.save()
+                if ResteCount == 0:
                     achat.situation_d_achat = SituationDachat.objects.get(id=4)
                     achat.isComplet = True
                 else:
@@ -256,14 +276,14 @@ def progress(request, id):
 
 @swagger_auto_schema(methods=['post'], request_body=AchatsGSerializer)
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def add_commande(request):
     try:
         data = request.data
         demandeur = data.get('demandeur')
-        entite = data.get('entite')
-        ligne_budgetaire = data.get('ligne_budgetaire')
+        entite = data.get('entité')
+        ligne_budgetaire = data.get('ligne_bugetaire')
         DateDeCommande = data.get('DateDeCommande')
         date_obj = datetime.strptime(DateDeCommande, "%Y-%m-%d")
         Type_d_achat = data.get('typeDachat')
@@ -271,7 +291,6 @@ def add_commande(request):
         if not (demandeur and isinstance(demandeur, str) and entite and isinstance(entite, str) and ligne_budgetaire and isinstance(ligne_budgetaire, str)
                 and DateDeCommande and date_obj.time() == timezone.datetime.min.time() and Type_d_achat and isinstance(Type_d_achat, int) and achats_data):
             return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
-
         achats = []
         if Type_d_achat == 1:
             for item in achats_data:
@@ -289,16 +308,14 @@ def add_commande(request):
             for item in achats_data:
                 designation = item.get('designation')
                 type_article = item.get('type')
-                fournisseur = item.get('fournisseur')
                 prix_estimatif = item.get('prix_estimatif')
-                if designation and isinstance(designation, str) and type_article and isinstance(type_article, str) \
-                        and fournisseur and isinstance(fournisseur, str) and prix_estimatif and isinstance(prix_estimatif, str):
+                if designation and isinstance(designation, str) and type_article and isinstance(type_article, str) and prix_estimatif and isinstance(prix_estimatif, str):
                     typearticle, created = TypeDArticle.objects.get_or_create(
                         type=type_article)
                     article = Article.objects.create(
-                        designation=designation, type=typearticle, fournisseur=fournisseur, prix_estimatif=int(prix_estimatif))
-                    achat = Achat(article=article, quantité=item.get(
-                        'quantité'), reste=item.get('quantité'))
+                        designation=designation, type=typearticle, prix_estimatif=int(prix_estimatif))
+                    achat = Achat(article=article, quantité=int(
+                        item.get('quantité')))
                     achat.save()
                     achats.append(achat)
                 else:
@@ -322,7 +339,7 @@ def add_commande(request):
 
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
@@ -356,7 +373,7 @@ def get_commandes(request):
         return Response({'message': f'Error in retrieving achats data: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response(achats_list)
-        
+
 
 @api_view(['GET'])
 def get_achat(request, id):
@@ -372,20 +389,21 @@ def get_achat(request, id):
     return Response(achats_data)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
-@throttle_classes([UserRateThrottle])
-def get_types_article(request):
-    types = TypeDArticle.objects.all()
-    types = types.values('type')
-    types_list = list(types)
-    return JsonResponse(types_list, safe=False)
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @throttle_classes([UserRateThrottle])
+# def get_types_article(request):
+#     types = TypeDArticle.objects.all()
+#     types = types.values('type')
+#     types_list = list(types)
+#     return JsonResponse(types_list, safe=False)
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_types_achat(request):
+    print('helod')
     types = TypeDachat.objects.all()
     types = types.values('id', 'type')
     types_list = list(types)
@@ -403,18 +421,24 @@ def get_situation_achat(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_progress(request, id):
-    achats = get_object_or_404(Achats, id=id)
-    serializer = ProgressSerializer({
-        'DA': achats.DA,
-        'BC': achats.BC,
-        'BL': achats.BL,
-        'isComplet': achats.isComplet,
-        'articles': achats.achat.all()
-    })
-    return Response(serializer.data)
+    try:
+        achats = Achats.objects.get(id=id)
+        serializer = ProgressSerializer({
+            'DA': achats.DA,
+            'BC': achats.BC,
+            'BL': achats.BL,
+            'isComplet': achats.isComplet,
+            'demandeur': achats.demandeur,
+            'achats': achats.achat.all()
+        })
+        return Response(serializer.data)
+    except Achats.DoesNotExist:
+        return Response({'message': f'Achats with id {id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': f'Error in retrieving achats data: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
