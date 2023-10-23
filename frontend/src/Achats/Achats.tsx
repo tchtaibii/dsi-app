@@ -412,7 +412,7 @@ const Achats = () => {
                                 }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
                                 <h4>DA terminé</h4>
                             </div>
-                            <div style={{ flexDirection: 'row-reverse' }} className="row">
+                            <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
                                 <button onClick={async () => {
                                     const nonNullParams: QueryParams | any = {};
                                     Object.keys(queryParams).forEach((key) => {
@@ -448,6 +448,9 @@ const Achats = () => {
                                         console.error('Error:', error);
                                     }
                                 }}>Submit</button>
+                                <button onClick={() => {
+                                    window.location.reload();
+                                }}>Clear</button>
                             </div>
                         </div>
                     </div>

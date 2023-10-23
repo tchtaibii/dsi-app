@@ -61,6 +61,7 @@ const UploadSvg = () => (
 
 interface AChat {
     demandeur: string;
+    typeDachat : number;
 }
 
 const Achats = () => {
@@ -105,8 +106,9 @@ const Achats = () => {
         reste: []
     })
     const statusFunc = (obj: any) => {
-        setarticle({ demandeur: obj.demandeur });
+        setarticle({ demandeur: obj.demandeur, typeDachat : obj.typeDachat });
         setReste(obj.achats);
+        console.log(obj)
         if (obj.isComplet === true) {
             setStatus({
                 DA: {
@@ -278,6 +280,7 @@ const Achats = () => {
     useEffect(() => {
         const fetchData = async () => {
             await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => {
+                console.log(rsp.data)
                 statusFunc(rsp.data)
                 OldsetReste(rsp.data.achats);
                 console.log(rsp.data.achats)
@@ -526,7 +529,7 @@ const Achats = () => {
                                                 </>
                                         }
                                         {
-                                            postData.is_ === 'BL' &&
+                                            postData.is_ === 'BL' && article.typeDachat !== 1 && 
                                             <div className="inputCommande" style={{ width: "40rem" }}>
                                                 <div className="label">{'Fournisseur *'}</div>
                                                 <div className="inputText">
@@ -536,7 +539,7 @@ const Achats = () => {
                                                             ...state,
                                                             fournisseur: newD
                                                         }))
-                                                    }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                                    }} placeholder="ex: Arocom" type="text" name="Demandeur" id="" />
                                                 </div>
                                             </div>
                                         }

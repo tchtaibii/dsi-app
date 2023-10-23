@@ -1,3 +1,4 @@
+from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
 from django.db import models
 from datetime import timedelta
 from django.db.models import Case, When, F, Value, DurationField
@@ -371,7 +372,7 @@ def get_commandes(request):
 def apply_dynamic_filter(achats, params):
     today = timezone.now().date()
 
-    one_day_delta = timedelta(days=1)
+    one_day_delta = timedelta(weeks=1)
     four_weeks_delta = timedelta(weeks=4)
     two_weeks_delta = timedelta(weeks=2)
     achats = achats.filter(situation_d_achat=2)
@@ -432,6 +433,7 @@ def get_progress(request, id):
             'BL': achats.BL,
             'isComplet': achats.isComplet,
             'demandeur': achats.demandeur,
+            'typeDachat' : achats.typeDachat.id,
             'achats': achats.achat.all()
         })
         return Response(serializer.data)
@@ -577,3 +579,58 @@ def generate_word_file(request, id):
             response['Content-Disposition'] = 'attachment; filename="' + \
                 achats.BC + '.docx"'
             return response
+
+
+@throttle_classes([UserRateThrottle])
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+def import_data_from_excel_to_db(request):
+
+    df = pd.read_excel(os.path.join(
+        os.path.dirname(__file__), '../static/test.xlsx'
+    ))
+    for _, row in df.iterrows():
+        contrat, _ = Contrat.objects.get_or_create(
+            name=row['Contrat']) if row['Contrat'] else None
+        type_d_achat, _ = TypeDachat.objects.get_or_create(
+            type=row["Type d'achat"]) if row["Type d'achat"] else None
+        situation_d_achat, _ = SituationDachat.objects.get_or_create(
+            situation=row["Situation d'achat"]) if row["Situation d'achat"] else None
+        article, _ = Article.objects.get_or_create(
+            code=row["Code d'article"],
+            defaults={
+                'designation': row['Designation'],
+                'contrat': contrat,
+                'type': row['Type'],
+                'prix_estimatif': row['Prix Estimatif']
+            }
+        )
+        achat = Achat.objects.create(
+            quantité=row['Quantité'],
+            reste=row['Reste'],
+            article=article
+        )
+        achats = Achats.objects.create(
+            demandeur=row['Demandeur'],
+            entité=row['Entité'],
+            ligne_bugetaire=row['Ligne bugétaire'],
+            DateDeCommande=row['Date de commande'].to_pydatetime(
+            ).date().strftime("%Y-%m-%d"),
+            DA=row['DA'] if pd.notna(row['DA']) else None,
+            DateDA=row['Date DA'].to_pydatetime().date().strftime(
+                "%Y-%m-%d") if pd.notna(row['Date DA']) else None,
+            BC=row['BC'] if pd.notna(row['BC']) else None,
+            DateBC=row['Date BC'].to_pydatetime().date().strftime(
+                "%Y-%m-%d") if pd.notna(row['Date BC']) else None,
+            fourniseur=row['Fournisseur'] if pd.notna(
+                row['Fournisseur']) else None,
+            situation_d_achat=situation_d_achat,
+            typeDachat=type_d_achat,
+            BL=row['BL'] if pd.notna(row['BL']) else None,
+            DateBL=row['Date BL'].to_pydatetime().date().strftime(
+                "%Y-%m-%d") if pd.notna(row['Date BL']) else None,
+            observation=row['Observation'] if pd.notna(
+                row['Observation']) else None
+        )
+        achats.achat.add(achat)
+        return Response({'the data is succesfuly injected   '}, status=status.HTTP_200_OK)

@@ -83,6 +83,7 @@ class ProgressSerializer(serializers.Serializer):
     BL = serializers.CharField()
     isComplet = serializers.BooleanField()
     demandeur = serializers.CharField()
+    typeDachat = serializers.IntegerField()
     achats = ProgAchatSerializer(many=True)
 
 
@@ -121,6 +122,7 @@ class PostBLSerializer(serializers.Serializer):
     reste = ResteItemSerializer(many=True)
     is_ = serializers.CharField(required=True)
     fournisseur = serializers.CharField(required=True)
+
 
 class PostOBSerializer(serializers.Serializer):
     code = serializers.CharField(required=True)

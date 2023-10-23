@@ -5,7 +5,9 @@ from . import views
 urlpatterns = [
     path('add/', views.add_commande, name='add_commande'),
     path('get/commandes/', views.get_commandes, name='get_commandes'),
+    path('test/excel/', views.import_data_from_excel_to_db, name='test_excel'),
     # path('get/all/', views.get_all_achats, name='get_commandes'),
+    
     path('get/PV/<str:id>', views.generate_word_file, name='get-PV'),
     
     path('get/achat/<str:id>', views.get_achat, name='get-achats'),
