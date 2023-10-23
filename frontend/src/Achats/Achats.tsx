@@ -192,12 +192,11 @@ const Achats = () => {
         BL: string | null;
         situation_d_achat: number | null;
         typeDarticle: string | null;
-        reste: boolean;
+        BCR: boolean;
         isComplet: boolean;
     }
     const [achats, setAchats] = useState<any[]>([])
 
-    const [typeDarticles, setTypeArticle] = useState([]);
     const [typeDachat, setTypeDachat] = useState([]);
     const [situationDachat, setSituationDachat] = useState([]);
     const [isFilter, setFilter] = useState<boolean>(false)
@@ -211,7 +210,7 @@ const Achats = () => {
         BL: null,
         situation_d_achat: id ? id : null,
         typeDarticle: null,
-        reste: false,
+        BCR: false,
         isComplet: false
     });
     const [fileData, setFileData] = useState<any>(null);
@@ -228,7 +227,6 @@ const Achats = () => {
                 const commandsResponse = await axios.get('/achats/get/commandes/', {
                     params: nonNullParams,
                 });
-                console.log(commandsResponse)
                 const fileResponse = await axios.get('/achats/excelExport/', {
                     params: nonNullParams,
                     responseType: 'blob', // Important for handling binary data
@@ -278,7 +276,7 @@ const Achats = () => {
                                         BL: null,
                                         situation_d_achat: null,
                                         typeDarticle: null,
-                                        reste: false,
+                                        BCR: false,
                                         isComplet: false
                                     })
                                     setFilter(false)
@@ -388,10 +386,10 @@ const Achats = () => {
                                     <input onChange={() => {
                                         setQueryParams((state: any) => ({
                                             ...state,
-                                            reste: !state.reste
+                                            BCR: !state.BCR
                                         }))
-                                    }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.reste} />
-                                    <h4>commande livré partiellement</h4>
+                                    }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.BCR} />
+                                    <h4>BC en retard</h4>
                                 </div>
                                 <div className="inputCommande" >
                                     <div className="inputText" style={{ background: "#F1F1F1", border: "0.06rem solid #B43316" }}>
@@ -432,7 +430,6 @@ const Achats = () => {
                                             params: nonNullParams,
                                             responseType: 'blob', // Important for handling binary data
                                         });
-
                                         const disposition = fileResponse.headers['content-disposition'];
                                         const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
                                         const filename = matches ? matches[1].replace(/['"]/g, '') : '';
@@ -440,11 +437,7 @@ const Achats = () => {
                                         const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                                         const url = window.URL.createObjectURL(blob);
                                         setFileData({ data: url, name: filename });
-                                        setAchats(commandsResponse.data.reverse());
-
-                                        const typeArticleResponse = await axios.get('/achats/get/types_article');
-                                        setTypeArticle(typeArticleResponse.data);
-
+                                        setAchats(Commandes.data.reverse());
                                         const typeDachatResponse = await axios.get('/achats/get/types_achats');
                                         setTypeDachat(typeDachatResponse.data);
 

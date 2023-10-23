@@ -65,7 +65,7 @@ class AchatFilterSerializer(serializers.Serializer):
     BL = serializers.CharField(max_length=100, required=False)
     situation_d_achat = serializers.IntegerField(required=False)
     typeDarticle = serializers.CharField(max_length=100, required=False)
-    reste = serializers.BooleanField(required=False)
+    BCR = serializers.BooleanField(required=False)
     isComplet = serializers.BooleanField(required=False)
 
 

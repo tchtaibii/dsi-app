@@ -1,3 +1,6 @@
+from django.db import models
+from datetime import timedelta
+from django.db.models import Case, When, F, Value, DurationField
 from docx import Document
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -64,8 +67,10 @@ def download_file(request, fl):
 def ExcelExportView(request):
     achats = Achats.objects.all().prefetch_related('achat')
     params = request.query_params
+    achats = Achats.objects.all()
+    params = request.query_params
     if 'typeDachat' in params:
-        achats = achats.filter(typeDachat__type=params['typeDachat'])
+        achats = achats.filter(typeDachat=params['typeDachat'])
     if 'DA' in params:
         achats = achats.filter(DA=params['DA'])
     if 'BC' in params:
@@ -74,10 +79,8 @@ def ExcelExportView(request):
         achats = achats.filter(BL=params['BL'])
     if 'situation_d_achat' in params:
         achats = achats.filter(
-            situation_d_achat__situation=params['situation_d_achat'])
-    if 'reste' in params and params['reste'].lower() == 'true':
-        # Replace 'reste__gt' with the appropriate condition for your field
-        achats = achats.filter(reste__gt=0)
+            situation_d_achat=params['situation_d_achat'])
+    achats = apply_dynamic_filter(achats, params)
     if 'isComplet' in params and params['isComplet'].lower() == 'true':
         achats = achats.filter(isComplet=False)
 
@@ -322,14 +325,17 @@ def add_commande(request):
 
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
-    achats_list = []  # Define an empty list
     try:
+        achats_list = []  # Initialize an empty list
+
         achats = Achats.objects.all()
         params = request.query_params
+
+        # Apply filters based on the request parameters
         if 'typeDachat' in params:
             achats = achats.filter(typeDachat=params['typeDachat'])
         if 'DA' in params:
@@ -341,19 +347,41 @@ def get_commandes(request):
         if 'situation_d_achat' in params:
             achats = achats.filter(
                 situation_d_achat=params['situation_d_achat'])
-        if 'reste' in params and params['reste'].lower() == 'true':
-            achats = achats.filter(achat_article__type=5)
+
+        # Apply dynamic filter based on the 'typeDachat'
+        if 'BCR' in params and params['BCR'].lower() == 'true':
+            achats = apply_dynamic_filter(achats, params)
+
+        # Apply additional filters
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)
 
-        # Get data from AchatsSerializer
+        # Serialize the data
         serializer = AchatsSerializer(achats, many=True)
         achats_list = serializer.data
 
-    except Exception as e:
-        return Response({'message': f'Error in retrieving achats data: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(achats_list)
 
-    return Response(achats_list)
+    except Exception as e:
+        logger.exception(f'Error in retrieving achats data: {e}')
+        return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def apply_dynamic_filter(achats, params):
+    today = timezone.now().date()
+
+    one_day_delta = timedelta(days=1)
+    four_weeks_delta = timedelta(weeks=4)
+    two_weeks_delta = timedelta(weeks=2)
+    achats = achats.filter(situation_d_achat=2)
+
+    achat_o = achats.filter(
+        Q(typeDachat__id=1) | Q(typeDachat__id=4, DateDA__lt=today - one_day_delta) |
+        Q(typeDachat__id=2, DateDA__lt=today - two_weeks_delta) |
+        Q(typeDachat__id=3, DateDA__lt=today - four_weeks_delta)
+    )
+
+    return achat_o
 
 
 @api_view(['GET'])
@@ -368,16 +396,6 @@ def get_achat(request, id):
         return Response({'message': f'Error in retrieving achats data: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response(achats_data)
-
-
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
-# @throttle_classes([UserRateThrottle])
-# def get_types_article(request):
-#     types = TypeDArticle.objects.all()
-#     types = types.values('type')
-#     types_list = list(types)
-#     return JsonResponse(types_list, safe=False)
 
 
 @api_view(['GET'])
@@ -490,7 +508,6 @@ def dashboard_line(request):
                     'achat_DA': achat.DA,
                 }
             )
-
         return Response(result)
 
     except Exception as e:
