@@ -80,7 +80,8 @@ def ExcelExportView(request):
     if 'situation_d_achat' in params:
         achats = achats.filter(
             situation_d_achat=params['situation_d_achat'])
-    achats = apply_dynamic_filter(achats, params)
+    if 'BCR' in params and params['BCR'].lower() == 'true':
+        achats = apply_dynamic_filter(achats, params)
     if 'isComplet' in params and params['isComplet'].lower() == 'true':
         achats = achats.filter(isComplet=False)
 
