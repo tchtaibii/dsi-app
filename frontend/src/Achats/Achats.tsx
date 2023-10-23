@@ -86,7 +86,7 @@ const TypeDachat = (sda: number) => {
         case 2:
             return "Achat Direct"
         case 3:
-            return "Achat d'offre"
+            return "Appel d'offre"
         case 4:
             return "Achat en ligne"
     }
@@ -229,18 +229,18 @@ const Achats = () => {
                     params: nonNullParams,
                 });
                 console.log(commandsResponse)
-                // const fileResponse = await axios.get('/achats/excelExport/', {
-                //     params: nonNullParams,
-                //     responseType: 'blob', // Important for handling binary data
-                // });
+                const fileResponse = await axios.get('/achats/excelExport/', {
+                    params: nonNullParams,
+                    responseType: 'blob', // Important for handling binary data
+                });
 
-                // const disposition = fileResponse.headers['content-disposition'];
-                // const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                // const filename = matches ? matches[1].replace(/['"]/g, '') : '';
+                const disposition = fileResponse.headers['content-disposition'];
+                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                const filename = matches ? matches[1].replace(/['"]/g, '') : '';
 
-                // const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                // const url = window.URL.createObjectURL(blob);
-                // setFileData({ data: url, name: filename });
+                const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                setFileData({ data: url, name: filename });
                 setAchats(commandsResponse.data.reverse());
                 const typeDachatResponse = await axios.get('/achats/get/types_achats');
                 setTypeDachat(typeDachatResponse.data);
@@ -405,15 +405,15 @@ const Achats = () => {
                                     </div>
                                 </div>
                             </div>
-                                <div className="checkboxs" style={{marginTop : '-2rem', width: '50%' }}>
-                                    <input onChange={() => {
-                                        setQueryParams((state: any) => ({
-                                            ...state,
-                                            isComplet: !state.isComplet
-                                        }))
-                                    }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
-                                    <h4>DA terminé</h4>
-                                </div>
+                            <div className="checkboxs" style={{ marginTop: '-2rem', width: '50%' }}>
+                                <input onChange={() => {
+                                    setQueryParams((state: any) => ({
+                                        ...state,
+                                        isComplet: !state.isComplet
+                                    }))
+                                }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
+                                <h4>DA terminé</h4>
+                            </div>
                             <div style={{ flexDirection: 'row-reverse' }} className="row">
                                 <button onClick={async () => {
                                     const nonNullParams: QueryParams | any = {};
@@ -467,7 +467,7 @@ const Achats = () => {
                         }} style={{ width: "6.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                             <FilterSvg />
                             filter</button>
-                        {/* <button onClick={() => {
+                        <button onClick={() => {
                             const link = document.createElement('a');
                             link.href = fileData.data;
                             link.setAttribute('download', fileData.name);
@@ -476,7 +476,7 @@ const Achats = () => {
                             document.body.removeChild(link);
                         }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                             <DownloadSvg />
-                            Donwload Exel</button> */}
+                            Donwload Exel</button>
                     </div>
                 </div>
                 <div style={{ gap: "1.44rem" }} className="main">

@@ -6,6 +6,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import Loading from '../Loading/Loading';
 import Error from '../Error'
 
+const DownloadSvg = () => (
+    <svg style={{
+        width: "1.1875rem",
+        height: "1.44194rem"
+    }} width={19} height={24} viewBox="0 0 19 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 8.14285H13.5714V0H5.42857V8.14285H0L9.5 17.6429L19 8.14285ZM0 20.3571V23.0714H19V20.3571H0Z" fill="white" />
+    </svg>
+
+)
+
 const ValidateSvg = () => (
     <svg style={{
         width: "5.34744rem",
@@ -58,6 +68,7 @@ const Achats = () => {
     const navigate = useNavigate()
     const { id } = useParams();
     const [article, setarticle] = useState<null | AChat>(null)
+    const [fileData, setfileData] = useState<any>({ data: null, name: null })
     const [statusAchat, setStatus] = useState({
         DA: {
             img: ProgressSvg,
@@ -96,7 +107,6 @@ const Achats = () => {
     const statusFunc = (obj: any) => {
         setarticle({ demandeur: obj.demandeur });
         setReste(obj.achats);
-
         if (obj.isComplet === true) {
             setStatus({
                 DA: {
@@ -261,25 +271,26 @@ const Achats = () => {
 
     }
     useEffect(() => {
-        console.log(Reste)
         setDataPost((state: any) => ({ ...state, reste: Reste }));
     }, [Reste])
 
-    useEffect(() => {
-        console.log(OldReste)
-    }, [OldReste])
 
     useEffect(() => {
         const fetchData = async () => {
             await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => {
                 statusFunc(rsp.data)
-                OldsetReste(rsp.data.achats.filter((item: any) => item.reste !== 0));
-                console.log(rsp.data)
+                OldsetReste(rsp.data.achats);
+                console.log(rsp.data.achats)
             })
             setLoading(true)
         }
         fetchData();
     }, [])
+
+    useEffect(() => {
+        if (postData.is_ === 'OB')
+            OldsetReste((state: any) => (state.filter((item: any) => item.reste !== 0)))
+    }, [postData.is_])
 
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -325,7 +336,6 @@ const Achats = () => {
         }
         else if (postData.is_ === 'DA' || postData.is_ === 'OB') {
             if (postData.is_ === 'DA') {
-
                 await axios.post(`/achats/progress/${id}`, {
                     code: postData.code, // Include other variables as needed
                     date: postData.date,
@@ -387,6 +397,36 @@ const Achats = () => {
     }, [statusCode])
     const [isLoading, setLoading] = useState(false)
 
+    useEffect(() => {
+        const fetchData = async () => {
+            const fileResponse = await axios.get(`/achats/get/PV/${id}`, {
+                responseType: 'blob',
+            });
+            var filename;
+            const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+            // Append the timestamp to the filename
+            filename = `${timestamp}`;
+            const disposition = fileResponse.headers['content-disposition'];
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                const matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+
+            const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = window.URL.createObjectURL(blob);
+            setfileData({ data: url, name: filename });
+            setfileData({ data: url, name: filename });
+        }
+        if (postData.is_ === 'OB' || postData.is_ === 'DONE' )
+            fetchData()
+    }, [postData.is_])
+
+    useEffect(() => {
+        console.log(OldReste)
+    }, [OldReste])
 
     return (
         !isLoading ? <Loading /> :
@@ -455,21 +495,6 @@ const Achats = () => {
                                                             }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
                                                         </div>
                                                     </div>
-                                                    {
-                                                        postData.is_ === 'BL' &&
-                                                        <div className="inputCommande" style={{ width: "40rem" }}>
-                                                            <div className="label">{'Fournisseur *'}</div>
-                                                            <div className="inputText">
-                                                                <input onChange={(e: any) => {
-                                                                    const newD = e.target.value;
-                                                                    setDataPost((state: any) => ({
-                                                                        ...state,
-                                                                        fournisseur: newD
-                                                                    }))
-                                                                }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
-                                                            </div>
-                                                        </div>
-                                                    }
                                                     <div className="inputCommande" style={{ width: "40rem" }}>
                                                         <div className="label">{`Date ${postData.is_
                                                             } *`}</div>
@@ -483,25 +508,6 @@ const Achats = () => {
                                                             }} placeholder="ex: 10020319" type="date" name="Demandeur" id="" />
                                                         </div>
                                                     </div>
-                                                    {
-                                                        postData && (postData.is_ === 'BC' || postData.is_ === 'BL') &&
-                                                        <div className="FileChange">
-                                                            <button onClick={() => document.getElementById('file-upload').click()}>
-                                                                <UploadSvg />
-                                                                Upload file
-                                                            </button>
-                                                            <label htmlFor="file-upload" className="custom-file-label">
-                                                                {selectedFile ? selectedFile.name : ''}
-                                                            </label>
-                                                            <input
-                                                                type="file"
-                                                                id="file-upload"
-                                                                className="hidden"
-                                                                onChange={handleFileChange}
-                                                                accept="application/pdf"
-                                                            />
-                                                        </div>
-                                                    }
                                                 </>
                                                 :
                                                 <>
@@ -517,65 +523,84 @@ const Achats = () => {
                                                             }} placeholder='No more than 100 characters' maxLength="100" name="" id=""></textarea>
                                                         </div>
                                                     </div>
-                                                    {
-                                                        postData.is_ === 'OB' &&
-                                                        OldReste.map((e: any, i: number) => {
-                                                            return (
-                                                                <div key={`${i}-designationR`} className="inputCommande" style={{ width: "40rem" }}>
-                                                                    <div className="label">{`${e.designation}`}</div>
-                                                                    <div className="inputText">
-                                                                        <input
-                                                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                                                                const newD = event.target.value;
-                                                                                setReste((state: any) =>
-                                                                                    state.map((a: any) => {
-                                                                                        if (a.id === e.id) {
-                                                                                            a.reste = newD;
-                                                                                        }
-                                                                                        return a;
-                                                                                    })
-                                                                                );
-                                                                            }}
-                                                                            placeholder="Reste : "
-                                                                            type="number"
-                                                                            name="Reste"
-                                                                            id=""
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        }
-                                                        )
-                                                    }
-                                                    {
-                                                        postData.is_ === 'BL' &&
-                                                        OldReste.map((e: any, i: number) => (
-                                                            <div key={`${i}-designationR`} className="inputCommande" style={{ width: "40rem" }}>
-                                                                <div className="label">{`${e.designation}`}</div>
-                                                                <div className="inputText">
-                                                                    <input
-                                                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                                                            const newD = event.target.value;
-                                                                            setReste((state: any) =>
-                                                                                state.map((a: any) => {
-                                                                                    if (a.id === e.id) {
-                                                                                        a.reste = newD;
-                                                                                    }
-                                                                                    return a;
-                                                                                })
-                                                                            );
-                                                                        }}
-                                                                        placeholder="Reste : "
-                                                                        type="number"
-                                                                        name="Reste"
-                                                                        id=""
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        ))
-                                                    }
-
                                                 </>
+                                        }
+                                        {
+                                            postData.is_ === 'BL' &&
+                                            <div className="inputCommande" style={{ width: "40rem" }}>
+                                                <div className="label">{'Fournisseur *'}</div>
+                                                <div className="inputText">
+                                                    <input onChange={(e: any) => {
+                                                        const newD = e.target.value;
+                                                        setDataPost((state: any) => ({
+                                                            ...state,
+                                                            fournisseur: newD
+                                                        }))
+                                                    }} placeholder="ex: 10020319" type="text" name="Demandeur" id="" />
+                                                </div>
+                                            </div>
+                                        }
+                                        {
+                                            (postData.is_ === 'OB' || postData.is_ === 'BL') &&
+                                            OldReste.map((e: any, i: number) => {
+                                                return (
+                                                    <div key={`${i}-designationR`} className="inputCommande" style={{ width: "40rem" }}>
+                                                        <div className="label">{`${e.designation}`}</div>
+                                                        <div className="inputText">
+                                                            <input
+                                                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                                                    const newD = event.target.value;
+                                                                    setReste((state: any) =>
+                                                                        state.map((a: any) => {
+                                                                            if (a.id === e.id) {
+                                                                                a.reste = newD;
+                                                                            }
+                                                                            return a;
+                                                                        })
+                                                                    );
+                                                                }}
+                                                                placeholder="Reste : "
+                                                                type="number"
+                                                                name="Reste"
+                                                                id=""
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                            )
+                                        }
+                                        {
+                                            postData.is_ === 'OB' &&
+                                            <button onClick={() => {
+                                                const link = document.createElement('a');
+                                                link.href = fileData.data ? fileData.data : '#';
+                                                link.setAttribute('download', fileData.name ? fileData.name : 'dd');
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                            }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
+                                                {/* <DownloadSvg /> */}
+                                                Donwload PV</button>
+                                        }
+                                        {
+                                            postData && (postData.is_ === 'BC' || postData.is_ === 'BL') &&
+                                            <div className="FileChange">
+                                                <button onClick={() => document.getElementById('file-upload').click()}>
+                                                    <UploadSvg />
+                                                    Upload file
+                                                </button>
+                                                <label htmlFor="file-upload" className="custom-file-label">
+                                                    {selectedFile ? selectedFile.name : ''}
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    id="file-upload"
+                                                    className="hidden"
+                                                    onChange={handleFileChange}
+                                                    accept="application/pdf"
+                                                />
+                                            </div>
                                         }
                                         <div className="submitStep">
                                             <button onClick={async () => {
@@ -606,7 +631,18 @@ const Achats = () => {
                                         </div>
                                     </div>
                                     :
-                                    <></>
+
+                                    <button onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = fileData.data ? fileData.data : '#';
+                                        link.setAttribute('download', fileData.name ? fileData.name : 'dd');
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                    }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
+                                        <DownloadSvg />
+                                        Donwload PV</button>
+
                             }
                         </div>
                     </div>

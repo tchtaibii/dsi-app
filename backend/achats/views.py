@@ -1,4 +1,4 @@
-import xlsxwriter
+from docx import Document
 from datetime import datetime, timedelta
 from django.conf import settings
 import io
@@ -62,11 +62,10 @@ def download_file(request, fl):
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def ExcelExportView(request):
-    achats_list = []  # Define an empty list
-    achats = Achats.objects.all()
+    achats = Achats.objects.all().prefetch_related('achat')
     params = request.query_params
     if 'typeDachat' in params:
-        achats = achats.filter(typeDachat=params['typeDachat'])
+        achats = achats.filter(typeDachat__type=params['typeDachat'])
     if 'DA' in params:
         achats = achats.filter(DA=params['DA'])
     if 'BC' in params:
@@ -75,51 +74,42 @@ def ExcelExportView(request):
         achats = achats.filter(BL=params['BL'])
     if 'situation_d_achat' in params:
         achats = achats.filter(
-            situation_d_achat=params['situation_d_achat'])
-    if 'typeDarticle' in params:
-        achats = achats.filter(article__type=params['typeDarticle'])
+            situation_d_achat__situation=params['situation_d_achat'])
     if 'reste' in params and params['reste'].lower() == 'true':
+        # Replace 'reste__gt' with the appropriate condition for your field
         achats = achats.filter(reste__gt=0)
     if 'isComplet' in params and params['isComplet'].lower() == 'true':
-        achats = achats.filter(isComplet=False)  # Fixed this line
-    achats = achats.select_related('article__contrat', 'article__type', 'typeDachat', 'situation_d_achat').values(
-        'demandeur', 'entité', 'DateDeCommande', 'quantité', 'typeDachat__type', 'ligne_bugetaire', 'DA', 'DateDA', 'BC', 'DateBC', 'BL', 'DateBL', 'situation_d_achat__situation', 'article__designation', 'article__code', 'article__prix_estimatif', 'article__contrat__name', 'article__type__type', 'observation', 'reste')
+        achats = achats.filter(isComplet=False)
 
-    achats_list = list(achats)  # Convert queryset to list
-    # Create a list of dictionaries including the related fields
-    achats_with_related_fields = []
-    for achat in achats_list:
-        temp = {
-            'Demandeur': achat['demandeur'],
-            'Entité': achat['entité'],
-            'Type': achat['article__type__type'],
-            # "Code d'article": achat['article__code'],
-            'Code d\'article': achat['article__code'] if achat['typeDachat__type'] == 'Contrat Cadre' else '',
-            'Désignation': achat['article__designation'],
-            'Quantité': achat['quantité'],
-            'Ligne budgétaire': achat['ligne_bugetaire'],
-            'Date De Commande': achat['DateDeCommande'],
-            'DA': achat['DA'],
-            'Date DA': achat['DateDA'],
-            'BC': achat['BC'],
-            'Date BC': achat['DateBC'],
-            'Contrat': achat['article__contrat__name'] if achat['typeDachat__type'] == 'Contrat Cadre' else '',
-            # 'Contrat': achat['article__contrat__name'],
-            # 'Fournisseur': achat['article__fourniseur'],
-            'Fournisseur': achat['article__fourniseur'] if achat['typeDachat__type'] != 'Contrat Cadre' else '',
-            "Type d'achat": achat['typeDachat__type'],
-            # 'Prix estimatif': achat['article__prix_estimatif'],
-            'Prix estimatif': achat['article__prix_estimatif'] if achat['typeDachat__type'] != 'Contrat Cadre' else '',
-            "Situation d'achat": achat['situation_d_achat__situation'],
-            'BL': achat['BL'],
-            'Date BL': achat['DateBL'],
-            'Reste': achat['reste'],
-            'Observation': achat['observation'],
-        }
-        achats_with_related_fields.append(temp)
+    achats_data = []
+    for achat in achats:
+        for a in achat.achat.all():
+            achat_data = {
+                'Demandeur': achat.demandeur,
+                'Entité': achat.entité,
+                "Type": a.article.type,
+                'Designation': a.article.designation,
+                "Code d'article": a.article.code,
+                'Quantité': a.quantité,
+                'Ligne bugétaire': achat.ligne_bugetaire,
+                'Prix Estimatif': a.article.prix_estimatif,
+                'Date de commande': achat.DateDeCommande,
+                'DA': achat.DA,
+                'Date DA': achat.DateDA,
+                'BC': achat.BC,
+                'Date BC': achat.DateBC,
+                'Fournisseur': achat.fourniseur,
+                'Contrat': a.article.contrat,
+                'Situation d\'achat': achat.situation_d_achat.situation,
+                "Type d'achat": achat.typeDachat.type,
+                'BL': achat.BL,
+                'Date BL': achat.DateBL,
+                'Observation': achat.observation,
+                'Reste': a.reste,
+            }
+            achats_data.append(achat_data)
 
-    # Convert the list of dictionaries to a DataFrame
-    df = pd.DataFrame(achats_with_related_fields)
+    df = pd.DataFrame(achats_data)
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -128,21 +118,16 @@ def ExcelExportView(request):
 
     writer = pd.ExcelWriter(response, engine='xlsxwriter')
 
-    # Convert the dataframe to an XlsxWriter Excel object.
     df.to_excel(writer, index=False, sheet_name='Sheet1')
 
-    # Get the xlsxwriter workbook and worksheet objects.
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
 
-    # Set the column width and format the cells to wrap text.
     for i, col in enumerate(df.columns):
         column_len = max(df[col].astype(str).map(len).max(), len(col))
-        # Adding extra space for padding
         worksheet.set_column(i, i, column_len + 2)
         worksheet.set_column(i, i, None, None, {'text_wrap': True})
 
-    # Save the workbook.
     workbook.close()
 
     return response
@@ -197,7 +182,6 @@ def progress(request, id):
                 achat.DateBC = DateBC
                 if file_data:
                     achat.BC_File = file_path
-                print('dkhlat hna')
                 achat.situation_d_achat = SituationDachat.objects.get(id=3)
                 achat.save()
                 return Response({"message": "Data is valid. Process it."})
@@ -217,7 +201,6 @@ def progress(request, id):
                 with open(file_path, 'wb') as f:
                     f.write(file_object.getbuffer())
             serializer = PostBLSerializer(data=data)
-            print(data)
             if serializer.is_valid():
                 BL = serializer.validated_data['code']
                 fournisseur = serializer.validated_data['fournisseur']
@@ -315,7 +298,7 @@ def add_commande(request):
                     article = Article.objects.create(
                         designation=designation, type=typearticle, prix_estimatif=int(prix_estimatif))
                     achat = Achat(article=article, quantité=int(
-                        item.get('quantité')))
+                        item.get('quantité')), reste=-1)
                     achat.save()
                     achats.append(achat)
                 else:
@@ -358,10 +341,8 @@ def get_commandes(request):
         if 'situation_d_achat' in params:
             achats = achats.filter(
                 situation_d_achat=params['situation_d_achat'])
-        if 'typeDarticle' in params:
-            achats = achats.filter(achat_article__type=params['typeDarticle'])
         if 'reste' in params and params['reste'].lower() == 'true':
-            achats = achats.filter(achat__reste__gt=0)
+            achats = achats.filter(achat_article__type=5)
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)
 
@@ -514,3 +495,67 @@ def dashboard_line(request):
 
     except Exception as e:
         return Response({'error': str(e)})
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def generate_word_file(request, id):
+    from .models import Achats  # Adjust this import according to your project structure
+
+    # Remove the prefetch_related as it is not needed for a single object
+    achats = Achats.objects.get(id=id)
+
+    # Load the existing Word template
+    # Adjust the path to your template
+    if achats.situation_d_achat.id == 4 or achats.situation_d_achat.id == 5:
+        template_path = os.path.join(
+            os.path.dirname(__file__),
+            '../static/PV.docx' if achats.situation_d_achat.id == 4 else '../static/PV2.docx'
+        )
+        doc = Document(template_path)
+
+        current_date = datetime.now()
+        # Format the date as "dd/mm/yy"
+        formatted_date = current_date.strftime("%d/%m/%Y")
+        print(achats.situation_d_achat.id)
+
+        # Change achats.get['typeDachat'] to achats.typeDachat
+
+        if achats.typeDachat.type != 'Contrat Cadre':
+            contrat = achats.fourniseur
+        else:
+            contrat = achats.achat.all()[0].article.contrat.name
+
+        # Define the words to be replaced
+        replacements = {
+            "***": formatted_date,
+            '+++': str(achats.BC),
+            # Make sure to convert to string if necessary
+            '+-+-': str(contrat),
+            # Add more words as needed
+        }
+
+        # Iterate through paragraphs and replace the defined words
+        for paragraph in doc.paragraphs:
+            for key, value in replacements.items():
+                if key in paragraph.text:
+                    inline = paragraph.runs
+                    for i in range(len(inline)):
+                        if key in inline[i].text:
+                            text = inline[i].text.replace(key, value)
+                            inline[i].text = text
+
+        # Save the modified Word document
+        # Adjust the path to save the modified file
+        new_file_path = os.path.join(os.path.dirname(
+            __file__), '../static/pv/' + achats.BC + '.docx')
+        doc.save(new_file_path)
+
+        # Return the generated file for download
+        with open(new_file_path, 'rb') as file:
+            response = HttpResponse(file.read(
+            ), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            response['Content-Disposition'] = 'attachment; filename="' + \
+                achats.BC + '.docx"'
+            return response

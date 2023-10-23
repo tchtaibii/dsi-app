@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'achats',
     'corsheaders',
     'xlsxwriter',
+    'docx',
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'

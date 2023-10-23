@@ -6,11 +6,10 @@ urlpatterns = [
     path('add/', views.add_commande, name='add_commande'),
     path('get/commandes/', views.get_commandes, name='get_commandes'),
     # path('get/all/', views.get_all_achats, name='get_commandes'),
-    # path('get/achats/<str:id>', views.get_achats, name='get-achats'),
+    path('get/PV/<str:id>', views.generate_word_file, name='get-PV'),
     
-
     path('get/achat/<str:id>', views.get_achat, name='get-achats'),
-    
+
     path('get/types_achats', views.get_types_achat, name='get-types-achats'),
     # path('get/types_article', views.get_types_article, name='get-types-articles'),
     path('get/situations_article', views.get_situation_achat,
@@ -22,5 +21,5 @@ urlpatterns = [
     path('situationDash/', views.dashboard_header, name='situation-dashboard'),
     path('pieChart/', views.dashboard_pie, name='Pie-dashboard'),
     path('lineChart/', views.dashboard_line, name='Line-dashboard'),
-    
+
 ]
