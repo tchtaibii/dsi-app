@@ -10,7 +10,7 @@ import Progress from './Progress/Progress'
 // import Orders from './Orders/Orders'
 // import Products from './Products/Products'
 // import Product from './Product/Product'
-// import Profile from './Profile/Profile'
+import Profile from './Profile/Profile'
 import Customer from './Customer/Customer'
 // import Settings from './Settings/Settings'
 import Login from './Login/Login'
@@ -20,6 +20,7 @@ import { useState, useEffect } from 'react'
 import axios from './Interceptor'
 import { useRecoilState } from 'recoil';
 import { myData } from './atoms'; // Import the atom defined earlier
+
 
 function App() {
 
@@ -61,6 +62,7 @@ function App() {
                     {/* <Route path="commandes" element={<Commandes />} /> */}
                     <Route path="achat/:id" element={<Achat />} />
                     <Route path="AddCommande" element={<AddCommande />} />
+                    <Route path="profile" element={<Profile />} />
                     <Route path="commandes/:id" element={<Progress />} />
                     {/* <Route path="Profile/id" element={<Profile />} />
               <Route path="Products" element={<Products />} />

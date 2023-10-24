@@ -34,7 +34,7 @@ const Achat = () => {
     const TypeDachat = (sda: number) => {
         switch (sda) {
             case 1:
-                return "Contrat Cadre";
+                return "Accord Cadre";
             case 2:
                 return "Achat Direct"
             case 3:

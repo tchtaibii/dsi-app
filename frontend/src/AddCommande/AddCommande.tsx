@@ -342,8 +342,8 @@ function AddCommande() {
                                 <div className="checkboxs">
                                     <input onChange={() => {
                                         setType(1)
-                                    }} type="checkbox" name="Contrat Cadre" id="" checked={typeDachat === 1} />
-                                    <h4>Contrat cadre</h4>
+                                    }} type="checkbox" name="Accord Cadre" id="" checked={typeDachat === 1} />
+                                    <h4>Accord Cadre</h4>
                                 </div>
                                 <div className="checkboxs">
                                     <input onChange={() => {

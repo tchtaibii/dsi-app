@@ -1,6 +1,55 @@
 @import '../tools.scss';
 
 
-.Profile{
-    
+.mainmain {
+    width: 100%;
+    background-color: $dark-color;
+    // height: 5rem;
+    border-radius: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    border: 0.065rem solid $nav-color;
+
+    .cardProfile {
+        width: 100%;
+        padding: 1.06rem 0 2rem 1.37rem;
+        display: flex;
+        gap: 2.58rem;
+        align-items: center;
+
+        .profilePhoto {
+            width: 14.4375rem;
+            height: 14.4375rem;
+            border-radius: 9.125rem;
+        }
+
+        .infoText {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+
+            h1 {
+                color: $second-color;
+                font-size: 2.5rem;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+            }
+
+            h3 {
+                color: $nav-color;
+                font-size: 1.25rem;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+            }
+            .phoneNumber, .emailP{
+                display: flex;
+                align-items: center;
+                gap: 0.69rem;
+                margin-top: 0.4rem;
+            }
+        }
+    }
+
 }

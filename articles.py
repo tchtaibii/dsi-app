@@ -7,7 +7,7 @@ def create_default_contrat(apps, schema_editor):
 
 def create_default_type_dachat(apps, schema_editor):
     typedachat = apps.get_model('achats', 'TypeDachat')
-    typedachat.objects.create(type='Contrat Cadre')
+    typedachat.objects.create(type='Accord Cadre')
     typedachat.objects.create(type='Achat Direct')
     typedachat.objects.create(type="Appel d'offre")
     typedachat.objects.create(type="Achat en ligne")

@@ -543,7 +543,7 @@ def generate_word_file(request, id):
 
         # Change achats.get['typeDachat'] to achats.typeDachat
 
-        if achats.typeDachat.type != 'Contrat Cadre':
+        if achats.typeDachat.type != 'Accord Cadre':
             contrat = achats.fourniseur
         else:
             contrat = achats.achat.all()[0].article.contrat.name
@@ -586,7 +586,7 @@ def generate_word_file(request, id):
 @api_view(['GET'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def import_data_from_excel_to_db(request):
-
+    
     df = pd.read_excel(os.path.join(
         os.path.dirname(__file__), '../static/test.xlsx'
     ))
@@ -597,45 +597,83 @@ def import_data_from_excel_to_db(request):
             type=row["Type d'achat"]) if row["Type d'achat"] else None
         situation_d_achat, _ = SituationDachat.objects.get_or_create(
             situation=row["Situation d'achat"]) if row["Situation d'achat"] else None
-        article, _ = Article.objects.get_or_create(
-            code=row["Code d'article"],
-            defaults={
-                'designation': row['Designation'],
-                'contrat': contrat,
-                'type': row['Type'],
-                'prix_estimatif': row['Prix Estimatif']
-            }
+
+        is_complet = False  # default value
+
+        if situation_d_achat and situation_d_achat.situation.lower() == 'livré':
+            is_complet = True
+
+        type_article, _ = TypeDArticle.objects.get_or_create(
+            type=row['Type']
         )
-        achat = Achat.objects.create(
-            quantité=row['Quantité'],
-            reste=row['Reste'],
-            article=article
-        )
+
+        prix_estimatif = row['Prix Estimatif'] if pd.notna(
+            row['Prix Estimatif']) else None
+
+        reste = row['Reste'] if pd.notna(row['Reste']) else 0
+
+        date_format = "%Y-%m-%d"
+
+        DateDeCommande = row['Date de commande']
+        DateDeCommande = DateDeCommande.to_pydatetime(
+        ).date().strftime(date_format) if not pd.isna(DateDeCommande) else None
+
+        DA = row['DA'] if pd.notna(row['DA']) else None
+
+        DateDA = row['Date DA']
+        DateDA = DateDA.to_pydatetime().date().strftime(date_format) if not pd.isna(
+            DateDA) else None
+
+        BC = row['BC'] if pd.notna(row['BC']) else None
+
+        DateBC = row['Date BC']
+        DateBC = DateBC.to_pydatetime().date().strftime(date_format) if not pd.isna(
+            DateBC) else None
+
+        fourniseur = row['Fournisseur'] if pd.notna(row['Fournisseur']) else None
+
+        BL = row['BL'] if pd.notna(row['BL']) else None
+
+        DateBL = row['Date BL']
+        DateBL = DateBL.to_pydatetime().date().strftime(date_format) if not pd.isna(
+            DateBL) else None
+
+        observation = row['Observation'] if pd.notna(
+            row['Observation']) else None
+
         achats = Achats.objects.create(
             demandeur=row['Demandeur'],
             entité=row['Entité'],
             ligne_bugetaire=row['Ligne bugétaire'],
-            DateDeCommande=row['Date de commande'].to_pydatetime(
-            ).date().strftime("%Y-%m-%d"),
-            DA=row['DA'] if pd.notna(row['DA']) else None,
-            DateDA=row['Date DA'].to_pydatetime().date().strftime(
-                "%Y-%m-%d") if pd.notna(row['Date DA']) else None,
-            BC=row['BC'] if pd.notna(row['BC']) else None,
-            DateBC=row['Date BC'].to_pydatetime().date().strftime(
-                "%Y-%m-%d") if pd.notna(row['Date BC']) else None,
-            fourniseur=row['Fournisseur'] if pd.notna(
-                row['Fournisseur']) else None,
+            DateDeCommande=DateDeCommande,
+            DA=DA,
+            DateDA=DateDA,
+            BC=BC,
+            DateBC=DateBC,
+            fourniseur=fourniseur,
             situation_d_achat=situation_d_achat,
             typeDachat=type_d_achat,
-            BL=row['BL'] if pd.notna(row['BL']) else None,
-            DateBL=row['Date BL'].to_pydatetime().date().strftime(
-                "%Y-%m-%d") if pd.notna(row['Date BL']) else None,
-            observation=row['Observation'] if pd.notna(
-                row['Observation']) else None
+            BL=BL,
+            DateBL=DateBL,
+            observation=observation,
+            isComplet=is_complet
         )
-        achats.achat.add(achat)
-        return Response({'the data is succesfuly injected   '}, status=status.HTTP_200_OK)
 
+        achats.achat.create(
+            quantité=row['Quantité'],
+            reste=reste,
+            article=Article.objects.get_or_create(
+                code=row["Code d'article"],
+                defaults={
+                    'designation': row['Designation'],
+                    'contrat': contrat,
+                    'type': type_article,
+                    'prix_estimatif': prix_estimatif
+                }
+            )[0]
+        )
+
+    return Response({'the data is successfully injected'}, status=status.HTTP_200_OK)
 
 @api_view(['DELETE'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
