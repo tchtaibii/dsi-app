@@ -1,3 +1,5 @@
+from django.db.models import Sum
+import numpy as np
 from django.db.models import Count
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
@@ -590,13 +592,16 @@ def import_data_from_excel_to_db(request):
     df = pd.read_excel(os.path.join(
         os.path.dirname(__file__), '../static/test.xlsx'))
     df = df.replace({pd.NaT: None})
+    df = df.replace({'Nan': None})
+    df = df.replace({np.nan: None})
     for _, row in df.iterrows():
-        achats_instance = Achats.objects.filter(DA=row['DA']).first()
+        achats_instance = Achats.objects.filter(
+            DA=str(row['DA']).rstrip('.0')).first()
         if not achats_instance:
             achats_instance = Achats.objects.create(
-                DA=str(row['DA']),
-                BC=str(row['BC']),
-                BL=str(row['BL']),
+                DA=str(row['DA']).rstrip('.0') if row['DA'] else "",
+                BC=str(row['BC']).rstrip('.0') if row['BC'] else "",
+                BL=str(row['BL']).rstrip('.0') if row['BL'] else "",
                 demandeur=row['Demandeur'],
                 entité=row['Entité'],
                 ligne_bugetaire=row['Ligne bugétaire'],
@@ -653,12 +658,33 @@ def delete_achats(request, id):
     return Response({"detail": "Achats deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
-from django.db.models import Sum
-
-
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def types_with_total_quantity(request):
-    types_with_quantities = TypeDArticle.objects.annotate(total_quantity=Sum('article__achat__quantité'))
-    result = [{"x": type_with_quantity.type, "y": type_with_quantity.total_quantity} for type_with_quantity in types_with_quantities]
+    types_with_quantities = TypeDArticle.objects.annotate(
+        total_quantity=Sum('article__achat__quantité'))
+    result = [{"x": type_with_quantity.type, "y": type_with_quantity.total_quantity}
+              for type_with_quantity in types_with_quantities]
     return Response(result)
+
+
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def search_commands(request):
+    try:
+        achats_list = []  # Initialize an empty list
+        params = request.query_params
+        print(params['search'])
+        if 'search' in params:
+            params = params['search']
+            achats = Achats.objects.filter(Q(demandeur=params) | Q(entité=params) | Q(
+                ligne_bugetaire=params) | Q(DA=params) | Q(BC=params) | Q(BL=params))
+            serializer = AchatsSerializer(achats, many=True)
+            achats_list = serializer.data
+            return Response(achats_list)
+        else:
+            return Response({'message': 'Data not provided'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        logger.exception(f'Error in retrieving achats data: {e}')
+        return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

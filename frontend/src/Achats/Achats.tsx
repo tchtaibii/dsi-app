@@ -183,7 +183,7 @@ const AchatCl = ({ achats, TypeDachat }) => {
 }
 
 
-const Achats = () => {
+const Achats = ({ SearchT }) => {
     const { id } = useParams()
     interface QueryParams {
         typeDachat: number | null;
@@ -201,7 +201,22 @@ const Achats = () => {
     const [situationDachat, setSituationDachat] = useState([]);
     const [isFilter, setFilter] = useState<boolean>(false)
 
-
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(false);
+            await axios.get('/achats/search/', {
+                params:
+                    { search: SearchT }
+            }).then((rsp) => {
+                setAchats(rsp.data.reverse());
+                console.log(rsp.data);
+            });
+            setLoading(true);
+        };
+        if (SearchT.length > 0) {
+            fetchData();
+        }
+    }, [SearchT]);
 
     const [queryParams, setQueryParams] = useState<QueryParams>({
         typeDachat: null,

@@ -25,6 +25,7 @@ urlpatterns = [
     path('lineChart/', views.dashboard_line, name='Line-dashboard'),
     path('deleteAchats/<str:id>', views.delete_achats, name='Delete-achats'),
     path('colChart/', views.types_with_total_quantity, name='TypeDarticle-dash'),
+    path('search/', views.search_commands, name='search'),
     
     
 

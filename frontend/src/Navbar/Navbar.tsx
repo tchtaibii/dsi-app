@@ -27,7 +27,7 @@ const Search = () => (
 
 
 
-const Navbar = () => {
+const Navbar = ({setSearch}) => {
     const data = useRecoilValue(myData)
 
     return (
@@ -43,7 +43,10 @@ const Navbar = () => {
                 </Link>
             </div>
             <div className="search">
-                <input type="text" placeholder='Search...' />
+                <input onChange={(e:any) => {
+                    const value = e.target.value;
+                    setSearch(value);
+                }} type="text" placeholder='Search...' />
                 <Search />
             </div>
             <img src={logo} />

@@ -46,6 +46,7 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
+  const [SearchT, setSearch] = useState('')
   return (
     <>
       {
@@ -54,11 +55,11 @@ function App() {
             <div id='app'>
               <Sidebar />
               <div className='underNav'>
-                <Navbar />
+                <Navbar setSearch={setSearch} />
                 <div className="content">
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="achats/:id?" element={<Achats />} />
+                    <Route path="achats/:id?" element={<Achats SearchT={SearchT} />} />
                     {/* <Route path="commandes" element={<Commandes />} /> */}
                     <Route path="achat/:id" element={<Achat />} />
                     <Route path="AddCommande" element={<AddCommande />} />
