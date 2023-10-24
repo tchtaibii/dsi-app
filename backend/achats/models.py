@@ -51,7 +51,7 @@ class Achat(models.Model):
     article = models.ForeignKey(
         'Article', on_delete=models.PROTECT, null=False, blank=False)
     def __str__(self):
-        return self.designation
+        return self.article.designation if self.article else 'Achat object without associated article'
 
 
 class Achats(models.Model):

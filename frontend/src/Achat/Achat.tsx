@@ -6,14 +6,26 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Loading from '../Loading/Loading';
 
 
+const DeleteSvg = () => (
+    <svg style={{
+        width: "2.125rem",
+        height: "2.125rem"
+    }} width={34} height={34} viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx={17} cy={17} r={17} fill="#BD391B" />
+        <path d="M11.8571 22.8039C11.8571 23.7529 12.6286 24.5294 13.5714 24.5294H20.4286C21.3714 24.5294 22.1429 23.7529 22.1429 22.8039V12.451H11.8571V22.8039ZM23 9.86275H20L19.1429 9H14.8571L14 9.86275H11V11.5882H23V9.86275Z" fill="white" />
+    </svg>
+
+
+)
 const Edits = () => (
     <svg style={{
         width: '2rem',
         height: '2rem'
     }} width={32} height={32} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx={16} cy={16} r={16} fill="#2A2D3E" />
-        <path d="M9 19.8754V23H12.1246L21.34 13.7846L18.2154 10.66L9 19.8754ZM23.7563 11.3683C24.0812 11.0433 24.0812 10.5184 23.7563 10.1934L21.8066 8.24372C21.4816 7.91876 20.9567 7.91876 20.6317 8.24372L19.1069 9.7685L22.2315 12.8931L23.7563 11.3683Z" fill="#B43316" />
+        <circle cx={16} cy={16} r={16} fill="#BD391B" />
+        <path d="M9 19.8754V23H12.1246L21.34 13.7846L18.2154 10.66L9 19.8754ZM23.7563 11.3683C24.0812 11.0433 24.0812 10.5184 23.7563 10.1934L21.8066 8.24372C21.4816 7.91876 20.9567 7.91876 20.6317 8.24372L19.1069 9.7685L22.2315 12.8931L23.7563 11.3683Z" fill="white" />
     </svg>
+
 )
 
 const Achat = () => {
@@ -60,6 +72,7 @@ const Achat = () => {
 
     const navigate = useNavigate()
     const [isLoading, setLoading] = useState(false)
+    const [deleteTab, setDelete] = useState(false);
 
     return (
 
@@ -67,13 +80,40 @@ const Achat = () => {
         !isLoading ? <Loading /> :
             <div className='ContentMain'>
                 {
+                    deleteTab &&
+                    <div className="filter">
+                        <div style={{ width: '30rem' }} className="filterBox">
+                            <div style={{ width: '100%', justifyContent: 'center' }} className="header">
+                                <h1>Supprimer cette achats?</h1>
+                            </div>
+
+                            <div style={{ flexDirection: 'row-reverse', justifyContent: 'center', gap: '1rem' }} className="row">
+                                <button style={{ background: 'green' }} onClick={async () => {
+                                    setLoading(false);
+                                    await axios.delete(`/achats/deleteAchats/${id}`).then((rsp) => setLoading(true))
+                                    navigate(`/`)
+                                }}>Delete</button>
+                                <button onClick={() => {
+                                    setDelete(false)
+                                }}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+                {
                     Data !== null ?
                         <>
-                            <div style={{ justifyContent: "flex-start", gap: '1rem', alignItems: 'center' }} className="header">
+                            <div style={{ justifyContent: "space-between", alignItems: 'center' }} className="header">
                                 <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur}`}</h1>
-                                <div onClick={() => {
-                                    navigate(`/commandes/${id}`)
-                                }} className="Edits"><Edits /></div>
+                                <div className="btnAchats">
+                                    <div onClick={() => {
+
+                                        navigate(`/commandes/${id}`)
+                                    }} className="Edits"><Edits /></div>
+                                    <div onClick={() => {
+                                        setDelete(true)
+                                    }} className="Edits"><DeleteSvg /></div>
+                                </div>
                             </div>
                             <div className="main">
                                 <table style={{ borderCollapse: "none", borderSpacing: "0" }} className="TableAchat">

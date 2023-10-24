@@ -23,5 +23,7 @@ urlpatterns = [
     path('situationDash/', views.dashboard_header, name='situation-dashboard'),
     path('pieChart/', views.dashboard_pie, name='Pie-dashboard'),
     path('lineChart/', views.dashboard_line, name='Line-dashboard'),
+    path('deleteAchats/<str:id>', views.delete_achats, name='Delete-achats'),
+    
 
 ]

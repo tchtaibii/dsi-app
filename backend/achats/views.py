@@ -1,3 +1,4 @@
+from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
 from django.db import models
 from datetime import timedelta
@@ -82,7 +83,7 @@ def ExcelExportView(request):
         achats = achats.filter(
             situation_d_achat=params['situation_d_achat'])
     if 'BCR' in params and params['BCR'].lower() == 'true':
-        achats = apply_dynamic_filter(achats, params)
+        achats = apply_dynamic_filter(achats)
     if 'isComplet' in params and params['isComplet'].lower() == 'true':
         achats = achats.filter(isComplet=False)
 
@@ -303,7 +304,7 @@ def add_commande(request):
                     article = Article.objects.create(
                         designation=designation, type=typearticle, prix_estimatif=int(prix_estimatif))
                     achat = Achat(article=article, quantité=int(
-                        item.get('quantité')), reste=-1)
+                        item.get('quantité')), reste=0)
                     achat.save()
                     achats.append(achat)
                 else:
@@ -352,7 +353,7 @@ def get_commandes(request):
 
         # Apply dynamic filter based on the 'typeDachat'
         if 'BCR' in params and params['BCR'].lower() == 'true':
-            achats = apply_dynamic_filter(achats, params)
+            achats = apply_dynamic_filter(achats)
 
         # Apply additional filters
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
@@ -369,7 +370,7 @@ def get_commandes(request):
         return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def apply_dynamic_filter(achats, params):
+def apply_dynamic_filter(achats):
     today = timezone.now().date()
 
     one_day_delta = timedelta(weeks=1)
@@ -433,7 +434,7 @@ def get_progress(request, id):
             'BL': achats.BL,
             'isComplet': achats.isComplet,
             'demandeur': achats.demandeur,
-            'typeDachat' : achats.typeDachat.id,
+            'typeDachat': achats.typeDachat.id,
             'achats': achats.achat.all()
         })
         return Response(serializer.data)
@@ -634,3 +635,28 @@ def import_data_from_excel_to_db(request):
         )
         achats.achat.add(achat)
         return Response({'the data is succesfuly injected   '}, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def delete_achats(request, id):
+    try:
+        with transaction.atomic():
+            achats_instance = Achats.objects.get(id=id)
+            for achat_instance in achats_instance.achat.all():
+                if not achat_instance.article.code:
+                    try:
+                        with transaction.atomic():
+                            article_instance = achat_instance.article
+                            achat_instance.delete()
+                            article_instance.delete()
+                    except Exception as e:
+                        return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    achat_instance.delete()
+            achats_instance.delete()
+    except Achats.DoesNotExist:
+        return Response({"detail": "Achats not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"detail": "Achats deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
