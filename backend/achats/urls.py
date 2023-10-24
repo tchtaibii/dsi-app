@@ -24,6 +24,8 @@ urlpatterns = [
     path('pieChart/', views.dashboard_pie, name='Pie-dashboard'),
     path('lineChart/', views.dashboard_line, name='Line-dashboard'),
     path('deleteAchats/<str:id>', views.delete_achats, name='Delete-achats'),
+    path('colChart/', views.types_with_article_count, name='TypeDarticle-dash'),
+    
     
 
 ]

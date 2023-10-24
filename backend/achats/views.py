@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
 from django.db import models
@@ -586,94 +587,46 @@ def generate_word_file(request, id):
 @api_view(['GET'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def import_data_from_excel_to_db(request):
-    
     df = pd.read_excel(os.path.join(
-        os.path.dirname(__file__), '../static/test.xlsx'
-    ))
+        os.path.dirname(__file__), '../static/test.xlsx'))
+    df = df.replace({pd.NaT: None})
     for _, row in df.iterrows():
-        contrat, _ = Contrat.objects.get_or_create(
-            name=row['Contrat']) if row['Contrat'] else None
-        type_d_achat, _ = TypeDachat.objects.get_or_create(
-            type=row["Type d'achat"]) if row["Type d'achat"] else None
-        situation_d_achat, _ = SituationDachat.objects.get_or_create(
-            situation=row["Situation d'achat"]) if row["Situation d'achat"] else None
+        achats_instance = Achats.objects.filter(DA=row['DA']).first()
+        if not achats_instance:
+            achats_instance = Achats.objects.create(
+                DA=row['DA'],
+                BC=row['BC'],
+                BL=row['BL'],
+                demandeur=row['Demandeur'],
+                entité=row['Entité'],
+                ligne_bugetaire=row['Ligne bugétaire'],
+                DateDeCommande=row['Date de commande'],
+                typeDachat=TypeDachat.objects.get(type=row["Type d'achat"]),
+                situation_d_achat=SituationDachat.objects.get(
+                    situation=row["Situation d'achat"]),
+                DateDA=row['Date DA'],
+                DateBC=row['Date BC'],
+                DateBL=row['Date BL'],
+                observation=row['Observation'],
+            )
 
-        is_complet = False  # default value
+            if row["Situation d'achat"] == 'Livré':
+                achats_instance.isComplet = True
+                achats_instance.save()
 
-        if situation_d_achat and situation_d_achat.situation.lower() == 'livré':
-            is_complet = True
+        achat_code = str(row["Code"])
+        if achat_code and isinstance(achat_code, str):
+            existing_article = Article.objects.filter(code=achat_code).first()
+            if existing_article:
+                achat = Achat.objects.create(
+                    quantité=row['Quantité'],
+                    reste=row['Reste'] if not pd.isna(row['Reste']) else 0,
+                    article=existing_article
+                )
+                achats_instance.achat.add(achat)
 
-        type_article, _ = TypeDArticle.objects.get_or_create(
-            type=row['Type']
-        )
+    return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
 
-        prix_estimatif = row['Prix Estimatif'] if pd.notna(
-            row['Prix Estimatif']) else None
-
-        reste = row['Reste'] if pd.notna(row['Reste']) else 0
-
-        date_format = "%Y-%m-%d"
-
-        DateDeCommande = row['Date de commande']
-        DateDeCommande = DateDeCommande.to_pydatetime(
-        ).date().strftime(date_format) if not pd.isna(DateDeCommande) else None
-
-        DA = row['DA'] if pd.notna(row['DA']) else None
-
-        DateDA = row['Date DA']
-        DateDA = DateDA.to_pydatetime().date().strftime(date_format) if not pd.isna(
-            DateDA) else None
-
-        BC = row['BC'] if pd.notna(row['BC']) else None
-
-        DateBC = row['Date BC']
-        DateBC = DateBC.to_pydatetime().date().strftime(date_format) if not pd.isna(
-            DateBC) else None
-
-        fourniseur = row['Fournisseur'] if pd.notna(row['Fournisseur']) else None
-
-        BL = row['BL'] if pd.notna(row['BL']) else None
-
-        DateBL = row['Date BL']
-        DateBL = DateBL.to_pydatetime().date().strftime(date_format) if not pd.isna(
-            DateBL) else None
-
-        observation = row['Observation'] if pd.notna(
-            row['Observation']) else None
-
-        achats = Achats.objects.create(
-            demandeur=row['Demandeur'],
-            entité=row['Entité'],
-            ligne_bugetaire=row['Ligne bugétaire'],
-            DateDeCommande=DateDeCommande,
-            DA=DA,
-            DateDA=DateDA,
-            BC=BC,
-            DateBC=DateBC,
-            fourniseur=fourniseur,
-            situation_d_achat=situation_d_achat,
-            typeDachat=type_d_achat,
-            BL=BL,
-            DateBL=DateBL,
-            observation=observation,
-            isComplet=is_complet
-        )
-
-        achats.achat.create(
-            quantité=row['Quantité'],
-            reste=reste,
-            article=Article.objects.get_or_create(
-                code=row["Code d'article"],
-                defaults={
-                    'designation': row['Designation'],
-                    'contrat': contrat,
-                    'type': type_article,
-                    'prix_estimatif': prix_estimatif
-                }
-            )[0]
-        )
-
-    return Response({'the data is successfully injected'}, status=status.HTTP_200_OK)
 
 @api_view(['DELETE'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
@@ -698,3 +651,13 @@ def delete_achats(request, id):
         return Response({"detail": "Achats not found"}, status=status.HTTP_404_NOT_FOUND)
 
     return Response({"detail": "Achats deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+def types_with_article_count(request):
+    types_with_counts = TypeDArticle.objects.annotate(
+        article_count=Count('article'))
+    result = [{"x": type_with_count.type, "y": type_with_count.article_count}
+              for type_with_count in types_with_counts]
+    return Response(result)

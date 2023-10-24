@@ -4,6 +4,7 @@ import './Dashboard.scss';
 import { useNavigate } from 'react-router-dom'
 import ChartPie from './PieChart'
 import LinePie from './LineCharts'
+import ColCharts from './ColCharts'
 import Loading from '../Loading/Loading';
 
 const Nouveau = () => (
@@ -83,12 +84,14 @@ const Dashboard = () => {
     })
     const [dataLine, setDataLine] = useState([])
     const [isLoading, setLoading] = useState(false)
+    const [series, setSeries] = useState<any>([])
 
     useEffect(() => {
         const fetchData = async () => {
             await axios.get('/achats/situationDash/').then((rsp: any) => setBoxData(rsp.data))
             await axios.get('/achats/pieChart/').then((rsp: any) => setDataPie(rsp.data))
             await axios.get('/achats/lineChart/').then((rsp: any) => setDataLine(rsp.data))
+            await axios.get('/achats/colChart/').then((rsp: any) => setSeries(rsp.data))
             setLoading(true);
         }
         fetchData();
@@ -101,7 +104,7 @@ const Dashboard = () => {
                         <div className="header">
                             <h1>Dashboard</h1>
                         </div>
-                        <div className="main" style={{ padding: 0 }}>
+                        <div className="main" style={{ paddingBottom: '7rem' }}>
                             <div className="dash-col">
                                 <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
                                 <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
@@ -116,6 +119,11 @@ const Dashboard = () => {
                                 <div className="pieChart">
                                     <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "Livraison en retard")}</h1>
                                     <LinePie data={dataLine.length > 0 ? dataLine : []} />
+                                </div>
+                            </div>
+                            <div className="col2" >
+                                <div style={{width: '100%'}} className="pieChart">
+                                    <ColCharts Series={series} />
                                 </div>
                             </div>
                         </div>
