@@ -594,9 +594,9 @@ def import_data_from_excel_to_db(request):
         achats_instance = Achats.objects.filter(DA=row['DA']).first()
         if not achats_instance:
             achats_instance = Achats.objects.create(
-                DA=row['DA'],
-                BC=row['BC'],
-                BL=row['BL'],
+                DA=str(row['DA']),
+                BC=str(row['BC']),
+                BL=str(row['BL']),
                 demandeur=row['Demandeur'],
                 entité=row['Entité'],
                 ligne_bugetaire=row['Ligne bugétaire'],
@@ -653,11 +653,12 @@ def delete_achats(request, id):
     return Response({"detail": "Achats deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
+from django.db.models import Sum
+
+
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
-def types_with_article_count(request):
-    types_with_counts = TypeDArticle.objects.annotate(
-        article_count=Count('article'))
-    result = [{"x": type_with_count.type, "y": type_with_count.article_count}
-              for type_with_count in types_with_counts]
+def types_with_total_quantity(request):
+    types_with_quantities = TypeDArticle.objects.annotate(total_quantity=Sum('article__achat__quantité'))
+    result = [{"x": type_with_quantity.type, "y": type_with_quantity.total_quantity} for type_with_quantity in types_with_quantities]
     return Response(result)
