@@ -30,7 +30,7 @@ class AchatTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achats
         # fields = '__all__'
-        exclude = ('achat',)
+        exclude = ()
 
 
 class AchatsSerializer(serializers.ModelSerializer):

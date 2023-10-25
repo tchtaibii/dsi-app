@@ -123,6 +123,32 @@ h3 {
 // }
 
 
+.achatArr {
+  width: 100%;
+  // border-radius: 1.25rem;
+  border-top: 0.06rem solid $nav-color;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  .achatZ {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+
+    .achatSD {
+      display: flex;
+      flex-direction: row;
+      padding-left: 1.5rem;
+
+    }
+  }
+
+}
+
 .checkboxs {
   display: flex;
   align-items: center;

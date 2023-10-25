@@ -61,7 +61,7 @@ const UploadSvg = () => (
 
 interface AChat {
     demandeur: string;
-    typeDachat : number;
+    typeDachat: number;
 }
 
 const Achats = () => {
@@ -106,7 +106,7 @@ const Achats = () => {
         reste: []
     })
     const statusFunc = (obj: any) => {
-        setarticle({ demandeur: obj.demandeur, typeDachat : obj.typeDachat });
+        setarticle({ demandeur: obj.demandeur, typeDachat: obj.typeDachat });
         setReste(obj.achats);
         console.log(obj)
         if (obj.isComplet === true) {
@@ -423,7 +423,7 @@ const Achats = () => {
             setfileData({ data: url, name: filename });
             setfileData({ data: url, name: filename });
         }
-        if (postData.is_ === 'OB' || postData.is_ === 'DONE' )
+        if (postData.is_ === 'OB' || postData.is_ === 'DONE')
             fetchData()
     }, [postData.is_])
 
@@ -529,7 +529,7 @@ const Achats = () => {
                                                 </>
                                         }
                                         {
-                                            postData.is_ === 'BL' && article.typeDachat !== 1 && 
+                                            postData.is_ === 'BL' && article.typeDachat !== 1 &&
                                             <div className="inputCommande" style={{ width: "40rem" }}>
                                                 <div className="label">{'Fournisseur *'}</div>
                                                 <div className="inputText">
@@ -576,12 +576,19 @@ const Achats = () => {
                                         {
                                             postData.is_ === 'OB' &&
                                             <button onClick={() => {
-                                                const link = document.createElement('a');
-                                                link.href = fileData.data ? fileData.data : '#';
-                                                link.setAttribute('download', fileData.name ? fileData.name : 'dd');
-                                                document.body.appendChild(link);
-                                                link.click();
-                                                document.body.removeChild(link);
+                                                const downloadData = () => {
+                                                    if (fileData.name) {
+                                                        const link = document.createElement('a');
+                                                        link.href = fileData.data ? fileData.data : '#';
+                                                        link.setAttribute('download', fileData.name ? fileData.name : 'dd');
+                                                        document.body.appendChild(link);
+                                                        link.click();
+                                                        document.body.removeChild(link);
+                                                        return;
+                                                    }
+                                                    else
+                                                        downloadData();
+                                                }
                                             }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                                                 {/* <DownloadSvg /> */}
                                                 Donwload PV</button>

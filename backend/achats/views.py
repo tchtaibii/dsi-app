@@ -74,22 +74,29 @@ def ExcelExportView(request):
     params = request.query_params
     achats = Achats.objects.all()
     params = request.query_params
-    if 'typeDachat' in params:
-        achats = achats.filter(typeDachat=params['typeDachat'])
-    if 'DA' in params:
-        achats = achats.filter(DA=params['DA'])
-    if 'BC' in params:
-        achats = achats.filter(BC=params['BC'])
-    if 'BL' in params:
-        achats = achats.filter(BL=params['BL'])
-    if 'situation_d_achat' in params:
-        achats = achats.filter(
-            situation_d_achat=params['situation_d_achat'])
-    if 'BCR' in params and params['BCR'].lower() == 'true':
-        achats = apply_dynamic_filter(achats)
-    if 'isComplet' in params and params['isComplet'].lower() == 'true':
-        achats = achats.filter(isComplet=False)
 
+    if 'search' in params and len(params['search']) > 0:
+        srch = params['search']
+        print('enter', srch)
+        achats = Achats.objects.filter(Q(demandeur=srch) | Q(entité=srch) | Q(
+            ligne_bugetaire=srch) | Q(DA=srch) | Q(BC=srch) | Q(BL=srch))
+    else:
+        if 'typeDachat' in params:
+            achats = achats.filter(typeDachat=params['typeDachat'])
+        if 'DA' in params:
+            achats = achats.filter(DA=params['DA'])
+        if 'BC' in params:
+            achats = achats.filter(BC=params['BC'])
+        if 'BL' in params:
+            achats = achats.filter(BL=params['BL'])
+        if 'situation_d_achat' in params:
+            achats = achats.filter(
+                situation_d_achat=params['situation_d_achat'])
+        if 'BCR' in params and params['BCR'].lower() == 'true':
+            achats = apply_dynamic_filter(achats)
+        if 'isComplet' in params and params['isComplet'].lower() == 'true':
+            achats = achats.filter(isComplet=False)
+    print(achats)
     achats_data = []
     for achat in achats:
         for a in achat.achat.all():
@@ -394,7 +401,7 @@ def apply_dynamic_filter(achats):
 def get_achat(request, id):
     try:
         achats = Achats.objects.get(id=id)
-        serializer = AchatTSerializer(achats)
+        serializer = AchatsSerializer(achats)
         achats_data = serializer.data
     except Achats.DoesNotExist:
         return Response({'message': 'Achats object not found.'}, status=status.HTTP_404_NOT_FOUND)

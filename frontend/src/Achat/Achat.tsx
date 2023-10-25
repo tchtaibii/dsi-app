@@ -19,14 +19,23 @@ const DeleteSvg = () => (
 )
 const Edits = () => (
     <svg style={{
-        width: '2rem',
-        height: '2rem'
-    }} width={32} height={32} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx={16} cy={16} r={16} fill="#BD391B" />
-        <path d="M9 19.8754V23H12.1246L21.34 13.7846L18.2154 10.66L9 19.8754ZM23.7563 11.3683C24.0812 11.0433 24.0812 10.5184 23.7563 10.1934L21.8066 8.24372C21.4816 7.91876 20.9567 7.91876 20.6317 8.24372L19.1069 9.7685L22.2315 12.8931L23.7563 11.3683Z" fill="white" />
+        width: '2.155rem',
+        height: '2.155rem'
+    }} width={35} height={35} viewBox="0 0  " fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsxlink="http://www.w3.org/1999/xlink">
+        <circle cx="17.24" cy="17.24" r="17.24" fill="#BD391B" />
+        <rect x={6} y={6} width="21.55" height="21.55" fill="url(#pattern0)" />
+        <defs>
+            <pattern id="pattern0" patternContentUnits="objectBoundingBox" width={1} height={1}>
+                <use xlinkHref="#image0_292_24" transform="scale(0.0104167)" />
+            </pattern>
+            <image id="image0_292_24" width={96} height={96} xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAADBUlEQVR4nO2az2oUQRDG5+QpuuhrRFDQVzI+gkdz25NBRMH4LObsgC0K4oPEXAOfDI6yTHamu6q7uubP94Pctmurvl9v907YpiGEEEIIIYSQmYMI3v2tHlAABWwabO0TEBuYTEMBzlCAMxTgDAU4QwHOUIAzFOAMnwsqwwczZyjAGQpwhgKcoQBnKMAZCnCGApyhgHxaAHvt4rULaPs/y/q7fs5zTYE1CwgAHnYBAfhiVX8w6ytpkbUKCIfhGEi4E75WwhoFhGPhFJQwGr5Ggmn4fTM1af+dySO97DLvhMn6g/dKupiLhj3SSC1CbGdmfhKS6ktFFwk50kwNQmo4Sgkm4XdkhZvYkJZ94iBt6rGgDEpy7IiPOFWowkE1vE7cqUGy84/0Vqy+9n7R9i4ZUhV+QkghJ/yS9XMu99z+U5pThz8RUigRfon6ud+sSs0w1WAq54mDtsIzWXp+m575cxWwn1GgO2H9LBprEvv4BuBRwffcDcKxrr94AcVCwng41vUXLyA7JMTDsa4vRtuLpGkpqpCQHo51fRGNNcq+RCFBHo51/WTUwQqa15IUEvThWNdPoljQEwPkMBkS8sOxrh/FLPiDIXI5GhLKhWNdf/EC7oSE8uFY11+8gP8hwS4c6/qLF1DrZybVwl+igNVBAc5QgDMU4AwFOEMBGxBw4z3kjLmuIeCX95Qz5mcNAW+9p5wxb2oIeAzg1nvSGdJlcmouoJfwwXvaGfKuSvi9gHsArrwnnhGfu0yqCTiQ8H7jx9Ftt/Orhz8QcQrgovsGsJGvqDf9rBfVznwP8Pf3nFM8O3jtk8hrf/hOszAAPI8E+jVHGIkL+BQJ88WRNWeRNZcMPm33nwD4HTmD74+su46se0AJcQEvIzv548Tay8jaMwqICwjasxzA08ja7xRQ+PIdwss4AxQ4QngZ68M/KXGJ8jJ2uHyH8DJWgIIPUryMHS7fIbyMBcDg+3vJI23VwOgJlpfxDHYq+GScFFKw+i9mtzZSO2hrE0IIIYQQQgghhBDSCPkDcIdJu0o/inwAAAAASUVORK5CYII=" />
+        </defs>
     </svg>
 
+
 )
+
+
 
 const Achat = () => {
 
@@ -64,6 +73,7 @@ const Achat = () => {
         const fetchData = async () => {
             await axios.get(`/achats/get/achat/${id}`).then((rsp: any) => {
                 setData(rsp.data)
+                console.log(rsp.data)
             })
         }
         fetchData();
@@ -194,6 +204,34 @@ const Achat = () => {
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div className="achatArr">
+                                    <div className="headerMain" style={{ paddingRight: "0rem" }}>
+                                        <p style={{ width: '45%', color: '#BD391B' }}>Designation</p>
+                                        <p style={{ width: '10%', color: '#BD391B' }}>Type</p>
+                                        <p style={{ width: '14%', color: '#BD391B' }}>{Data.typeDachat === 1 ? "Code d’article" : "Prix Estimatif"}</p>
+                                        <p style={{ width: '18%', color: '#BD391B' }}>{Data.typeDachat === 1 ? "Contrat" : "Fournisseur"}</p>
+                                        <p style={{ width: '8%', color: '#BD391B' }}>Quantité</p>
+                                        <p style={{ width: 'fit-content', color: '#BD391B' }}>Reste</p>
+                                    </div>
+                                    <div className="achatZ">
+
+                                        {
+                                            Data.achat && Data.achat.map((ele: any) => {
+                                                return (
+                                                    <div className="achatSD">
+
+                                                        <p style={{ width: '45%' }}>{ele.article.designation}</p>
+                                                        <p style={{ width: '10%' }}>{ele.article.type}</p>
+                                                        <p style={{ width: '14%' }}>{Data.typeDachat === 1 ? ele.article.code : ele.article.prix_estimatif}</p>
+                                                        <p style={{ width: '19%' }}>{Data.typeDachat === 1 ? ele.article.contrat.name : Data.fourniseur}</p>
+                                                        <p style={{ width: '8%' }}>{ele.quantité}</p>
+                                                        <p style={{ width: 'fit-content' }}>{Data.situation_d_achat >= 4 ? ele.reste : '----'}</p>
+                                                    </div>
+                                                )
+                                            })
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </>
                         : <h1 style={{ fontSize: '1.5rem' }}>Achat Not Found</h1>

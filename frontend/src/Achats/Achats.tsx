@@ -182,7 +182,6 @@ const AchatCl = ({ achats, TypeDachat }) => {
     )
 }
 
-
 const Achats = ({ SearchT }) => {
     const { id } = useParams()
     interface QueryParams {
@@ -194,6 +193,7 @@ const Achats = ({ SearchT }) => {
         typeDarticle: string | null;
         BCR: boolean;
         isComplet: boolean;
+        search: string;
     }
     const [achats, setAchats] = useState<any[]>([])
 
@@ -202,21 +202,10 @@ const Achats = ({ SearchT }) => {
     const [isFilter, setFilter] = useState<boolean>(false)
 
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(false);
-            await axios.get('/achats/search/', {
-                params:
-                    { search: SearchT }
-            }).then((rsp) => {
-                setAchats(rsp.data.reverse());
-                console.log(rsp.data);
-            });
-            setLoading(true);
-        };
-        if (SearchT.length > 0) {
-            fetchData();
-        }
+        fetchDataB();
     }, [SearchT]);
+
+
 
     const [queryParams, setQueryParams] = useState<QueryParams>({
         typeDachat: null,
@@ -226,9 +215,9 @@ const Achats = ({ SearchT }) => {
         situation_d_achat: id ? id : null,
         typeDarticle: null,
         BCR: false,
-        isComplet: false
+        isComplet: false,
+        search: SearchT
     });
-    const [fileData, setFileData] = useState<any>(null);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -238,10 +227,21 @@ const Achats = ({ SearchT }) => {
                         nonNullParams[key] = queryParams[key];
                     }
                 });
-
-                const commandsResponse = await axios.get('/achats/get/commandes/', {
-                    params: nonNullParams,
-                });
+                if (SearchT.length > 0) {
+                    await axios.get('/achats/search/', {
+                        params:
+                            { search: SearchT }
+                    }).then((rsp: any) => {
+                        setAchats(rsp.data.reverse());
+                        console.log(rsp.data);
+                    });
+                }
+                else {
+                    const commandsResponse = await axios.get('/achats/get/commandes/', {
+                        params: nonNullParams,
+                    });
+                    setAchats(commandsResponse.data.reverse());
+                }
                 const fileResponse = await axios.get('/achats/excelExport/', {
                     params: nonNullParams,
                     responseType: 'blob', // Important for handling binary data
@@ -254,7 +254,6 @@ const Achats = ({ SearchT }) => {
                 const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const url = window.URL.createObjectURL(blob);
                 setFileData({ data: url, name: filename });
-                setAchats(commandsResponse.data.reverse());
                 const typeDachatResponse = await axios.get('/achats/get/types_achats');
                 setTypeDachat(typeDachatResponse.data);
 
@@ -264,16 +263,21 @@ const Achats = ({ SearchT }) => {
                 console.error('Error:', error);
             }
             setLoading(true);
-        };
-
-        fetchData();
-    }, []);
-
-
+        }
+        fetchData()
+    }, [queryParams])
     const [isFilterTypeAchat, setFilterAchat] = useState<boolean>(false);
     const [isFilterTypeArt, setFilterArt] = useState<boolean>(false);
     const [isFiltersit, setFilterSit] = useState<boolean>(false);
     const [isLoading, setLoading] = useState(false)
+    const fetchDataB = async () => {
+        setQueryParams((state: any) => ({ ...state, search: SearchT }))
+    };
+    const [fileData, setFileData] = useState<any>(null);
+    useEffect(() => {
+        fetchDataB();
+    }, []);
+
     return (
         !isLoading ? <Loading /> :
             <div className='ContentMain'>
@@ -292,7 +296,8 @@ const Achats = ({ SearchT }) => {
                                         situation_d_achat: null,
                                         typeDarticle: null,
                                         BCR: false,
-                                        isComplet: false
+                                        isComplet: false,
+                                        search: SearchT
                                     })
                                     setFilter(false)
                                 }} style={{ cursor: 'pointer' }}><ExitSvg /></div>
@@ -429,39 +434,8 @@ const Achats = ({ SearchT }) => {
                             </div>
                             <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
                                 <button onClick={async () => {
-                                    const nonNullParams: QueryParams | any = {};
-                                    Object.keys(queryParams).forEach((key) => {
-                                        if (queryParams[key as keyof QueryParams] !== null) {
-                                            nonNullParams[key as keyof QueryParams] = queryParams[key as keyof QueryParams];
-                                        }
-                                    });
-                                    try {
-                                        const Commandes = await axios.get('/achats/get/commandes/', {
-                                            params: nonNullParams,
-                                        });
-                                        setAchats(Commandes.data.reverse())
-                                        setFilter(false)
-                                        const fileResponse = await axios.get('/achats/excelExport/', {
-                                            params: nonNullParams,
-                                            responseType: 'blob', // Important for handling binary data
-                                        });
-                                        const disposition = fileResponse.headers['content-disposition'];
-                                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                                        const filename = matches ? matches[1].replace(/['"]/g, '') : '';
-
-                                        const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                                        const url = window.URL.createObjectURL(blob);
-                                        setFileData({ data: url, name: filename });
-                                        setAchats(Commandes.data.reverse());
-                                        const typeDachatResponse = await axios.get('/achats/get/types_achats');
-                                        setTypeDachat(typeDachatResponse.data);
-
-                                        const situationResponse = await axios.get('/achats/get/situations_article');
-                                        setSituationDachat(situationResponse.data);
-                                    }
-                                    catch (error) {
-                                        console.error('Error:', error);
-                                    }
+                                    fetchDataB();
+                                    setFilter(false)
                                 }}>Submit</button>
                                 <button onClick={() => {
                                     window.location.reload();
@@ -504,7 +478,6 @@ const Achats = ({ SearchT }) => {
                                 </div>
                                 <div className="achatsCL">
                                     <AchatCl TypeDachat={TypeDachat} achats={achats} />
-
                                 </div>
 
                             </>
