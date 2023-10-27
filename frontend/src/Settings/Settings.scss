@@ -1,6 +1,134 @@
 @import '../tools.scss';
 
 
-.Settings{
-    
+.row1S {
+    display: flex;
+    justify-content: space-between;
+
+    .boxSet {
+        width: 49%;
+        height: 25.5rem;
+        border-radius: 1.25rem;
+        box-shadow: 5px 7px 12px 2px rgba(0, 0, 0, 0.25);
+        background-color: #3BB056;
+        background-image: url('../assets/excelW.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+        padding-top: 2.25rem;
+        padding-bottom: 1.13rem;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+
+        h1 {
+            color: $back-color;
+            text-align: center;
+            font-size: 2rem;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+        }
+
+        .fileUplaod {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+
+            .fileName {
+                color: #FFF;
+
+                font-family: Inter;
+                font-size: 0.75rem;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+            }
+
+            .inputUplaod {
+                width: 24.875rem;
+                height: 4.5625rem;
+                border-radius: 1.25rem;
+                background: $back-color;
+                position: absolute;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                display: flex;
+                align-items: center;
+                padding-inline: 2.19rem;
+                gap: 3.5rem;
+                color: #217346;
+                text-align: center;
+                font-size: 2rem;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                cursor: pointer;
+
+            }
+
+            input[type=file] {
+                width: 24.875rem;
+                height: 4.5625rem;
+                opacity: 0;
+                cursor: pointer;
+            }
+        }
+
+        .saveFile {
+            width: 100%;
+            display: flex;
+            flex-direction: row-reverse;
+            padding-inline: 1.56rem;
+            display: flex;
+            justify-content: space-between;
+
+            .downloadTemplate {
+                cursor: pointer;
+
+            }
+
+            .saveBtn {
+                border-radius: 1.25rem;
+                background: #3BB056;
+                width: 7.75rem;
+                height: 2.9375rem;
+                text-align: center;
+                font-size: 1.5rem;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+
+            }
+        }
+
+
+    }
+
+    .redBox {
+        background-color: $nav-color;
+        background-image: url('../assets/excelA.png');
+
+        .fileUplaod {
+
+            .inputUplaod {
+                color: $nav-color;
+            }
+        }
+
+        .saveFile {
+            display: flex;
+            justify-content: space-between;
+
+            .saveBtn {
+                background: #B0523B;
+            }
+
+        }
+    }
 }

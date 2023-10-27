@@ -1,3 +1,6 @@
+from datetime import datetime
+import logging
+from django.utils import timezone
 from django.db import models
 
 
@@ -50,8 +53,12 @@ class Achat(models.Model):
     reste = models.IntegerField(blank=True, null=True)
     article = models.ForeignKey(
         'Article', on_delete=models.PROTECT, null=False, blank=False)
+
     def __str__(self):
         return self.article.designation if self.article else 'Achat object without associated article'
+
+
+logger = logging.getLogger(__name__)
 
 
 class Achats(models.Model):
@@ -75,6 +82,35 @@ class Achats(models.Model):
     observation = models.TextField(blank=True, null=True)
     isComplet = models.BooleanField(default=False)
     fourniseur = models.CharField(max_length=60, null=True, blank=True)
-    
+    TV = models.IntegerField(blank=True, null=True)
+    TT = models.IntegerField(blank=True, null=True)
+    TL = models.IntegerField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            if not self.pk:
+                super(Achats, self).save(*args, **kwargs)
+
+            current_time = datetime.now()
+            current_time_formatted = datetime.strptime(
+                current_time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+            if self.DateDeCommande and self.DateDA:
+                self.TV = (self.DateDA - self.DateDeCommande).days
+            elif self.DateDeCommande:
+                self.TV = (current_time_formatted - self.DateDeCommande).days
+            if self.DateBC and self.DateDA:
+                self.TT = (self.DateBC - self.DateDA).days
+            elif self.DateDA:
+                self.TT = (current_time_formatted - self.DateDA).days
+
+            if self.DateBL and self.DateBC:
+                self.TL = (self.DateBL - self.DateBC).days
+            elif self.DateBC:
+                self.TL = (current_time_formatted - self.DateBC).days
+
+            super(Achats, self).save(*args, **kwargs)
+        except Exception as e:
+            logger.exception(f'Error in saving Achats instance: {str(e)}')
+
     def __str__(self):
         return str(self.DateDeCommande)

@@ -1,3 +1,4 @@
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Sum
 import numpy as np
 from django.db.models import Count
@@ -63,6 +64,30 @@ def download_file(request, fl):
 
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def download_achats_file(request):
+    file_path = '/app/static/Achats.xlsx'
+    with open(file_path, 'rb') as excel_file:
+        response = HttpResponse(
+            excel_file.read(), content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="example.xlsx"'
+        return response
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def download_article_file(request):
+    file_path = '/app/static/Article.xlsx'
+    with open(file_path, 'rb') as excel_file:
+        response = HttpResponse(
+            excel_file.read(), content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="example.xlsx"'
+        return response
 
 
 @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
@@ -217,14 +242,16 @@ def progress(request, id):
                 with open(file_path, 'wb') as f:
                     f.write(file_object.getbuffer())
             serializer = PostBLSerializer(data=data)
+            print(data)
             if serializer.is_valid():
                 BL = serializer.validated_data['code']
-                fournisseur = serializer.validated_data['fournisseur']
+                achat = Achats.objects.get(id=id)
+                if data.get('fournisseur'):
+                    fournisseur = serializer.validated_data['fournisseur']
+                    achat.fourniseur = fournisseur
                 DateBL = serializer.validated_data['date']
                 reste_data = serializer.validated_data['reste']
-                achat = Achats.objects.get(id=id)
                 achat.BL = BL
-                achat.fourniseur = fournisseur
                 achat.DateBL = DateBL
                 if file_data:
                     achat.BL_File = file_path
@@ -242,6 +269,7 @@ def progress(request, id):
                     achat.situation_d_achat = SituationDachat.objects.get(id=5)
                 achat.save()
                 return Response({"message": "Data is valid. Process it."})
+            logger.exception(f'Error in saving Achats instance: {str(e)}')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif is_ == 'OB':
             serializer = PostOBSerializer(data=data)
@@ -334,6 +362,7 @@ def add_commande(request):
 
         return Response("Commande added successfully", status=status.HTTP_201_CREATED)
     except Exception as e:
+        logger.exception(f'Error in creating Achats instance: {str(e)}')
         return Response({'message': f'Error in adding commande. {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -592,54 +621,6 @@ def generate_word_file(request, id):
             return response
 
 
-@throttle_classes([UserRateThrottle])
-@api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
-def import_data_from_excel_to_db(request):
-    df = pd.read_excel(os.path.join(
-        os.path.dirname(__file__), '../static/test.xlsx'))
-    df = df.replace({pd.NaT: None})
-    df = df.replace({'Nan': None})
-    df = df.replace({np.nan: None})
-    for _, row in df.iterrows():
-        achats_instance = Achats.objects.filter(
-            DA=str(row['DA']).rstrip('.0')).first()
-        if not achats_instance:
-            achats_instance = Achats.objects.create(
-                DA=str(row['DA']).rstrip('.0') if row['DA'] else "",
-                BC=str(row['BC']).rstrip('.0') if row['BC'] else "",
-                BL=str(row['BL']).rstrip('.0') if row['BL'] else "",
-                demandeur=row['Demandeur'],
-                entité=row['Entité'],
-                ligne_bugetaire=row['Ligne bugétaire'],
-                DateDeCommande=row['Date de commande'],
-                typeDachat=TypeDachat.objects.get(type=row["Type d'achat"]),
-                situation_d_achat=SituationDachat.objects.get(
-                    situation=row["Situation d'achat"]),
-                DateDA=row['Date DA'],
-                DateBC=row['Date BC'],
-                DateBL=row['Date BL'],
-                observation=row['Observation'],
-            )
-
-            if row["Situation d'achat"] == 'Livré':
-                achats_instance.isComplet = True
-                achats_instance.save()
-
-        achat_code = str(row["Code"])
-        if achat_code and isinstance(achat_code, str):
-            existing_article = Article.objects.filter(code=achat_code).first()
-            if existing_article:
-                achat = Achat.objects.create(
-                    quantité=row['Quantité'],
-                    reste=row['Reste'] if not pd.isna(row['Reste']) else 0,
-                    article=existing_article
-                )
-                achats_instance.achat.add(achat)
-
-    return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
-
-
 @api_view(['DELETE'])
 # @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
@@ -695,3 +676,128 @@ def search_commands(request):
     except Exception as e:
         logger.exception(f'Error in retrieving achats data: {e}')
         return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@throttle_classes([UserRateThrottle])
+def add_articles(request):
+    if 'file' not in request.FILES:
+        return Response({'message': 'No file was found'}, status=status.HTTP_400_BAD_REQUEST)
+
+    excel_file = request.FILES['file']
+    if not excel_file.name.endswith('.xlsx'):
+        return Response({'message': 'Invalid file format. Please upload a .xlsx file.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        stream = io.BytesIO(excel_file.read())
+        df = pd.read_excel(stream)
+
+        df = df.replace({pd.NaT: None})
+        df = df.replace({'Nan': None})
+        df = df.replace({np.nan: None})
+
+        contrat = excel_file.name
+        Contrat.objects.get_or_create(name=contrat)
+        for _, row in df.iterrows():
+            if not Article.objects.filter(code=row['CODE']).exists():
+                type_article, _ = TypeDArticle.objects.get_or_create(
+                    type=str(row['type']) if row['type'] else "")
+                contrat_instance = Contrat.objects.get(name=contrat)
+                achats_instance = Article.objects.create(
+                    code=str(row['CODE']) if row['CODE'] else "",
+                    designation=str(row['designation']
+                                    ) if row['designation'] else "",
+                    type=type_article,
+                    contrat=contrat_instance)
+
+        return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.exception(f'Error in saving Achats instance: {str(e)}')
+        return Response({'message': f'Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@throttle_classes([UserRateThrottle])
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+def add_achats_file(request):
+    if 'file' not in request.FILES:
+        return Response({'message': 'No file was found'}, status=status.HTTP_400_BAD_REQUEST)
+    excel_file = request.FILES['file']
+    if not excel_file.name.endswith('.xlsx'):
+        return Response({'message': 'Invalid file format. Please upload a .xlsx file.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        stream = io.BytesIO(excel_file.read())
+        df = pd.read_excel(stream)
+        df = df.replace({pd.NaT: None})
+        df = df.replace({'Nan': None})
+        df = df.replace({np.nan: None})
+        for _, row in df.iterrows():
+            achats_instance = Achats.objects.filter(
+                DA=str(row['DA']).rstrip('.0')).first()
+            if not achats_instance:
+                date_de_commande_string = str(
+                    row['Date de commande']) if row['Date de commande'] is not None else None
+                clean_date_de_commande_string = date_de_commande_string.split(
+                )[0] if date_de_commande_string is not None else None
+                DateDeCommande = datetime.strptime(
+                    clean_date_de_commande_string, "%Y-%m-%d") if clean_date_de_commande_string else None
+
+                date_da_string = str(
+                    row['Date DA']) if row['Date DA'] is not None else None
+                clean_date_da_string = date_da_string.split(
+                )[0] if date_da_string is not None else None
+                DateDA = datetime.strptime(
+                    clean_date_da_string, "%Y-%m-%d") if clean_date_da_string else None
+
+                date_bc_string = str(
+                    row['Date BC']) if row['Date BC'] is not None else None
+                clean_date_bc_string = date_bc_string.split(
+                )[0] if date_bc_string is not None else None
+                DateBC = datetime.strptime(
+                    clean_date_bc_string, "%Y-%m-%d") if clean_date_bc_string else None
+
+                date_bl_string = str(
+                    row['Date BL']) if row['Date BL'] is not None else None
+                clean_date_bl_string = date_bl_string.split(
+                )[0] if date_bl_string is not None else None
+                DateBL = datetime.strptime(
+                    clean_date_bl_string, "%Y-%m-%d") if clean_date_bl_string else None
+
+                achats_instance = Achats.objects.create(
+                    DA=str(row['DA']).rstrip('.0') if row['DA'] else "",
+                    BC=str(row['BC']).rstrip('.0') if row['BC'] else "",
+                    BL=str(row['BL']).rstrip('.0') if row['BL'] else "",
+                    demandeur=row['Demandeur'],
+                    entité=row['Entité'],
+                    ligne_bugetaire=row['Ligne bugétaire'],
+                    DateDeCommande=DateDeCommande,
+                    typeDachat=TypeDachat.objects.get(
+                        type=row["Type d'achat"]),
+                    situation_d_achat=SituationDachat.objects.get(
+                        situation=row["Situation d'achat"]),
+                    DateDA=DateDA,
+                    DateBC=DateBC,
+                    DateBL=DateBL,
+                    observation=row['Observation'],
+                )
+
+                if row["Situation d'achat"] == 'Livré':
+                    achats_instance.isComplet = True
+                achats_instance.save()
+            print(str(row["Code"]))
+            achat_code = str(row["Code"])
+            if achat_code and isinstance(achat_code, str):
+                existing_article = Article.objects.filter(
+                    code=achat_code).first()
+                if existing_article:
+                    achat = Achat.objects.create(
+                        quantité=row['Quantité'],
+                        reste=row['Reste'] if not pd.isna(
+                            row['Reste']) else 0,
+                        article=existing_article
+                    )
+                    achats_instance.achat.add(achat)
+        return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.exception(f'Error in saving Achats instance: {str(e)}')
+        return Response({'message': f'Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)

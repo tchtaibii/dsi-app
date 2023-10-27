@@ -35,7 +35,6 @@ class AchatTSerializer(serializers.ModelSerializer):
 
 class AchatsSerializer(serializers.ModelSerializer):
     achat = AchatSerializer(many=True, read_only=True)
-
     class Meta:
         model = Achats
         fields = '__all__'
@@ -121,7 +120,7 @@ class PostBLSerializer(serializers.Serializer):
     date = serializers.DateTimeField(required=True)
     reste = ResteItemSerializer(many=True)
     is_ = serializers.CharField(required=True)
-    fournisseur = serializers.CharField(required=True)
+    fournisseur = serializers.CharField(required=False)
 
 
 class PostOBSerializer(serializers.Serializer):

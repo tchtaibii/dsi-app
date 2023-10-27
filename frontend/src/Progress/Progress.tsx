@@ -589,6 +589,7 @@ const Achats = () => {
                                                     else
                                                         downloadData();
                                                 }
+                                                downloadData();
                                             }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                                                 {/* <DownloadSvg /> */}
                                                 Donwload PV</button>
@@ -643,12 +644,20 @@ const Achats = () => {
                                     :
 
                                     <button onClick={() => {
-                                        const link = document.createElement('a');
-                                        link.href = fileData.data ? fileData.data : '#';
-                                        link.setAttribute('download', fileData.name ? fileData.name : 'dd');
-                                        document.body.appendChild(link);
-                                        link.click();
-                                        document.body.removeChild(link);
+                                        const downloadData = () => {
+                                            if (fileData.name) {
+                                                const link = document.createElement('a');
+                                                link.href = fileData.data ? fileData.data : '#';
+                                                link.setAttribute('download', fileData.name ? fileData.name : 'dd');
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                                return;
+                                            }
+                                            else
+                                                downloadData();
+                                        }
+                                        downloadData();
                                     }} style={{ width: "11.625rem", borderRadius: "1rem", backgroundColor: "#BD391B", display: 'flex', gap: "0.3rem", color: "#ffff", fontSize: '1rem' }}>
                                         <DownloadSvg />
                                         Donwload PV</button>

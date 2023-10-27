@@ -12,7 +12,7 @@ import Progress from './Progress/Progress'
 // import Product from './Product/Product'
 import Profile from './Profile/Profile'
 import Customer from './Customer/Customer'
-// import Settings from './Settings/Settings'
+import Settings from './Settings/Settings'
 import Login from './Login/Login'
 import Loading from './Loading/Loading'
 import { Routes, Route } from "react-router-dom"
@@ -65,11 +65,11 @@ function App() {
                     <Route path="AddCommande" element={<AddCommande />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="commandes/:id" element={<Progress />} />
-                    {/* <Route path="Profile/id" element={<Profile />} />
-              <Route path="Products" element={<Products />} />
-              <Route path="Product/:id" element={<Product />} />
-              <Route path="Settings" element={<Settings />} />
-              <Route path="Orders" element={<Orders />} /> */}
+                    <Route path="Profile/id" element={<Profile />} />
+                    <Route path="Settings" element={<Settings />} />
+                {/* <Route path="Products" element={<Products />} />
+                <Route path="Product/:id" element={<Product />} />
+                <Route path="Orders" element={<Orders />} /> */}
 
                     {/* <Route path="Achats" element={<Achats />} /> */}
                     {/* <Route path="Commandes" element={<Commandes />} /> */}

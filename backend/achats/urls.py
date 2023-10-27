@@ -5,11 +5,11 @@ from . import views
 urlpatterns = [
     path('add/', views.add_commande, name='add_commande'),
     path('get/commandes/', views.get_commandes, name='get_commandes'),
-    path('test/excel/', views.import_data_from_excel_to_db, name='test_excel'),
+    # path('test/excel/', views.import_data_from_excel_to_db, name='test_excel'),
     # path('get/all/', views.get_all_achats, name='get_commandes'),
-    
+
     path('get/PV/<str:id>', views.generate_word_file, name='get-PV'),
-    
+
     path('get/achat/<str:id>', views.get_achat, name='get-achats'),
 
     path('get/types_achats', views.get_types_achat, name='get-types-achats'),
@@ -26,7 +26,13 @@ urlpatterns = [
     path('deleteAchats/<str:id>', views.delete_achats, name='Delete-achats'),
     path('colChart/', views.types_with_total_quantity, name='TypeDarticle-dash'),
     path('search/', views.search_commands, name='search'),
+    path('addArticles/', views.add_articles, name='add-article'),
+    path('addAchats/', views.add_achats_file, name='add-achats'),
+    path('downloadAchats/', views.download_achats_file, name='downlaod-achats'),
+    path('downloadArticle/', views.download_article_file, name='downlaod-article'),
     
-    
+
+
+
 
 ]

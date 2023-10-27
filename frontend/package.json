@@ -17,6 +17,7 @@
     "react-dom": "^18.2.0",
     "react-google-charts": "^4.0.1",
     "react-router-dom": "^6.17.0",
+    "react-svg": "^16.1.29",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

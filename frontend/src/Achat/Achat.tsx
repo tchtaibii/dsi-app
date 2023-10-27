@@ -21,7 +21,7 @@ const Edits = () => (
     <svg style={{
         width: '2.155rem',
         height: '2.155rem'
-    }} width={35} height={35} viewBox="0 0  " fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsxlink="http://www.w3.org/1999/xlink">
+    }} width={35} height={35} viewBox="0 0  " fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
         <circle cx="17.24" cy="17.24" r="17.24" fill="#BD391B" />
         <rect x={6} y={6} width="21.55" height="21.55" fill="url(#pattern0)" />
         <defs>
@@ -202,6 +202,18 @@ const Achat = () => {
                                             <td className="keyTd">Observation</td>
                                             <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
                                         </tr>
+                                        <tr>
+                                            <td className="keyTd">{'Temps de Validation' + (Data.DA ? ' ✔' : '')}</td>
+                                            <td className="ValueTd">{Data.TV !== null ? Data.TV : '----'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">{'Temps de Traitement' + (Data.BC ? ' ✔' : '')}</td>
+                                            <td className="ValueTd">{Data.TT !== null ? Data.TT : '----'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="keyTd">{'Temps de Livraison' + (Data.BL ? ' ✔' : '')}</td>
+                                            <td className="ValueTd">{Data.TL !== null ? Data.TL : '----'}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                                 <div className="achatArr">
@@ -212,6 +224,7 @@ const Achat = () => {
                                         <p style={{ width: '18%', color: '#BD391B' }}>{Data.typeDachat === 1 ? "Contrat" : "Fournisseur"}</p>
                                         <p style={{ width: '8%', color: '#BD391B' }}>Quantité</p>
                                         <p style={{ width: 'fit-content', color: '#BD391B' }}>Reste</p>
+
                                     </div>
                                     <div className="achatZ">
 
