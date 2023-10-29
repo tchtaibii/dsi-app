@@ -121,7 +121,11 @@ def ExcelExportView(request):
             achats = apply_dynamic_filter(achats)
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)
-    print(achats)
+        if 'apple' in params and params['apple'].lower() == 'true':
+            achats = achats.filter(apple=True)
+
+        if 'consommable' in params and params['consommable'].lower() == 'true':
+            achats = achats.filter(consommable=True)
     achats_data = []
     for achat in achats:
         for a in achat.achat.all():
@@ -188,13 +192,15 @@ def progress(request, id):
         is_ = data.get('is_')
         # Access file directly from request data
         file_data = request.data.get('file')
+        date = datetime.strptime(request.data.get('date'), "%Y-%m-%d").date()
         if is_ == 'DA':
             serializer = PostDaSerializer(data=data)
             if serializer.is_valid():
                 DA = serializer.validated_data['code']
-                DateDA = serializer.validated_data['date']
+                DateDA = date
                 achat = Achats.objects.get(id=id)
                 achat.DA = DA
+                print(DateDA, '******')
                 achat.DateDA = DateDA
                 achat.situation_d_achat = SituationDachat.objects.get(id=2)
                 achat.save()
@@ -217,7 +223,7 @@ def progress(request, id):
             serializer = PostBCSerializer(data=data)
             if serializer.is_valid():
                 BC = serializer.validated_data['code']
-                DateBC = serializer.validated_data['date']
+                DateBC = date
                 achat = Achats.objects.get(id=id)
                 achat.BC = BC
                 achat.DateBC = DateBC
@@ -242,14 +248,13 @@ def progress(request, id):
                 with open(file_path, 'wb') as f:
                     f.write(file_object.getbuffer())
             serializer = PostBLSerializer(data=data)
-            print(data)
             if serializer.is_valid():
                 BL = serializer.validated_data['code']
                 achat = Achats.objects.get(id=id)
                 if data.get('fournisseur'):
                     fournisseur = serializer.validated_data['fournisseur']
                     achat.fourniseur = fournisseur
-                DateBL = serializer.validated_data['date']
+                DateBL = date
                 reste_data = serializer.validated_data['reste']
                 achat.BL = BL
                 achat.DateBL = DateBL
@@ -298,6 +303,7 @@ def progress(request, id):
         return Response('error', status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
+        logger.exception(f'Error in creating Achats instance: {str(e)}')
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -312,11 +318,13 @@ def add_commande(request):
         entite = data.get('entité')
         ligne_budgetaire = data.get('ligne_bugetaire')
         DateDeCommande = data.get('DateDeCommande')
+        Consommable = data.get('Consommable')
+        apple = data.get('apple')
         date_obj = datetime.strptime(DateDeCommande, "%Y-%m-%d")
         Type_d_achat = data.get('typeDachat')
         achats_data = data.get('achats')
         if not (demandeur and isinstance(demandeur, str) and entite and isinstance(entite, str) and ligne_budgetaire and isinstance(ligne_budgetaire, str)
-                and DateDeCommande and date_obj.time() == timezone.datetime.min.time() and Type_d_achat and isinstance(Type_d_achat, int) and achats_data):
+                and DateDeCommande and date_obj.time() == timezone.datetime.min.time() and isinstance(Consommable, bool) and isinstance(apple, bool) and Type_d_achat and isinstance(Type_d_achat, int) and achats_data):
             return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
         achats = []
         if Type_d_achat == 1:
@@ -356,6 +364,8 @@ def add_commande(request):
             DateDeCommande=date_obj.date(),
             typeDachat=Type_d_achat_instance,
             situation_d_achat=situation,
+            consommable=Consommable,
+            apple=apple
         )
         achats_instance.achat.set(achats)
         achats_instance.save()
@@ -397,6 +407,12 @@ def get_commandes(request):
         # Apply additional filters
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)
+
+        if 'apple' in params and params['apple'].lower() == 'true':
+            achats = achats.filter(apple=True)
+
+        if 'consommable' in params and params['consommable'].lower() == 'true':
+            achats = achats.filter(consommable=True)
 
         # Serialize the data
         serializer = AchatsSerializer(achats, many=True)
@@ -740,28 +756,28 @@ def add_achats_file(request):
                 clean_date_de_commande_string = date_de_commande_string.split(
                 )[0] if date_de_commande_string is not None else None
                 DateDeCommande = datetime.strptime(
-                    clean_date_de_commande_string, "%Y-%m-%d") if clean_date_de_commande_string else None
+                    clean_date_de_commande_string, "%Y-%m-%d").date() if clean_date_de_commande_string else None
 
                 date_da_string = str(
                     row['Date DA']) if row['Date DA'] is not None else None
                 clean_date_da_string = date_da_string.split(
                 )[0] if date_da_string is not None else None
                 DateDA = datetime.strptime(
-                    clean_date_da_string, "%Y-%m-%d") if clean_date_da_string else None
+                    clean_date_da_string, "%Y-%m-%d").date() if clean_date_da_string else None
 
                 date_bc_string = str(
                     row['Date BC']) if row['Date BC'] is not None else None
                 clean_date_bc_string = date_bc_string.split(
                 )[0] if date_bc_string is not None else None
                 DateBC = datetime.strptime(
-                    clean_date_bc_string, "%Y-%m-%d") if clean_date_bc_string else None
+                    clean_date_bc_string, "%Y-%m-%d").date() if clean_date_bc_string else None
 
                 date_bl_string = str(
                     row['Date BL']) if row['Date BL'] is not None else None
                 clean_date_bl_string = date_bl_string.split(
                 )[0] if date_bl_string is not None else None
                 DateBL = datetime.strptime(
-                    clean_date_bl_string, "%Y-%m-%d") if clean_date_bl_string else None
+                    clean_date_bl_string, "%Y-%m-%d").date() if clean_date_bl_string else None
 
                 achats_instance = Achats.objects.create(
                     DA=str(row['DA']).rstrip('.0') if row['DA'] else "",
@@ -778,6 +794,8 @@ def add_achats_file(request):
                     DateDA=DateDA,
                     DateBC=DateBC,
                     DateBL=DateBL,
+                    apple=True if row['Apple'] and row['Apple'] == 'Apple' else False,
+                    consommable=True if row['Consommable'] and row['Consommable'] == 'Consommable' else False,
                     observation=row['Observation'],
                 )
 
@@ -801,3 +819,69 @@ def add_achats_file(request):
     except Exception as e:
         logger.exception(f'Error in saving Achats instance: {str(e)}')
         return Response({'message': f'Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def dashboard_lines(request):
+    try:
+        achats = Achats.objects.all()
+        achats = achats.filter(isComplet=False)
+        TV = achats.filter(TV__gt=7, situation_d_achat=1)
+
+        result_TV = []
+        for achat in TV:
+            weeks_count = round(achat.TV / 7)  # Round to the nearest integer
+            result_TV.append(
+                {
+
+                    'achat_id': achat.id,
+                    'weeks_count': weeks_count,
+                    'demandeur': achat.demandeur,
+                    'entité': achat.entité,
+                    'DateDeCommande': achat.DateDeCommande,
+                    'typeDachat': achat.typeDachat.type
+                }
+            )
+
+        TT = achats.filter(situation_d_achat=2)
+        TT = TT.filter(
+            Q(typeDachat__id=1, TT__gt=7) | Q(typeDachat__id=4, TT__gt=8) |
+            Q(typeDachat__id=2, TT__gt=14) |
+            Q(typeDachat__id=3, TT__gt=28)
+        )
+        result_TT = []
+        for achat in TT:
+            weeks_count = round(achat.TT / 7)
+            result_TT.append(
+                {
+                    'achat_id': achat.id,
+                    'weeks_count': weeks_count,  # Use the rounded value directly
+                    'achat_DA': achat.DA,
+                }
+            )
+
+        TL = achats.filter(TL__gt=56, situation_d_achat=3)
+        result_TL = []
+        for achat in TL:
+            weeks_count = round(achat.TL / 7)
+            result_TL.append(
+                {
+                    'achat_id': achat.id,
+                    'weeks_count': weeks_count,
+                    'achat_DA': achat.DA,
+                }
+            )
+        result = []
+        result.append(
+            {
+                'TV': result_TV,
+                'TT': result_TT,
+                'TL': result_TL,
+            }
+        )
+        return JsonResponse(result, safe=False)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)})

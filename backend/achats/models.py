@@ -81,6 +81,8 @@ class Achats(models.Model):
     BL_File = models.FileField(upload_to='uploads/BL', null=True, blank=True)
     observation = models.TextField(blank=True, null=True)
     isComplet = models.BooleanField(default=False)
+    consommable = models.BooleanField(default=False)
+    apple = models.BooleanField(default=False)
     fourniseur = models.CharField(max_length=60, null=True, blank=True)
     TV = models.IntegerField(blank=True, null=True)
     TT = models.IntegerField(blank=True, null=True)
@@ -93,7 +95,7 @@ class Achats(models.Model):
 
             current_time = datetime.now()
             current_time_formatted = datetime.strptime(
-                current_time.strftime('%Y-%m-%d'), '%Y-%m-%d')
+                current_time.strftime('%Y-%m-%d'), '%Y-%m-%d').date()
             if self.DateDeCommande and self.DateDA:
                 self.TV = (self.DateDA - self.DateDeCommande).days
             elif self.DateDeCommande:

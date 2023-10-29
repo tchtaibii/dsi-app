@@ -46,6 +46,8 @@ class AchatsGSerializer(serializers.Serializer):
     ligne_bugetaire = serializers.CharField()
     DateDeCommande = serializers.DateField()
     typeDachat = serializers.IntegerField()
+    apple = serializers.BooleanField()
+    Consommable = serializers.BooleanField()
     achats = serializers.ListField(child=serializers.DictField())
 
 
@@ -66,6 +68,8 @@ class AchatFilterSerializer(serializers.Serializer):
     typeDarticle = serializers.CharField(max_length=100, required=False)
     BCR = serializers.BooleanField(required=False)
     isComplet = serializers.BooleanField(required=False)
+    apple = serializers.BooleanField()
+    consommable = serializers.BooleanField()
 
 
 class ProgAchatSerializer(serializers.ModelSerializer):

@@ -82,7 +82,11 @@ const Dashboard = () => {
         livre: 0,
         non_livre: 0,
     })
-    const [dataLine, setDataLine] = useState([])
+    const [dataLine, setDataLine] = useState({
+        TV: [],
+        TT: [],
+        TL: []
+    })
     const [isLoading, setLoading] = useState(false)
     const [series, setSeries] = useState<any>([])
 
@@ -90,12 +94,18 @@ const Dashboard = () => {
         const fetchData = async () => {
             await axios.get('/achats/situationDash/').then((rsp: any) => setBoxData(rsp.data))
             await axios.get('/achats/pieChart/').then((rsp: any) => setDataPie(rsp.data))
-            await axios.get('/achats/lineChart/').then((rsp: any) => setDataLine(rsp.data))
+            await axios.get('/achats/linesChart/').then((rsp: any) => {
+                setDataLine(rsp.data[0])
+            })
             await axios.get('/achats/colChart/').then((rsp: any) => setSeries(rsp.data))
             setLoading(true);
         }
         fetchData();
     }, [])
+    useEffect(() => {
+        console.log(dataLine)
+    }, [dataLine])
+    const navigate = useNavigate()
     return (
         <>
             {
@@ -113,16 +123,52 @@ const Dashboard = () => {
                             </div>
                             <div className="col2">
                                 <div className="pieChart">
+                                    <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune d'achats en retard (BL)" : "Livraison en retard")}</h1>
+                                    <LinePie color={'#f3c627'} data={(dataLine.TL && dataLine.TL.length > 0) ? dataLine.TL : null} />
+                                </div>
+                                <div className="pieChart">
+                                    <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune d'achats en retard (BC)" : "Traitement en retard")}</h1>
+                                    <LinePie color={'#ff7a00'} data={(dataLine.TT && dataLine.TT.length > 0) ? dataLine.TT : null} />
+                                </div>
+                            </div>
+                            <div className="col2">
+
+                                <div className="pieChart">
+                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune d'achats en retard (DA)" : "Validation en retard")}</h1>
+                                    <div className="validationRetard">
+                                        <div className="VRheader">
+                                            <p style={{ width: '22%' }}>Demandeur</p>
+                                            <p style={{ width: '20%' }}>Entité</p>
+                                            <p style={{ width: '26%' }}>Date de commande</p>
+                                            <p style={{ width: '15%' }}>Type d'achat</p>
+                                        </div>
+                                        <div className="mainVRH">
+                                            {
+                                                dataLine.TV && dataLine.TV.map((e: any, i: number) => {
+                                                    return (
+                                                        <div key={`${i}-retardV`} onClick={() => {
+                                                            navigate(`/achat/${e.achat_id}`)
+                                                        }} className="RetardValidationAchat">
+                                                            <p style={{ width: '22.3%' }}>{e.demandeur}</p>
+                                                            <p style={{ width: '20%' }}>{e.entité}</p>
+                                                            <p style={{ width: '26.2%' }}>{e.DateDeCommande}</p>
+                                                            <p style={{ width: '22.3%' }}>{e.typeDachat}</p>
+                                                            <div className='weeksCircle'>{e.weeks_count}</div>
+                                                            {/* <p>Type d'achat</p> */}
+                                                        </div>
+                                                    )
+                                                })
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="pieChart">
                                     <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>
                                     <ChartPie data={pieData} />
                                 </div>
-                                <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.length <= 0) ? "No achats Found" : "Livraison en retard")}</h1>
-                                    <LinePie data={dataLine.length > 0 ? dataLine : []} />
-                                </div>
                             </div>
                             <div className="col2" >
-                                <div style={{width: '100%'}} className="pieChart">
+                                <div style={{ width: '100%' }} className="pieChart">
                                     <ColCharts Series={series} />
                                 </div>
                             </div>

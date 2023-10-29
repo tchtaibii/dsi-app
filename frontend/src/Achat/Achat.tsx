@@ -39,6 +39,31 @@ const Edits = () => (
 
 const Achat = () => {
 
+    const convertDaysToMonthWeeksDays = (days) => {
+        const months = Math.floor(days / 30);
+        const weeks = Math.floor((days % 30) / 7);
+        const remainingDays = days - months * 30 - weeks * 7;
+        if (days < 0)
+            return ('There is an error in your dates')
+        if (days === 0)
+            return ('1 jour')
+        let result = '';
+        if (months > 0) {
+            result += `${months} mois `;
+        }
+        if (weeks > 0) {
+            result += `${weeks} semaine `;
+        }
+        if (remainingDays > 0) {
+            result += `${remainingDays} jour`;
+            if (remainingDays > 1) {
+                result += 's';
+            }
+        }
+        console.log(result)
+        return result.trim();
+    };
+
     let { id } = useParams();
     const TypeDachat = (sda: number) => {
         switch (sda) {
@@ -191,7 +216,6 @@ const Achat = () => {
                                                         await axios.get(`/achats/download_file/${Data.BL}`)
                                                     }}>Download</button> : "-----"
                                                 }
-
                                             </td>
                                         </tr>
                                         <tr>
@@ -203,16 +227,16 @@ const Achat = () => {
                                             <td className="ValueTd">{Data.observation ? Data.observation : "-----"}</td>
                                         </tr>
                                         <tr>
-                                            <td className="keyTd">{'Temps de Validation' + (Data.DA ? ' ✔' : '')}</td>
-                                            <td className="ValueTd">{Data.TV !== null ? Data.TV : '----'}</td>
+                                            <td className="keyTd">{'Temps de Validation' + (Data.DateDA ? ' ✔' : '')}</td>
+                                            <td className="ValueTd">{Data.TV !== null ? convertDaysToMonthWeeksDays(Data.TV) : '----'}</td>
                                         </tr>
                                         <tr>
-                                            <td className="keyTd">{'Temps de Traitement' + (Data.BC ? ' ✔' : '')}</td>
-                                            <td className="ValueTd">{Data.TT !== null ? Data.TT : '----'}</td>
+                                            <td className="keyTd">{'Temps de Traitement' + (Data.DateBC ? ' ✔' : '')}</td>
+                                            <td className="ValueTd">{Data.TT !== null ? convertDaysToMonthWeeksDays(Data.TT) : '----'}</td>
                                         </tr>
                                         <tr>
-                                            <td className="keyTd">{'Temps de Livraison' + (Data.BL ? ' ✔' : '')}</td>
-                                            <td className="ValueTd">{Data.TL !== null ? Data.TL : '----'}</td>
+                                            <td className="keyTd">{'Temps de Livraison' + (Data.DateBL ? ' ✔' : '')}</td>
+                                            <td className="ValueTd">{Data.TL !== null ? convertDaysToMonthWeeksDays(Data.TL) : '----'}</td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -19,6 +19,8 @@ interface Commandes {
     ligne_bugetaire: string,
     DateDeCommande: string,
     typeDachat: number,
+    apple: boolean,
+    Consommable: boolean,
     achats: Article[]
 }
 
@@ -185,6 +187,8 @@ function AddCommande() {
         is: false
     })
     const [typeDachat, setType] = useState<number>(1);
+    const [Consommbale, setConso] = useState<boolean>(false);
+    const [apple, setApple] = useState<boolean>(false);
     const [submit, setSubmit] = useState<boolean>(true);
 
     const [achat, setAchat] = useState<Commandes>({
@@ -193,6 +197,8 @@ function AddCommande() {
         ligne_bugetaire: "",
         DateDeCommande: "00-00-00",
         typeDachat: 1,
+        apple: false,
+        Consommable: false,
         achats: []
     })
     useEffect(() => {
@@ -242,13 +248,15 @@ function AddCommande() {
         } else {
             setSubmit(true);
         }
-    }, [achat, typeDachat]);
+    }, [achat, typeDachat,]);
 
 
     const handleSubmit = async () => {
         setAchat((state: any) => ({
             ...state,
-            typeDachat
+            typeDachat,
+            apple: apple,
+            Consommable: Consommbale,
         }))
         await axios.post('/achats/add/', achat).then((rsp: any) => {
             setStatus({
@@ -270,7 +278,9 @@ function AddCommande() {
     useEffect(() => {
         setAchat((state) => ({
             ...state,
-            typeDachat
+            typeDachat,
+            apple: apple,
+            Consommable: Consommbale,
         }));
         if (children.length > 0) {
             setChildren((children) => {
@@ -280,7 +290,7 @@ function AddCommande() {
                 return newC;
             });
         }
-    }, [typeDachat]);
+    }, [typeDachat, apple, Consommbale]);
 
 
     useEffect(() => {
@@ -420,7 +430,29 @@ function AddCommande() {
                             }} placeholder="YY-MM-DD" type="date" name="Entité" id="" />
                         </div>
                     </div>
-                    <div style={{ height: '100%' }} className="inputCommande">
+                    <div className="inputCommande">
+                        <div style={{ height: '100%', marginTop: '2rem' }} className="colcheks">
+                            <div className="rowchecks">
+                                <div className="checkboxs" style={{ marginBottom: '1rem' }} >
+                                    <input onChange={() => {
+                                        setApple((state: boolean) => !state)
+                                    }} type="checkbox" name="Apple" id="" checked={apple} />
+                                    <h4>Apple</h4>
+                                </div>
+                                <div className="checkboxs">
+                                    <input onChange={() => {
+                                        setConso((state: boolean) => !state)
+                                    }} type="checkbox" checked={Consommbale} name="Consommable" id="" />
+                                    <h4>Consommable</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div style={{ marginBottom: '-2rem' }} className="inputsCommande">
+
+                    <div style={{ height: '50%', width: '100%' }} className="inputCommande">
                         <div className="inputArticles">
                             <InputNumber value={value} SetValue={SetValue} />
                         </div>

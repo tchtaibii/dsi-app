@@ -192,6 +192,8 @@ const Achats = ({ SearchT }) => {
         situation_d_achat: number | null;
         typeDarticle: string | null;
         BCR: boolean;
+        apple: boolean;
+        consommable: boolean;
         isComplet: boolean;
         search: string;
     }
@@ -216,6 +218,8 @@ const Achats = ({ SearchT }) => {
         typeDarticle: null,
         BCR: false,
         isComplet: false,
+        apple: false,
+        consommable: false,
         search: SearchT
     });
     useEffect(() => {
@@ -297,6 +301,8 @@ const Achats = ({ SearchT }) => {
                                         typeDarticle: null,
                                         BCR: false,
                                         isComplet: false,
+                                        apple: false,
+                                        consommable: false,
                                         search: SearchT
                                     })
                                     setFilter(false)
@@ -423,7 +429,7 @@ const Achats = ({ SearchT }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="checkboxs" style={{ marginTop: '-2rem', width: '50%' }}>
+                            <div className="checkboxs" style={{ marginTop: '-1rem', width: '50%' }}>
                                 <input onChange={() => {
                                     setQueryParams((state: any) => ({
                                         ...state,
@@ -431,6 +437,24 @@ const Achats = ({ SearchT }) => {
                                     }))
                                 }} type="checkbox" name="Not Complet" id="" checked={!queryParams.isComplet} />
                                 <h4>DA terminé</h4>
+                            </div>
+                            <div className="checkboxs" style={{ marginTop: '0', width: '50%' }}>
+                                <input onChange={() => {
+                                    setQueryParams((state: any) => ({
+                                        ...state,
+                                        consommable: !state.consommable
+                                    }))
+                                }} type="checkbox" name="consommable" id="" checked={queryParams.consommable} />
+                                <h4>Consommable</h4>
+                            </div>
+                            <div className="checkboxs" style={{ marginTop: '0', width: '50%' }}>
+                                <input onChange={() => {
+                                    setQueryParams((state: any) => ({
+                                        ...state,
+                                        apple: !state.apple
+                                    }))
+                                }} type="checkbox" name="apple" id="" checked={queryParams.apple} />
+                                <h4>Apple</h4>
                             </div>
                             <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
                                 <button onClick={async () => {

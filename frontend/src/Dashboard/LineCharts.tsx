@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import { useNavigate } from 'react-router-dom'
 
-const ApexChart = ({ data }) => {
+const ApexChart = ({ data, color }) => {
     const [lineData, setData] = useState([])
     const [CategoData, setCatego] = useState([])
     useEffect(() => {
+        console.log(data)
         setData(() => (
             data && data.map((e: any) => (
                 e.weeks_count
@@ -21,9 +22,9 @@ const ApexChart = ({ data }) => {
 
     const options = {
         xaxis: {
-            categories: CategoData
+            categories: CategoData.length === 0 ? null : CategoData
         },
-        colors: ['#F44336', '#FFFF', '#FFFF'],
+        colors: [color, '#FFFF', '#FFFF'],
         chart: {
             events: {
                 markerClick: function (event, chartContext, { seriesIndex, dataPointIndex, config }) {

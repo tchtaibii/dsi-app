@@ -119,7 +119,7 @@ const Settings = () => {
             <div className="main">
                 <div className="row1S">
                     <div className="boxSet">
-                        <h1>Import Articles</h1>
+                        <h1>Importation de Contrat</h1>
                         <div className="fileUplaod">
                             <input onChange={handleFileChange} type="file" name="" id="" />
                             <div className="inputUplaod">
@@ -160,7 +160,7 @@ const Settings = () => {
                         </div>
                     </div>
                     <div className="boxSet redBox">
-                        <h1>Import Achats</h1>
+                        <h1>Importation Demande d'achats</h1>
                         <div className="fileUplaod">
                             <input onChange={handleFileChange2} type="file" name="" id="" />
                             <div className="inputUplaod">
