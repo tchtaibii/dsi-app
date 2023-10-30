@@ -1,17 +1,12 @@
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Sum
 import numpy as np
-from django.db.models import Count
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
-from django.db import models
 from datetime import timedelta
-from django.db.models import Case, When, F, Value, DurationField
 from docx import Document
 from datetime import datetime, timedelta
 from django.conf import settings
 import io
-from .serializers import ProgressPostSerializer, FileSerializer
 import base64
 from rest_framework.decorators import api_view
 from .models import Achats, Achat
@@ -20,15 +15,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Achats, TypeDachat, TypeDArticle, Article, SituationDachat
-from .serializers import AchatSerializer, AchatsSerializer, AchatFilterSerializer, AchatTSerializer, AchatsGSerializer, ProgressSerializer, PostDaSerializer, PostBCSerializer, PostBLSerializer, ProgressPostSerializer, PostOBSerializer
+from .serializers import AchatsSerializer, ProgressSerializer, PostDaSerializer, PostBCSerializer, PostBLSerializer, PostOBSerializer, FileSerializer
 from .permissions import IsManagerAchatPermission
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.throttling import UserRateThrottle
 from datetime import datetime
 from django.utils import timezone
 from django.http import JsonResponse
 import logging
-from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import os
 from django.http import HttpResponse
@@ -46,7 +39,7 @@ class CustomObject:
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def download_file(request, fl):
     try:
@@ -67,7 +60,7 @@ def download_file(request, fl):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def download_achats_file(request):
     file_path = '/app/static/Achats.xlsx'
@@ -79,7 +72,7 @@ def download_achats_file(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def download_article_file(request):
     file_path = '/app/static/Article.xlsx'
@@ -90,9 +83,8 @@ def download_article_file(request):
         return response
 
 
-@swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def ExcelExportView(request):
     achats = Achats.objects.all().prefetch_related('achat')
@@ -117,8 +109,6 @@ def ExcelExportView(request):
         if 'situation_d_achat' in params:
             achats = achats.filter(
                 situation_d_achat=params['situation_d_achat'])
-        if 'BCR' in params and params['BCR'].lower() == 'true':
-            achats = apply_dynamic_filter(achats)
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)
         if 'apple' in params and params['apple'].lower() == 'true':
@@ -181,7 +171,6 @@ def ExcelExportView(request):
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
-@swagger_auto_schema(methods=['post'], request_body=ProgressPostSerializer)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
@@ -307,7 +296,6 @@ def progress(request, id):
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@swagger_auto_schema(methods=['post'], request_body=AchatsGSerializer)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
@@ -375,19 +363,19 @@ def add_commande(request):
         logger.exception(f'Error in creating Achats instance: {str(e)}')
         return Response({'message': f'Error in adding commande. {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
+# @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 
-@swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
     try:
-        achats_list = []  # Initialize an empty list
+        achats_list = []
 
         achats = Achats.objects.all()
         params = request.query_params
 
-        # Apply filters based on the request parameters
         if 'typeDachat' in params:
             achats = achats.filter(typeDachat=params['typeDachat'])
         if 'DA' in params:
@@ -400,11 +388,6 @@ def get_commandes(request):
             achats = achats.filter(
                 situation_d_achat=params['situation_d_achat'])
 
-        # Apply dynamic filter based on the 'typeDachat'
-        if 'BCR' in params and params['BCR'].lower() == 'true':
-            achats = apply_dynamic_filter(achats)
-
-        # Apply additional filters
         if 'isComplet' in params and params['isComplet'].lower() == 'true':
             achats = achats.filter(isComplet=False)
 
@@ -414,7 +397,6 @@ def get_commandes(request):
         if 'consommable' in params and params['consommable'].lower() == 'true':
             achats = achats.filter(consommable=True)
 
-        # Serialize the data
         serializer = AchatsSerializer(achats, many=True)
         achats_list = serializer.data
 
@@ -425,24 +407,9 @@ def get_commandes(request):
         return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def apply_dynamic_filter(achats):
-    today = timezone.now().date()
-
-    one_day_delta = timedelta(weeks=1)
-    four_weeks_delta = timedelta(weeks=4)
-    two_weeks_delta = timedelta(weeks=2)
-    achats = achats.filter(situation_d_achat=2)
-
-    achat_o = achats.filter(
-        Q(typeDachat__id=1) | Q(typeDachat__id=4, DateDA__lt=today - one_day_delta) |
-        Q(typeDachat__id=2, DateDA__lt=today - two_weeks_delta) |
-        Q(typeDachat__id=3, DateDA__lt=today - four_weeks_delta)
-    )
-
-    return achat_o
-
-
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
 def get_achat(request, id):
     try:
         achats = Achats.objects.get(id=id)
@@ -457,7 +424,7 @@ def get_achat(request, id):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_types_achat(request):
     print('helod')
@@ -478,7 +445,7 @@ def get_situation_achat(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_progress(request, id):
     try:
@@ -574,16 +541,12 @@ def dashboard_line(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def generate_word_file(request, id):
-    from .models import Achats  # Adjust this import according to your project structure
+    from .models import Achats
 
-    # Remove the prefetch_related as it is not needed for a single object
     achats = Achats.objects.get(id=id)
-
-    # Load the existing Word template
-    # Adjust the path to your template
     if achats.situation_d_achat.id == 4 or achats.situation_d_achat.id == 5:
         template_path = os.path.join(
             os.path.dirname(__file__),
@@ -592,27 +555,19 @@ def generate_word_file(request, id):
         doc = Document(template_path)
 
         current_date = datetime.now()
-        # Format the date as "dd/mm/yy"
         formatted_date = current_date.strftime("%d/%m/%Y")
-        print(achats.situation_d_achat.id)
-
-        # Change achats.get['typeDachat'] to achats.typeDachat
 
         if achats.typeDachat.type != 'Accord Cadre':
             contrat = achats.fourniseur
         else:
             contrat = achats.achat.all()[0].article.contrat.name
 
-        # Define the words to be replaced
         replacements = {
             "***": formatted_date,
             '+++': str(achats.BC),
-            # Make sure to convert to string if necessary
             '+-+-': str(contrat),
-            # Add more words as needed
         }
 
-        # Iterate through paragraphs and replace the defined words
         for paragraph in doc.paragraphs:
             for key, value in replacements.items():
                 if key in paragraph.text:
@@ -621,14 +576,9 @@ def generate_word_file(request, id):
                         if key in inline[i].text:
                             text = inline[i].text.replace(key, value)
                             inline[i].text = text
-
-        # Save the modified Word document
-        # Adjust the path to save the modified file
         new_file_path = os.path.join(os.path.dirname(
             __file__), '../static/pv/' + achats.BC + '.docx')
         doc.save(new_file_path)
-
-        # Return the generated file for download
         with open(new_file_path, 'rb') as file:
             response = HttpResponse(file.read(
             ), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -638,7 +588,7 @@ def generate_word_file(request, id):
 
 
 @api_view(['DELETE'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def delete_achats(request, id):
     try:
@@ -664,6 +614,7 @@ def delete_achats(request, id):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def types_with_total_quantity(request):
     types_with_quantities = TypeDArticle.objects.annotate(
         total_quantity=Sum('article__achat__quantité'))
@@ -672,7 +623,7 @@ def types_with_total_quantity(request):
     return Response(result)
 
 
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def search_commands(request):
@@ -696,6 +647,7 @@ def search_commands(request):
 
 @api_view(['POST'])
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def add_articles(request):
     if 'file' not in request.FILES:
         return Response({'message': 'No file was found'}, status=status.HTTP_400_BAD_REQUEST)
@@ -733,8 +685,9 @@ def add_articles(request):
 
 
 @throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def add_achats_file(request):
     if 'file' not in request.FILES:
         return Response({'message': 'No file was found'}, status=status.HTTP_400_BAD_REQUEST)
@@ -747,38 +700,56 @@ def add_achats_file(request):
         df = df.replace({pd.NaT: None})
         df = df.replace({'Nan': None})
         df = df.replace({np.nan: None})
+        current_one = datetime.strptime(
+            datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d').date()
         for _, row in df.iterrows():
             achats_instance = Achats.objects.filter(
                 DA=str(row['DA']).rstrip('.0')).first()
             if not achats_instance:
-                date_de_commande_string = str(
-                    row['Date de commande']) if row['Date de commande'] is not None else None
-                clean_date_de_commande_string = date_de_commande_string.split(
-                )[0] if date_de_commande_string is not None else None
-                DateDeCommande = datetime.strptime(
-                    clean_date_de_commande_string, "%Y-%m-%d").date() if clean_date_de_commande_string else None
-
+                # Date DA
                 date_da_string = str(
                     row['Date DA']) if row['Date DA'] is not None else None
                 clean_date_da_string = date_da_string.split(
                 )[0] if date_da_string is not None else None
                 DateDA = datetime.strptime(
                     clean_date_da_string, "%Y-%m-%d").date() if clean_date_da_string else None
-
+                # Date de Commande
+                if DateDA is not None:
+                    current_one = DateDA
+                date_de_commande_string = str(
+                    row['Date de commande']) if row['Date de commande'] is not None else None
+                clean_date_de_commande_string = date_de_commande_string.split(
+                )[0] if date_de_commande_string is not None else None
+                DateDeCommande = datetime.strptime(
+                    clean_date_de_commande_string, "%Y-%m-%d").date() if clean_date_de_commande_string else current_one
+                # Date BC
                 date_bc_string = str(
                     row['Date BC']) if row['Date BC'] is not None else None
                 clean_date_bc_string = date_bc_string.split(
                 )[0] if date_bc_string is not None else None
                 DateBC = datetime.strptime(
                     clean_date_bc_string, "%Y-%m-%d").date() if clean_date_bc_string else None
-
+                # Date BL
                 date_bl_string = str(
                     row['Date BL']) if row['Date BL'] is not None else None
                 clean_date_bl_string = date_bl_string.split(
                 )[0] if date_bl_string is not None else None
                 DateBL = datetime.strptime(
                     clean_date_bl_string, "%Y-%m-%d").date() if clean_date_bl_string else None
-
+                # situation
+                situation = 1
+                if row["Situation d'achat"] == 'Livré':
+                    situation = 4
+                else:
+                    if row['DA']:
+                        situation = 2
+                        if row['BC']:
+                            situation = 3
+                            if row['BL']:
+                                situation: 4
+                                if row["Situation d'achat"] == 'Livraison partielle':
+                                    situation = 5
+                # achat infectation
                 achats_instance = Achats.objects.create(
                     DA=str(row['DA']).rstrip('.0') if row['DA'] else "",
                     BC=str(row['BC']).rstrip('.0') if row['BC'] else "",
@@ -790,31 +761,37 @@ def add_achats_file(request):
                     typeDachat=TypeDachat.objects.get(
                         type=row["Type d'achat"]),
                     situation_d_achat=SituationDachat.objects.get(
-                        situation=row["Situation d'achat"]),
+                        id=situation),
                     DateDA=DateDA,
                     DateBC=DateBC,
                     DateBL=DateBL,
+                    fourniseur=row['Fournisseur'] if row['Fournisseur'] else None,
                     apple=True if row['Apple'] and row['Apple'] == 'Apple' else False,
                     consommable=True if row['Consommable'] and row['Consommable'] == 'Consommable' else False,
                     observation=row['Observation'],
                 )
-
-                if row["Situation d'achat"] == 'Livré':
+                if situation == 4:
                     achats_instance.isComplet = True
-                achats_instance.save()
-            print(str(row["Code"]))
-            achat_code = str(row["Code"])
-            if achat_code and isinstance(achat_code, str):
-                existing_article = Article.objects.filter(
-                    code=achat_code).first()
-                if existing_article:
-                    achat = Achat.objects.create(
-                        quantité=row['Quantité'],
-                        reste=row['Reste'] if not pd.isna(
-                            row['Reste']) else 0,
-                        article=existing_article
-                    )
-                    achats_instance.achat.add(achat)
+            achats_instance.save()
+            if row["Type d'achat"] == 'Accord Cadre':
+                achat_code = str(row["Code"])
+                if achat_code and isinstance(achat_code, str):
+                    existing_article = Article.objects.filter(
+                        code=achat_code).first()
+            else:
+                type = TypeDArticle.objects.get_or_create(type=row['Type'])
+                new_article = Article.objects.create(
+                    designation=row['Désignation'],
+                    type=type,
+                    prix_estimatif=row['Prix Estimatif']
+                )
+            achat = Achat.objects.create(
+                quantité=row['Quantité'],
+                reste=row['Reste'] if not pd.isna(
+                    row['Reste']) else 0,
+                article=existing_article if existing_article else new_article
+            )
+            achats_instance.achat.add(achat)
         return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
     except Exception as e:
         logger.exception(f'Error in saving Achats instance: {str(e)}')
@@ -822,7 +799,7 @@ def add_achats_file(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_lines(request):
     try:

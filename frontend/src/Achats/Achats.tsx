@@ -86,9 +86,11 @@ const TypeDachat = (sda: number) => {
         case 2:
             return "Achat Direct"
         case 3:
-            return "Appel d'offre"
+            return "Achat d'offre"
         case 4:
             return "Achat en ligne"
+        case 5:
+            return "Convention Partenari"
     }
 }
 
@@ -191,7 +193,6 @@ const Achats = ({ SearchT }) => {
         BL: string | null;
         situation_d_achat: number | null;
         typeDarticle: string | null;
-        BCR: boolean;
         apple: boolean;
         consommable: boolean;
         isComplet: boolean;
@@ -216,7 +217,6 @@ const Achats = ({ SearchT }) => {
         BL: null,
         situation_d_achat: id ? id : null,
         typeDarticle: null,
-        BCR: false,
         isComplet: false,
         apple: false,
         consommable: false,
@@ -299,7 +299,6 @@ const Achats = ({ SearchT }) => {
                                         BL: null,
                                         situation_d_achat: null,
                                         typeDarticle: null,
-                                        BCR: false,
                                         isComplet: false,
                                         apple: false,
                                         consommable: false,
@@ -408,14 +407,14 @@ const Achats = ({ SearchT }) => {
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="checkboxs" style={{ width: '50%' }}>
+                                <div className="checkboxs" style={{ marginTop: '0', width: '50%' }}>
                                     <input onChange={() => {
                                         setQueryParams((state: any) => ({
                                             ...state,
-                                            BCR: !state.BCR
+                                            apple: !state.apple
                                         }))
-                                    }} type="checkbox" name="commande livré partielement" id="" checked={queryParams.BCR} />
-                                    <h4>BC en retard</h4>
+                                    }} type="checkbox" name="apple" id="" checked={queryParams.apple} />
+                                    <h4>Apple</h4>
                                 </div>
                                 <div className="inputCommande" >
                                     <div className="inputText" style={{ background: "#F1F1F1", border: "0.06rem solid #B43316" }}>
@@ -447,15 +446,7 @@ const Achats = ({ SearchT }) => {
                                 }} type="checkbox" name="consommable" id="" checked={queryParams.consommable} />
                                 <h4>Consommable</h4>
                             </div>
-                            <div className="checkboxs" style={{ marginTop: '0', width: '50%' }}>
-                                <input onChange={() => {
-                                    setQueryParams((state: any) => ({
-                                        ...state,
-                                        apple: !state.apple
-                                    }))
-                                }} type="checkbox" name="apple" id="" checked={queryParams.apple} />
-                                <h4>Apple</h4>
-                            </div>
+
                             <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
                                 <button onClick={async () => {
                                     fetchDataB();

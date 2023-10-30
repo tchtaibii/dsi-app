@@ -75,6 +75,8 @@ const Achat = () => {
                 return "Achat d'offre"
             case 4:
                 return "Achat en ligne"
+            case 5:
+                return "Convention Partenari"
         }
     }
     const Situation = (sda: number) => {

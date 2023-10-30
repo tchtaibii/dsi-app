@@ -123,18 +123,18 @@ const Dashboard = () => {
                             </div>
                             <div className="col2">
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune d'achats en retard (BL)" : "Livraison en retard")}</h1>
+                                    <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune d'achats en retard (BL)" : "Livraison en retard (BL)")}</h1>
                                     <LinePie color={'#f3c627'} data={(dataLine.TL && dataLine.TL.length > 0) ? dataLine.TL : null} />
                                 </div>
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune d'achats en retard (BC)" : "Traitement en retard")}</h1>
+                                    <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune d'achats en retard (BC)" : "Traitement d'achat en retard (BC)")}</h1>
                                     <LinePie color={'#ff7a00'} data={(dataLine.TT && dataLine.TT.length > 0) ? dataLine.TT : null} />
                                 </div>
                             </div>
                             <div className="col2">
 
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune d'achats en retard (DA)" : "Validation en retard")}</h1>
+                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune d'achats en retard (DA)" : "Validation en retard (DA)")}</h1>
                                     <div className="validationRetard">
                                         <div className="VRheader">
                                             <p style={{ width: '22%' }}>Demandeur</p>

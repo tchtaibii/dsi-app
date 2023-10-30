@@ -17,6 +17,7 @@ def create_default_type_dachat(apps, schema_editor):
     typedachat.objects.create(type='Achat Direct')
     typedachat.objects.create(type="Appel d'offre")
     typedachat.objects.create(type="Achat en ligne")
+    typedachat.objects.create(type="Convention Partenari")
 
 
 def create_default_situation_dachat(apps, schema_editor):

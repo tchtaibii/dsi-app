@@ -207,7 +207,7 @@ function AddCommande() {
     useEffect(() => {
         if (
             typeDachat >= 1 &&
-            typeDachat <= 4 &&
+            typeDachat <= 5 &&
             achat.demandeur.length > 0 &&
             achat.DateDeCommande.length > 0 &&
             achat.entité.length > 0 &&
@@ -360,6 +360,12 @@ function AddCommande() {
                                         setType(3)
                                     }} type="checkbox" checked={typeDachat === 3} name="Achat d’offre" id="" />
                                     <h4>Achat d’offre</h4>
+                                </div>
+                                <div style={{width : 'fit-content'}} className="checkboxs">
+                                    <input onChange={() => {
+                                        setType(5)
+                                    }} type="checkbox" checked={typeDachat === 5} name="Convention Partenari" id="" />
+                                    <h4>Convention Partenari</h4>
                                 </div>
                             </div>
                             <div className="rowchecks">
