@@ -250,12 +250,14 @@ def progress(request, id):
                 if file_data:
                     achat.BL_File = file_path
                 for item in reste_data:
+                    achat_obj = Achat.objects.get(id=achat_id)
                     achat_id = item['id']
                     new_reste = int(item['reste'])
                     if new_reste > 0:
                         ResteCount = ResteCount + 1
-                    achat_obj = Achat.objects.get(id=achat_id)
                     achat_obj.reste = new_reste
+                    valable = achat_obj.get('quanité') - new_reste
+                    achat_obj.valable = valable
                     achat_obj.save()
                 if ResteCount == 0:
                     achat.situation_d_achat = SituationDachat.objects.get(id=4)
@@ -273,13 +275,16 @@ def progress(request, id):
                 achat = Achats.objects.get(id=id)
                 achat.observation = OB
                 for item in reste_data:
+                    achat_obj = Achat.objects.get(id=achat_id)
                     achat_id = item['id']
                     new_reste = int(item['reste'])
-                    print(new_reste)
+                    if new_reste < 0:
+                        new_reste = 0
                     if new_reste > 0:
                         ResteCount = ResteCount + 1
-                    achat_obj = Achat.objects.get(id=achat_id)
                     achat_obj.reste = new_reste
+                    valable = achat_obj.get('quanité') - new_reste
+                    achat_obj.valable = valable
                     achat_obj.save()
                 if ResteCount == 0:
                     achat.situation_d_achat = SituationDachat.objects.get(id=4)
@@ -333,12 +338,15 @@ def add_commande(request):
                 type_article = item.get('type')
                 prix_estimatif = item.get('prix_estimatif')
                 if designation and isinstance(designation, str) and type_article and isinstance(type_article, str) and prix_estimatif and isinstance(prix_estimatif, str):
-                    typearticle, created = TypeDArticle.objects.get_or_create(
-                        type=type_article)
-                    article = Article.objects.create(
-                        designation=designation, type=typearticle, prix_estimatif=int(prix_estimatif))
+                    article = Article.objects.filter(
+                        designation=designation).first()
+                    if not article:
+                        typearticle, created = TypeDArticle.objects.get_or_create(
+                            type=type_article)
+                        article = Article.objects.create(
+                            designation=designation, type=typearticle, prix_estimatif=int(prix_estimatif))
                     achat = Achat(article=article, quantité=int(
-                        item.get('quantité')), reste=0)
+                        item.get('quantité')), reste=0, valable=0)
                     achat.save()
                     achats.append(achat)
                 else:
@@ -357,7 +365,6 @@ def add_commande(request):
         )
         achats_instance.achat.set(achats)
         achats_instance.save()
-
         return Response("Commande added successfully", status=status.HTTP_201_CREATED)
     except Exception as e:
         logger.exception(f'Error in creating Achats instance: {str(e)}')
@@ -786,7 +793,8 @@ def add_achats_file(request):
                     prix_estimatif=row['Prix Estimatif']
                 )
             achat = Achat.objects.create(
-                quantité=row['Quantité'],
+                quantité=row['Quantité'], valable=row['Quantité'] -
+                (row['Reste'] if not pd.isna(row['Reste']) else 0),
                 reste=row['Reste'] if not pd.isna(
                     row['Reste']) else 0,
                 article=existing_article if existing_article else new_article

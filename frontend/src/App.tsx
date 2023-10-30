@@ -4,10 +4,10 @@ import Sidebar from './Sidebar/Sidebar'
 import Dashboard from './Dashboard/Dashboard'
 import Achats from './Achats/Achats'
 import Achat from './Achat/Achat'
-import Commandes from './Commandes/Commandes'
+// import Commandes from './Commandes/Commandes'
 import AddCommande from './AddCommande/AddCommande'
 import Progress from './Progress/Progress'
-// import Orders from './Orders/Orders'
+import Stock from './Stock/Stock'
 // import Products from './Products/Products'
 // import Product from './Product/Product'
 import Profile from './Profile/Profile'
@@ -67,9 +67,10 @@ function App() {
                     <Route path="commandes/:id" element={<Progress />} />
                     <Route path="Profile/id" element={<Profile />} />
                     <Route path="Settings" element={<Settings />} />
-                {/* <Route path="Products" element={<Products />} />
-                <Route path="Product/:id" element={<Product />} />
-                <Route path="Orders" element={<Orders />} /> */}
+                    <Route path="stock" element={<Stock />} />
+                  {/* <Route path="Products" element={<Products />} />
+                  <Route path="Product/:id" element={<Product />} />
+                  <Route path="Orders" element={<Orders />} /> */}
 
                     {/* <Route path="Achats" element={<Achats />} /> */}
                     {/* <Route path="Commandes" element={<Commandes />} /> */}

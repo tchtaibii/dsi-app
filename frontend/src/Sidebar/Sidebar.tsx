@@ -49,6 +49,13 @@ const LogoutSvg = () => (
 
 )
 
+const StockSvg = () => (
+    <svg style={{ width: "1.3rem", height: "1.3rem", marginLeft: "0.5rem" }} width={35} height={35} viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M31.1111 0H3.88889C1.75 0 0 1.75 0 3.88889V17.5C0 19.6389 1.75 21.3889 3.88889 21.3889H31.1111C33.25 21.3889 35 19.6389 35 17.5V3.88889C35 1.75 33.25 0 31.1111 0ZM31.1111 11.6667H23.3333C23.3333 14.8167 20.65 17.5 17.5 17.5C14.35 17.5 11.6667 14.8167 11.6667 11.6667H3.88889V3.88889H31.1111V11.6667ZM23.3333 25.2778H35V31.1111C35 33.25 33.25 35 31.1111 35H3.88889C1.75 35 0 33.25 0 31.1111V25.2778H11.6667C11.6667 28.5056 14.2722 31.1111 17.5 31.1111C20.7278 31.1111 23.3333 28.5056 23.3333 25.2778Z" fill="#434343" />
+    </svg>
+
+)
+
 const Sidebar = () => {
 
     const [increaseNav, setNav] = useState<boolean>(true)
@@ -87,6 +94,9 @@ const Sidebar = () => {
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
+                    <NavLink className={({ isActive }) =>
+                        isActive ? 'nav-icon-act' : ''
+                    } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>
                 </ul>
             </div>
             <div className="top">

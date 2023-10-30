@@ -50,6 +50,7 @@ class SituationDachat(models.Model):
 
 class Achat(models.Model):
     quantité = models.IntegerField(null=False, blank=False)
+    valable = models.IntegerField(default=0, null=False, blank=False)
     reste = models.IntegerField(blank=True, null=True)
     article = models.ForeignKey(
         'Article', on_delete=models.PROTECT, null=False, blank=False)

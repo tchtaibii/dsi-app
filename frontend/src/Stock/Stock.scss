@@ -1,0 +1,49 @@
+@import '../tools.scss';
+
+
+.headerStock {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4rem;
+    padding-right: 3rem;
+
+    .s1h {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        padding-left: 2rem;
+        // padding-right: 2rem;
+        justify-content: space-between;
+
+        p {
+            color: $second-color;
+            font-size: 1rem;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+        }
+    }
+
+}
+
+.stocks {
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-left: 1rem;
+    // padding-right: 3rem;
+    .stock {
+        width: 48%;
+        height: 4.125rem;
+        background: #0468C8;
+        border-radius: 1.25rem;
+
+    }
+}
