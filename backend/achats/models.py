@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db import models
 
 
+
 class Contrat(models.Model):
     name = models.CharField(max_length=60, blank=False, null=False)
 

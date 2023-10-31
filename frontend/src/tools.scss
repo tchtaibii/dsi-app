@@ -9,6 +9,14 @@ $dark2-color : #eeeeee;
 $back-color : #FFFFFF;
 $nav-color : #BD391B;
 
+
+::selection {
+  background-color: $nav-color;
+  /* Change to the background color you prefer */
+  color: $back-color;
+  /* Change to the text color you prefer */
+}
+
 p {
   // color: #BABABA;
   font-family: 'Inter';

@@ -67,7 +67,7 @@ function App() {
                     <Route path="commandes/:id" element={<Progress />} />
                     <Route path="Profile/id" element={<Profile />} />
                     <Route path="Settings" element={<Settings />} />
-                    <Route path="stock" element={<Stock />} />
+                    <Route path="stock/:type?" element={<Stock />} />
                   {/* <Route path="Products" element={<Products />} />
                   <Route path="Product/:id" element={<Product />} />
                   <Route path="Orders" element={<Orders />} /> */}

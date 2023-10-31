@@ -1,4 +1,5 @@
-from django.db.models import Sum
+from django.db.models import Count, Sum
+from django.db import models
 import numpy as np
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
@@ -231,7 +232,6 @@ def progress(request, id):
                 file_data = file_data.split(',', 1)[1]
                 decoded_file = base64.b64decode(file_data)
                 file_object = io.BytesIO(decoded_file)
-                # Assuming 'MEDIA_ROOT' is your media directory
                 file_path = os.path.join(
                     settings.MEDIA_ROOT, f"{data['code']}.pdf")
                 with open(file_path, 'wb') as f:
@@ -327,7 +327,7 @@ def add_commande(request):
                     article = Article.objects.filter(code=code).first()
                     if article:
                         achat = Achat(article=article,
-                                      quantité=item.get('quantité'), reste=0)
+                                      quantité=item.get('quantité'), reste=item.get('quantité'))
                         achat.save()
                         achats.append(achat)
                     else:
@@ -346,7 +346,7 @@ def add_commande(request):
                         article = Article.objects.create(
                             designation=designation, type=typearticle, prix_estimatif=int(prix_estimatif))
                     achat = Achat(article=article, quantité=int(
-                        item.get('quantité')), reste=0, valable=0)
+                        item.get('quantité')), reste=item.get('quantité'), valable=0)
                     achat.save()
                     achats.append(achat)
                 else:
@@ -630,6 +630,69 @@ def types_with_total_quantity(request):
     return Response(result)
 
 
+@api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+def stock_types(request):
+    types_with_counts = TypeDArticle.objects.annotate(
+        Demande=Sum('article__achat__quantité'),
+        Livré=Sum('article__achat__valable'),
+    ).values('type', 'Livré', 'Demande')
+
+    data = list(types_with_counts)  # Convert the queryset to a list
+
+    return Response(data)
+
+
+@api_view(['GET'])
+def get_articles_by_type(request, type_name):
+    try:
+        type_article = TypeDArticle.objects.get(type=type_name)
+        achats_with_type = Achats.objects.filter(
+            achat__article__type=type_article).prefetch_related('achat__article')
+
+        article_data = []
+        da_set = set()
+        for achats_instance in achats_with_type:
+            for achat in achats_instance.achat.all():
+                if achat.article.type.type == type_name:
+                    existing_article = next(
+                        (item for item in article_data if item["designation"] == achat.article.designation), None)
+                    if existing_article:
+                        existing_article["quantité"] += achat.quantité
+                        existing_article["valable"] += achat.valable
+                        existing_article["reste"] += achat.reste
+                        if achats_instance.DA not in da_set:
+                            existing_article["DA"].append({
+                                "demandeur": achats_instance.demandeur,
+                                "entité": achats_instance.entité,
+                                "DA": achats_instance.DA,
+                                "id": achats_instance.id,
+                                "isComplet": achats_instance.isComplet
+                            })
+                            da_set.add(achats_instance.DA)
+                    else:
+                        article_data.append({
+                            "designation": achat.article.designation,
+                            "quantité": achat.quantité,
+                            "valable": achat.valable,
+                            "reste": achat.reste,
+                            "DA": [{
+                                "demandeur": achats_instance.demandeur,
+                                "DA": achats_instance.DA,
+                                "id": achats_instance.id,
+                                "isComplet": achats_instance.isComplet,
+                                "entité": achats_instance.entité
+                            }]
+                        })
+                        da_set.add(achats_instance.DA)
+
+        return Response(article_data, status=200)
+
+    except TypeDArticle.DoesNotExist:
+        return Response({'message': 'Type not found'}, status=404)
+
+
 @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
@@ -781,25 +844,29 @@ def add_achats_file(request):
                     achats_instance.isComplet = True
             achats_instance.save()
             if row["Type d'achat"] == 'Accord Cadre':
+                print('code d"article  ==== >', str(row["Code"]))
                 achat_code = str(row["Code"])
                 if achat_code and isinstance(achat_code, str):
-                    existing_article = Article.objects.filter(
+                    article = Article.objects.filter(
                         code=achat_code).first()
             else:
-                type = TypeDArticle.objects.get_or_create(type=row['Type'])
-                new_article = Article.objects.create(
+                type, _ = TypeDArticle.objects.get_or_create(type=row['Type'])
+                article = Article.objects.create(
                     designation=row['Désignation'],
                     type=type,
                     prix_estimatif=row['Prix Estimatif']
                 )
-            achat = Achat.objects.create(
-                quantité=row['Quantité'], valable=row['Quantité'] -
-                (row['Reste'] if not pd.isna(row['Reste']) else 0),
-                reste=row['Reste'] if not pd.isna(
-                    row['Reste']) else 0,
-                article=existing_article if existing_article else new_article
-            )
-            achats_instance.achat.add(achat)
+            if article:
+                achat = Achat.objects.create(
+                    quantité=row['Quantité'],
+                    reste=row['Quantité'] if (
+                        situation != 4 and situation != 5) else row['Reste'] if not pd.isna(row['Reste']) else 0,
+                    valable=(row['Quantité'] - (row['Reste']
+                             if not pd.isna(row['Reste']) else 0)) if (situation == 4 or situation == 5) else 0,
+                    article=article
+                )
+                if achats_instance:
+                    achats_instance.achat.add(achat)
         return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
     except Exception as e:
         logger.exception(f'Error in saving Achats instance: {str(e)}')

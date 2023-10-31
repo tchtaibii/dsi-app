@@ -264,7 +264,7 @@ const Achat = () => {
                                                         <p style={{ width: '14%' }}>{Data.typeDachat === 1 ? ele.article.code : ele.article.prix_estimatif}</p>
                                                         <p style={{ width: '19%' }}>{Data.typeDachat === 1 ? ele.article.contrat.name : Data.fourniseur}</p>
                                                         <p style={{ width: '8%' }}>{ele.quantité}</p>
-                                                        <p style={{ width: 'fit-content' }}>{Data.situation_d_achat >= 4 ? ele.reste : '----'}</p>
+                                                        <p style={{ width: 'fit-content' }}>{ele.reste}</p>
                                                     </div>
                                                 )
                                             })

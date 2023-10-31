@@ -154,7 +154,7 @@ const AChatU = ({ TypeDachat, e, i }) => {
                                         <p style={{ width: '14%' }}>{e.typeDachat === 1 ? ele.article.code : ele.article.prix_estimatif}</p>
                                         <p style={{ width: '19%' }}>{e.typeDachat === 1 ? ele.article.contrat.name : e.fourniseur}</p>
                                         <p style={{ width: '8%' }}>{ele.quantité}</p>
-                                        <p style={{ width: 'fit-content' }}>{e.situation_d_achat >= 4 ? ele.reste : '----'}</p>
+                                        <p style={{ width: 'fit-content' }}>{ele.reste}</p>
                                     </div>
                                 )
                             })

@@ -123,44 +123,54 @@ const Dashboard = () => {
                             </div>
                             <div className="col2">
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune d'achats en retard (BL)" : "Livraison en retard (BL)")}</h1>
-                                    <LinePie color={'#f3c627'} data={(dataLine.TL && dataLine.TL.length > 0) ? dataLine.TL : null} />
+                                    <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune achats en retard (BL)" : "Livraison en retard (BL)")}</h1>
+                                    {
+                                        dataLine.TL.length > 0 &&
+                                        <LinePie color={'#f3c627'} data={dataLine.TL} />
+                                    }
                                 </div>
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune d'achats en retard (BC)" : "Traitement d'achat en retard (BC)")}</h1>
-                                    <LinePie color={'#ff7a00'} data={(dataLine.TT && dataLine.TT.length > 0) ? dataLine.TT : null} />
+                                    <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune achats en retard (BC)" : "Traitement d'achat en retard (BC)")}</h1>
+                                    {
+                                        dataLine.TT.length > 0 &&
+                                        <LinePie color={'#ff7a00'} data={dataLine.TT} />
+                                    }
                                 </div>
                             </div>
                             <div className="col2">
 
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune d'achats en retard (DA)" : "Validation en retard (DA)")}</h1>
-                                    <div className="validationRetard">
-                                        <div className="VRheader">
-                                            <p style={{ width: '22%' }}>Demandeur</p>
-                                            <p style={{ width: '20%' }}>Entité</p>
-                                            <p style={{ width: '26%' }}>Date de commande</p>
-                                            <p style={{ width: '15%' }}>Type d'achat</p>
+                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune achats en retard (DA)" : "Validation en retard (DA)")}</h1>
+                                    {
+                                        dataLine.TT.length > 0 &&
+
+                                        <div className="validationRetard">
+                                            <div className="VRheader">
+                                                <p style={{ width: '22%' }}>Demandeur</p>
+                                                <p style={{ width: '20%' }}>Entité</p>
+                                                <p style={{ width: '26%' }}>Date de commande</p>
+                                                <p style={{ width: '15%' }}>Type d'achat</p>
+                                            </div>
+                                            <div className="mainVRH">
+                                                {
+                                                    dataLine.TV && dataLine.TV.map((e: any, i: number) => {
+                                                        return (
+                                                            <div key={`${i}-retardV`} onClick={() => {
+                                                                navigate(`/achat/${e.achat_id}`)
+                                                            }} className="RetardValidationAchat">
+                                                                <p style={{ width: '22.3%' }}>{e.demandeur}</p>
+                                                                <p style={{ width: '20%' }}>{e.entité}</p>
+                                                                <p style={{ width: '26.2%' }}>{e.DateDeCommande}</p>
+                                                                <p style={{ width: '22.3%' }}>{e.typeDachat}</p>
+                                                                <div className='weeksCircle'>{e.weeks_count}</div>
+                                                                {/* <p>Type d'achat</p> */}
+                                                            </div>
+                                                        )
+                                                    })
+                                                }
+                                            </div>
                                         </div>
-                                        <div className="mainVRH">
-                                            {
-                                                dataLine.TV && dataLine.TV.map((e: any, i: number) => {
-                                                    return (
-                                                        <div key={`${i}-retardV`} onClick={() => {
-                                                            navigate(`/achat/${e.achat_id}`)
-                                                        }} className="RetardValidationAchat">
-                                                            <p style={{ width: '22.3%' }}>{e.demandeur}</p>
-                                                            <p style={{ width: '20%' }}>{e.entité}</p>
-                                                            <p style={{ width: '26.2%' }}>{e.DateDeCommande}</p>
-                                                            <p style={{ width: '22.3%' }}>{e.typeDachat}</p>
-                                                            <div className='weeksCircle'>{e.weeks_count}</div>
-                                                            {/* <p>Type d'achat</p> */}
-                                                        </div>
-                                                    )
-                                                })
-                                            }
-                                        </div>
-                                    </div>
+                                    }
                                 </div>
                                 <div className="pieChart">
                                     <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>

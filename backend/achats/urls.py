@@ -25,4 +25,8 @@ urlpatterns = [
     path('addAchats/', views.add_achats_file, name='add-achats'),
     path('downloadAchats/', views.download_achats_file, name='downlaod-achats'),
     path('downloadArticle/', views.download_article_file, name='downlaod-article'),
+    path('stock_types/', views.stock_types, name='stock-types'),
+    path('stock_article/<str:type_name>', views.get_articles_by_type, name='stock-article'),
+    
+    
 ]
