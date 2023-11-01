@@ -41,6 +41,7 @@ class TypeDachat(models.Model):
         return self.type
 
 
+
 class SituationDachat(models.Model):
     situation = models.CharField(
         max_length=50, blank=False, null=False)

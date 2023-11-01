@@ -18,11 +18,19 @@ const ApexChart = ({ data, color }) => {
             ))
         ))
     }, [data])
+
+    useEffect(() => {
+        console.log(CategoData)
+    }, [CategoData])
     const navigate = useNavigate()
 
     const options = {
         xaxis: {
-            categories: CategoData.length === 0 ? null : CategoData
+            categories: CategoData,
+            label: {
+                // rotate: 45,
+                rotateAlways: true
+            }
         },
         colors: [color, '#FFFF', '#FFFF'],
         chart: {
@@ -32,9 +40,8 @@ const ApexChart = ({ data, color }) => {
                         const id = data[dataPointIndex].achat_id
                         navigate(`/achat/${id}`)
                     }
-
                 }
-            }
+            },
         }
     };
     const series = [
@@ -44,6 +51,10 @@ const ApexChart = ({ data, color }) => {
         }
     ];
 
-    return <Chart options={options} series={series} width='200%' type="area" />;
+    return (
+        <div style={{ width: '48rem', height: '95%' }}>
+            <Chart options={options} height="100%" series={series} type="area" />
+        </div >
+    );
 };
 export default ApexChart;

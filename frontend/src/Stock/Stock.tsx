@@ -13,6 +13,13 @@ const MoreArrowSvg = () => (
     </svg>
 
 )
+const Search = () => (
+    <svg style={{ width: "1.5rem", cursor: 'pointer' }} xmlns="http://www.w3.org/2000/svg" width={31} height={31} viewBox="0 0 31 31" fill="none">
+        <path d="M22.3427 18.9167H20.9889L20.5091 18.4554C22.1885 16.5079 23.1996 13.9796 23.1996 11.2292C23.1996 5.09625 18.2128 0.125 12.0606 0.125C5.90847 0.125 0.921631 5.09625 0.921631 11.2292C0.921631 17.3621 5.90847 22.3333 12.0606 22.3333C14.8196 22.3333 17.3559 21.3254 19.3095 19.6513L19.7722 20.1296V21.4792L28.3407 30.0038L30.8941 27.4583L22.3427 18.9167ZM12.0606 18.9167C7.79352 18.9167 4.34901 15.4829 4.34901 11.2292C4.34901 6.97542 7.79352 3.54167 12.0606 3.54167C16.3277 3.54167 19.7722 6.97542 19.7722 11.2292C19.7722 15.4829 16.3277 18.9167 12.0606 18.9167Z" fill="#52535C" />
+    </svg>
+
+)
+
 
 const AChatU = ({ e, i }) => {
     const [showMore, setMore] = useState(false)
@@ -27,15 +34,15 @@ const AChatU = ({ e, i }) => {
                 <p style={{ width: '6.80rem', textAlign: 'center', marginRight: '6.5rem' }}>{e.quantité}</p>
                 <p style={{ width: '3.1rem', maxWidth: '6rem', textAlign: 'center', marginRight: '7.2rem' }}>{e.valable}</p>
                 <p style={{ width: '6.1rem', textAlign: 'center', marginRight: '5rem' }}>{e.reste}</p>
-                <p style={{ width: '' }}>{'--'}</p>
             </div>
             {
                 showMore &&
                 <div className="achatArr">
                     <div className="headerMain" style={{ paddingRight: "0rem" }}>
-                        <p style={{ width: '50%', color: '#BD391B' }}>Demandeur</p>
+                        <p style={{ width: '30%', color: '#BD391B' }}>Demandeur</p>
                         <p style={{ width: '20%', color: '#BD391B' }}>Entité</p>
                         <p style={{ width: '20%', color: '#BD391B' }}>DA</p>
+                        <p style={{ width: '20%', color: '#BD391B' }}>BC</p>
                         <p style={{ width: '10%', color: '#BD391B' }}>Achat Status</p>
                     </div>
                     <div className="achatZ">
@@ -46,9 +53,10 @@ const AChatU = ({ e, i }) => {
                                     <div className="achatSD" onClick={() => {
                                         navigate(`/achat/${ele.id}`)
                                     }} >
-                                        <p style={{ width: '50%' }}>{ele.demandeur}</p>
+                                        <p style={{ width: '30%' }}>{ele.demandeur}</p>
                                         <p style={{ width: '20%' }}>{ele.entité}</p>
                                         <p style={{ width: '20%' }}>{ele.DA}</p>
+                                        <p style={{ width: '20%' }}>{ele.BC}</p>
                                         <p style={{ width: '10%' }}>{ele.isComplet ? 'Livré' : 'Non Livré'}</p>
                                     </div>
                                 )
@@ -80,13 +88,14 @@ const AchatCl = ({ data }) => {
     )
 }
 
-
 const Stock = () => {
     let navigate = useNavigate();
     const { type } = useParams()
     const [Data, setData] = useState([])
+    const [backUp, setBackUp] = useState([])
     useEffect(() => {
         const fetchData = async () => {
+            console.log(type)
             if (!type)
                 await axios.get('/achats/stock_types/').then((rsp: any) => {
                     rsp.data.sort((a: any, b: any) => a.Demande - b.Demande);
@@ -99,12 +108,32 @@ const Stock = () => {
         fetchData();
         setLoading(true)
     }, [type])
+
+    useEffect(() => {
+        setBackUp(Data)
+    }, [Data])
     const [isLoading, setLoading] = useState(false)
 
     return (
         <div className='ContentMain'>
             <div className="header">
-                <h1>Stock</h1>
+                <h1>{type ? type : (Data.length > 0 ? "Stock" : "No type artcile with this name")}</h1>
+                <div style={{ border: '0.06rem solid #bd391b', width: '20rem' }} className="search">
+                    <input onKeyPress={() => { }} onClick={() => { }} onChange={(e: any) => {
+                        const value = e.target.value;
+                        if (value === '' || value === null)
+                            setBackUp(Data.map((e) => e))
+                        if (!type)
+                            setBackUp(Data.filter((e) => e.type === value || e.type.includes(value) || e.type.toUpperCase().includes(value.toUpperCase())));
+                        else
+                            setBackUp(Data.filter((e) => e.designation === value || e.designation.includes(value) || e.designation.toUpperCase().includes(value.toUpperCase())));
+                        // setSearchTest(value)
+
+                    }} type="text" placeholder='Search...' />
+                    <div onClick={() => { }}>
+                        <Search />
+                    </div>
+                </div>
             </div>
             {
                 !isLoading ? <Loading /> :
@@ -113,34 +142,34 @@ const Stock = () => {
                             !type ?
                                 <>
                                     <div className="headerStock">
-                                        <div className="s1h">
-                                            <p style={{ width: '50%' }}>Type</p>
-                                            <p>Demande</p>
-                                            <p>Livré</p>
-                                            <p>Affécté</p>
-                                        </div>
                                         {
-                                            Data.length > 1 &&
+                                            backUp.length >= 1 &&
+                                            <div className="s1h">
+                                                <p style={{ width: '50%' }}>Type</p>
+                                                <p style={{ position: 'relative', left: '1rem' }}>Demande</p>
+                                                <p style={{ position: 'relative', left: '-0.7rem' }}>Livré</p>
+                                            </div>
+                                        }
+                                        {
+                                            backUp.length > 1 &&
                                             <div style={{ paddingLeft: '1.5rem' }} className="s1h">
                                                 <p style={{ width: '48%' }}>Type</p>
                                                 <p style={{ position: 'relative', left: '-0.1rem' }}>Demande</p>
-                                                <p style={{ position: 'relative', left: '-0.6rem' }}>Livré</p>
-                                                <p style={{ position: 'relative', left: '-0.6rem' }}>Affécté</p>
+                                                <p style={{ position: 'relative', left: '-1.8rem' }}>Livré</p>
                                             </div>
                                         }
                                     </div>
                                     <div className="stocks">
                                         {
-                                            Data.length > 0 &&
-                                            Data.map((e: any) => {
+                                            backUp.length > 0 &&
+                                            backUp.map((e: any) => {
                                                 return (
                                                     <div onClick={() => {
                                                         navigate(`/stock/${e.type}`)
                                                     }} className="stock">
-                                                        <p style={{ width: '58%' }}>{e.type}</p>
-                                                        <p style={{ width: '16.2%' }}>{e.Demande}</p>
-                                                        <p style={{ width: '16%' }}>{e.Livré}</p>
-                                                        <p>--</p>
+                                                        <p style={{ width: '68%' }}>{e.type}</p>
+                                                        <p style={{ width: '20%' }}>{e.Demande}</p>
+                                                        <p style={{ width: 'fit-content' }}>{e.Livré}</p>
                                                     </div>
                                                 )
                                             })
@@ -149,16 +178,20 @@ const Stock = () => {
                                 </>
                                 :
                                 <>
-                                    <div style={{ paddingRight: 0, justifyContent: 'initial' }} className="headerMain">
-                                        <p style={{ width: '60%' }}>Designation</p>
-                                        <p style={{ width: '13%' }}>Demandes</p>
-                                        <p style={{ width: '10%' }}>Livré</p>
-                                        <p style={{ width: '10%' }}>Non Livré</p>
-                                        <p style={{ width: 'fit-content' }}>Affecté</p>
-                                    </div>
-                                    <div className="achatsCL">
-                                        <AchatCl data={Data} />
-                                    </div>
+                                    {
+                                        backUp.length > 0 &&
+                                        <>
+                                            <div style={{ paddingRight: 0, justifyContent: 'initial' }} className="headerMain">
+                                                <p style={{ width: '60%' }}>Designation</p>
+                                                <p style={{ width: '13%' }}>Demandes</p>
+                                                <p style={{ width: '10%' }}>Livré</p>
+                                                <p style={{ width: '10%' }}>Non Livré</p>
+                                            </div>
+                                            <div className="achatsCL">
+                                                <AchatCl data={backUp} />
+                                            </div>
+                                        </>
+                                    }
 
                                 </>
 

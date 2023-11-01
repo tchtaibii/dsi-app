@@ -27,6 +27,4 @@ urlpatterns = [
     path('downloadArticle/', views.download_article_file, name='downlaod-article'),
     path('stock_types/', views.stock_types, name='stock-types'),
     path('stock_article/<str:type_name>', views.get_articles_by_type, name='stock-article'),
-    
-    
 ]

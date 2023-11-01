@@ -89,14 +89,15 @@ const Sidebar = () => {
                     } style={{ width: changeWidthC }} to="/achats"><AchatSvg />{increaseNav && "Achats"}</NavLink>
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
+                    } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>
+                    <NavLink className={({ isActive }) =>
+                        isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/customer"><CustomerSvg />{increaseNav && "Customer"}</NavLink>
                     {/* <NavLink style={{ width: changeWidthC }} to="/commandes/"><CommandeSvg />{increaseNav && "Commandes"}</NavLink> */}
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
-                    <NavLink className={({ isActive }) =>
-                        isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>
+
                 </ul>
             </div>
             <div className="top">

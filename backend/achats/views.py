@@ -667,6 +667,7 @@ def get_articles_by_type(request, type_name):
                                 "demandeur": achats_instance.demandeur,
                                 "entité": achats_instance.entité,
                                 "DA": achats_instance.DA,
+                                "BC": achats_instance.BC,
                                 "id": achats_instance.id,
                                 "isComplet": achats_instance.isComplet
                             })
@@ -680,6 +681,7 @@ def get_articles_by_type(request, type_name):
                             "DA": [{
                                 "demandeur": achats_instance.demandeur,
                                 "DA": achats_instance.DA,
+                                "BC": achats_instance.BC,
                                 "id": achats_instance.id,
                                 "isComplet": achats_instance.isComplet,
                                 "entité": achats_instance.entité
@@ -774,7 +776,7 @@ def add_achats_file(request):
             datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d').date()
         for _, row in df.iterrows():
             achats_instance = Achats.objects.filter(
-                DA=str(row['DA']).rstrip('.0')).first()
+                DA=str(row['DA']).split('.')[0]).first()
             if not achats_instance:
                 # Date DA
                 date_da_string = str(
@@ -821,9 +823,9 @@ def add_achats_file(request):
                                     situation = 5
                 # achat infectation
                 achats_instance = Achats.objects.create(
-                    DA=str(row['DA']).rstrip('.0') if row['DA'] else "",
-                    BC=str(row['BC']).rstrip('.0') if row['BC'] else "",
-                    BL=str(row['BL']).rstrip('.0') if row['BL'] else "",
+                    DA=str(row['DA']).split('.')[0],
+                    BC=str(row['BC']).split('.')[0],
+                    BL=str(row['BL']).split('.')[0],
                     demandeur=row['Demandeur'],
                     entité=row['Entité'],
                     ligne_bugetaire=row['Ligne bugétaire'],
