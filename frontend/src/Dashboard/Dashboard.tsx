@@ -98,9 +98,9 @@ const Dashboard = () => {
                 setDataLine(rsp.data[0])
             })
             await axios.get('/achats/colChart/').then((rsp: any) => setSeries(rsp.data))
-            setLoading(true);
         }
         fetchData();
+        setLoading(true);
     }, [])
     useEffect(() => {
         console.log(dataLine)

@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from django.conf import settings
 import io
 import base64
-from rest_framework.decorators import api_view
 from .models import Achats, Achat
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
@@ -87,13 +86,10 @@ def download_file(request, fl):
             with open(file_path + fl + '.pdf', 'rb') as file:
                 response = HttpResponse(
                     file.read(), content_type='application/pdf')
-                # Replace with the actual file name
                 response['Content-Disposition'] = 'attachment; filename="' + fl + '.pdf"'
-
             return response
     except FileNotFoundError:
         return Response({"message": "File not found."}, status=status.HTTP_404_NOT_FOUND)
-
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -696,7 +692,7 @@ def types_with_total_quantity(request):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def stock_types(request):
     types_with_counts = TypeDArticle.objects.annotate(
         Demande=Sum('article__achat__quantité'),

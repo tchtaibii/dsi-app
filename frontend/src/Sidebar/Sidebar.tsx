@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
 import { NavLink } from "react-router-dom";
 import './Sidebar.scss';
 
@@ -56,8 +58,15 @@ const StockSvg = () => (
 
 )
 
-const Sidebar = () => {
+const AffectéSvg = () => (
+    <svg style={{ width: "1.5rem", height: "1.83rem", marginLeft: "0.5rem" }} width={36} height={30} viewBox="0 0 36 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32.7273 0H3.27273C1.47273 0 0 1.47273 0 3.27273V9.80182H3.27273V3.24H32.7273V26.1982H3.27273V19.62H0V26.1818C0 27.9818 1.47273 29.4218 3.27273 29.4218H32.7273C34.5273 29.4218 36 27.9818 36 26.1818V3.27273C36 1.45636 34.5273 0 32.7273 0ZM16.3636 21.2564L22.9091 14.7109L16.3636 8.16545V13.0745H0V16.3473H16.3636V21.2564Z" fill="#434343" />
+    </svg>
 
+)
+
+const Sidebar = () => {
+    const my = useRecoilValue(myData)
     const [increaseNav, setNav] = useState<boolean>(true)
     const [changeWidth, setWidth] = useState<string>("15rem")
     const [changeWidthC, setWidthC] = useState<string>("100%")
@@ -84,9 +93,20 @@ const Sidebar = () => {
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/"><DashboardSvg />{increaseNav && "Dashboard"}</NavLink>
-                    <NavLink className={({ isActive }) =>
-                        isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/achats"><AchatSvg />{increaseNav && "Achats"}</NavLink>
+                    {
+                        my.is_achat_manager &&
+                        <>
+                            <NavLink className={({ isActive }) =>
+                                isActive ? 'nav-icon-act' : ''
+                            } style={{ width: changeWidthC }} to="/achats"><AchatSvg />{increaseNav && "Achats"}</NavLink>
+                        </>
+                    }
+                    {
+                        my.is_reception &&
+                        <NavLink className={({ isActive }) =>
+                            isActive ? 'nav-icon-act' : ''
+                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Affecté"}</NavLink>
+                    }
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>

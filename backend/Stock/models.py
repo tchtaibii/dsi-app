@@ -22,6 +22,7 @@ class Stocks(models.Model):
     designation = models.TextField(null=False, blank=False)
     type = models.ForeignKey('achats.TypeDArticle', on_delete=models.CASCADE)
     quantité=models.IntegerField(null=False, blank=False, default=0)
+    affecté=models.IntegerField(null=False, blank=False, default=0)
     stocks = models.ManyToManyField('Stock')
 
 

@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 import axios from '../Interceptor';
 import { useParams, useNavigate } from 'react-router-dom';
 import Loading from '../Loading/Loading';
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
+
+
 
 const MoreArrowSvg = () => (
     <svg style={{
@@ -21,7 +25,7 @@ const Search = () => (
 )
 
 
-const AChatU = ({ e, i }) => {
+const AChatU = ({ e, i, is_achat_manager }) => {
     const [showMore, setMore] = useState(false)
     let navigate = useNavigate();
     useEffect(() => {
@@ -31,12 +35,12 @@ const AChatU = ({ e, i }) => {
         <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
             <div style={{ height: '7.211rem', justifyContent: 'initial', paddingRight: '0rem' }} className="roww">
                 <p style={{ width: '60%' }}>{e.designation}</p>
-                <p style={{ width: '6.80rem', textAlign: 'center', marginRight: '6.5rem' }}>{e.quantité}</p>
-                <p style={{ width: '3.1rem', maxWidth: '6rem', textAlign: 'center', marginRight: '7.2rem' }}>{e.valable}</p>
-                <p style={{ width: '6.1rem', textAlign: 'center', marginRight: '5rem' }}>{e.reste}</p>
+                <p style={{ width: '6.80rem', textAlign: 'center', marginRight: '6.5rem' }}>{is_achat_manager ? e.quantité : ''}</p>
+                <p style={{ width: '3.1rem', maxWidth: '6rem', textAlign: 'center', marginRight: '7.2rem' }}>{is_achat_manager ? e.valable : e.quantité}</p>
+                <p style={{ width: '6.1rem', textAlign: 'center', marginRight: '5rem' }}>{is_achat_manager ? e.reste : e.affecté}</p>
             </div>
             {
-                showMore &&
+                is_achat_manager && showMore &&
                 <div className="achatArr">
                     <div className="headerMain" style={{ paddingRight: "0rem" }}>
                         <p style={{ width: '30%', color: '#BD391B' }}>Demandeur</p>
@@ -65,22 +69,26 @@ const AChatU = ({ e, i }) => {
                     </div>
                 </div>
             }
-            <div onClick={() => {
-                setMore((state: any) => (!state))
-            }} className="More">
-                <MoreArrowSvg />
-            </div>
+            {
+                is_achat_manager &&
+                <div onClick={() => {
+                    setMore((state: any) => (!state))
+                }} className="More">
+                    <MoreArrowSvg />
+                </div>
+            }
+
         </div>
     )
 }
 
 
-const AchatCl = ({ data }) => {
+const AchatCl = ({ data, is_achat_manager }) => {
     return (
         <div className="achatCf">
             {
                 data.map((e: any, i: number) => (
-                    <AChatU key={`${i}-article-des`} e={e} i={i} />
+                    <AChatU is_achat_manager={is_achat_manager} key={`${i}-article-des`} e={e} i={i} />
                 ))
             }
         </div>
@@ -89,22 +97,35 @@ const AchatCl = ({ data }) => {
 }
 
 const Stock = () => {
+    const my = useRecoilValue(myData)
     let navigate = useNavigate();
     const { type } = useParams()
     const [Data, setData] = useState([])
     const [backUp, setBackUp] = useState([])
     useEffect(() => {
         const fetchData = async () => {
-            console.log(type)
-            if (!type)
-                await axios.get('/achats/stock_types/').then((rsp: any) => {
-                    rsp.data.sort((a: any, b: any) => a.Demande - b.Demande);
-                    setData(rsp.data.reverse())
-                });
-            else
-                await axios.get(`/achats/stock_article/${type}`).then((rsp: any) => setData(rsp.data.reverse()));
+            if (my.is_achat_manager) {
+                if (!type)
+                    await axios.get('/achats/stock_types/').then((rsp: any) => {
+                        rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande)));
+                        setData(rsp.data.reverse())
+                    });
+                else
+                    await axios.get(`/achats/stock_article/${type}`).then((rsp: any) => setData(rsp.data.reverse()));
+            }
+            else if (my.is_reception) {
+                if (!type)
+                    await axios.get('/stock/types_in_stock/').then((rsp: any) => {
+                        rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande)));
+                        setData(rsp.data.reverse())
+                    });
+                else
+                    await axios.get(`/stock/stocks_by_type/${type}`).then((rsp: any) => setData(rsp.data.reverse()));
+            }
+
         }
         setLoading(false)
+
         fetchData();
         setLoading(true)
     }, [type])
@@ -117,18 +138,18 @@ const Stock = () => {
     return (
         <div className='ContentMain'>
             <div className="header">
-                <h1>{type ? type : (Data.length > 0 ? "Stock" : "No type artcile with this name")}</h1>
+                <h1>{(my.is_achat_manager || my.is_reception) && (type ? type : (Data.length > 0 ? "Stock" : "No type artcile with this name"))}</h1>
                 <div style={{ border: '0.06rem solid #bd391b', width: '20rem' }} className="search">
                     <input onKeyPress={() => { }} onClick={() => { }} onChange={(e: any) => {
                         const value = e.target.value;
-                        if (value === '' || value === null)
-                            setBackUp(Data.map((e) => e))
-                        if (!type)
-                            setBackUp(Data.filter((e) => e.type === value || e.type.includes(value) || e.type.toUpperCase().includes(value.toUpperCase())));
-                        else
-                            setBackUp(Data.filter((e) => e.designation === value || e.designation.includes(value) || e.designation.toUpperCase().includes(value.toUpperCase())));
-                        // setSearchTest(value)
-
+                        if (my.is_achat_manager || my.is_reception) {
+                            if (value === '' || value === null)
+                                setBackUp(Data.map((e) => e))
+                            if (!type)
+                                setBackUp(Data.filter((e) => e.type === value || e.type.includes(value) || e.type.toUpperCase().includes(value.toUpperCase())));
+                            else
+                                setBackUp(Data.filter((e) => e.designation === value || e.designation.includes(value) || e.designation.toUpperCase().includes(value.toUpperCase())));
+                        }
                     }} type="text" placeholder='Search...' />
                     <div onClick={() => { }}>
                         <Search />
@@ -136,67 +157,72 @@ const Stock = () => {
                 </div>
             </div>
             {
-                !isLoading ? <Loading /> :
-                    <div className="main">
-                        {
-                            !type ?
-                                <>
-                                    <div className="headerStock">
-                                        {
-                                            backUp.length >= 1 &&
-                                            <div className="s1h">
-                                                <p style={{ width: '50%' }}>Type</p>
-                                                <p style={{ position: 'relative', left: '1rem' }}>Demande</p>
-                                                <p style={{ position: 'relative', left: '-0.7rem' }}>Livré</p>
-                                            </div>
-                                        }
-                                        {
-                                            backUp.length > 1 &&
-                                            <div style={{ paddingLeft: '1.5rem' }} className="s1h">
-                                                <p style={{ width: '48%' }}>Type</p>
-                                                <p style={{ position: 'relative', left: '-0.1rem' }}>Demande</p>
-                                                <p style={{ position: 'relative', left: '-1.8rem' }}>Livré</p>
-                                            </div>
-                                        }
-                                    </div>
-                                    <div className="stocks">
-                                        {
-                                            backUp.length > 0 &&
-                                            backUp.map((e: any) => {
-                                                return (
-                                                    <div onClick={() => {
-                                                        navigate(`/stock/${e.type}`)
-                                                    }} className="stock">
-                                                        <p style={{ width: '68%' }}>{e.type}</p>
-                                                        <p style={{ width: '20%' }}>{e.Demande}</p>
-                                                        <p style={{ width: 'fit-content' }}>{e.Livré}</p>
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
-                                </>
-                                :
-                                <>
-                                    {
-                                        backUp.length > 0 &&
+                (my.is_achat_manager || my.is_reception) &&
+                <>
+                    {
+                        !isLoading ? <Loading /> :
+                            <div className="main">
+                                {
+                                    !type ?
                                         <>
-                                            <div style={{ paddingRight: 0, justifyContent: 'initial' }} className="headerMain">
-                                                <p style={{ width: '60%' }}>Designation</p>
-                                                <p style={{ width: '13%' }}>Demandes</p>
-                                                <p style={{ width: '10%' }}>Livré</p>
-                                                <p style={{ width: '10%' }}>Non Livré</p>
+                                            <div className="headerStock">
+                                                {
+                                                    backUp.length >= 1 &&
+                                                    <div className="s1h">
+                                                        <p style={{ width: '50%' }}>Type</p>
+                                                        <p style={{ position: 'relative', left: '1rem' }}>{my.is_reception ? 'Stock' : 'Demande'}</p>
+                                                        <p style={{ position: 'relative', left: '-0.7rem' }}>{my.is_reception ? 'Affecté' : 'Livré'}</p>
+                                                    </div>
+                                                }
+                                                {
+                                                    backUp.length > 1 &&
+                                                    <div style={{ paddingLeft: '1.5rem' }} className="s1h">
+                                                        <p style={{ width: '48%' }}>Type</p>
+                                                        <p style={{ position: 'relative', left: '-0.1rem' }}>{my.is_reception ? 'Stock' : 'Demande'}</p>
+                                                        <p style={{ position: 'relative', left: '-1.8rem' }}>{my.is_reception ? 'Affecté' : 'Livré'}</p>
+                                                    </div>
+                                                }
                                             </div>
-                                            <div className="achatsCL">
-                                                <AchatCl data={backUp} />
+                                            <div className="stocks">
+                                                {
+                                                    backUp.length > 0 &&
+                                                    backUp.map((e: any) => {
+                                                        return (
+                                                            <div onClick={() => {
+                                                                navigate(`/stock/${e.type}`)
+                                                            }} className="stock">
+                                                                <p style={{ width: '68%' }}>{e.type}</p>
+                                                                <p style={{ width: '20%' }}>{my.is_reception ? e.quantity : e.Demande}</p>
+                                                                <p style={{ width: 'fit-content' }}>{my.is_reception ? e.affecté : e.Livré}</p>
+                                                            </div>
+                                                        )
+                                                    })
+                                                }
                                             </div>
                                         </>
-                                    }
+                                        :
+                                        <>
+                                            {
+                                                backUp.length > 0 &&
+                                                <>
+                                                    <div style={{ paddingRight: 0, justifyContent: 'initial' }} className="headerMain">
+                                                        <p style={{ width: '60%' }}>Designation</p>
+                                                        <p style={{ width: '13%' }}>{my.is_achat_manager ? 'Demandes' : ''}</p>
+                                                        <p style={{ width: '10%' }}>{my.is_achat_manager ? 'Livré' : 'Stock'}</p>
+                                                        <p style={{ width: '10%' }}>{my.is_achat_manager ? 'Non Livré' : 'Affecté'}</p>
+                                                    </div>
+                                                    <div className="achatsCL">
+                                                        <AchatCl is_achat_manager={my.is_achat_manager} data={backUp} />
+                                                    </div>
+                                                </>
+                                            }
 
-                                </>
+                                        </>
 
-                        }
-                    </div>
+                                }
+                            </div>
+                    }
+                </>
             }
         </div>
     )

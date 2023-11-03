@@ -51,4 +51,4 @@ class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('email', 'avatar', 'first_name',
-                  'last_name', 'mobile', 'proffession', 'is_achat_manager')
+                  'last_name', 'mobile', 'proffession', 'is_achat_manager', 'is_reception')

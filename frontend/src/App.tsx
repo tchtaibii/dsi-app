@@ -3,6 +3,7 @@ import Navbar from './Navbar/Navbar'
 import Sidebar from './Sidebar/Sidebar'
 import Dashboard from './Dashboard/Dashboard'
 import Achats from './Achats/Achats'
+import { myData } from './atoms'
 import Achat from './Achat/Achat'
 // import Commandes from './Commandes/Commandes'
 import AddCommande from './AddCommande/AddCommande'
@@ -19,7 +20,6 @@ import { Routes, Route } from "react-router-dom"
 import { useState, useEffect } from 'react'
 import axios from './Interceptor'
 import { useRecoilState } from 'recoil';
-import { myData } from './atoms'; // Import the atom defined earlier
 
 
 function App() {
@@ -59,16 +59,21 @@ function App() {
                 <div className="content">
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="achats/:id?" element={<Achats SearchT={SearchT} />} />
                     {/* <Route path="commandes" element={<Commandes />} /> */}
-                    <Route path="achat/:id" element={<Achat />} />
-                    <Route path="AddCommande" element={<AddCommande />} />
+                    {
+                      recoilMyData.is_achat_manager &&
+                      <>
+                        <Route path="achats/:id?" element={<Achats SearchT={SearchT} />} />
+                        <Route path="achat/:id" element={<Achat />} />
+                        <Route path="AddCommande" element={<AddCommande />} />
+                        <Route path="commandes/:id" element={<Progress />} />
+                      </>
+                    }
                     <Route path="profile" element={<Profile />} />
-                    <Route path="commandes/:id" element={<Progress />} />
                     <Route path="Profile/id" element={<Profile />} />
                     <Route path="Settings" element={<Settings />} />
                     <Route path="stock/:type?" element={<Stock />} />
-                  {/* <Route path="Products" element={<Products />} />
+                    {/* <Route path="Products" element={<Products />} />
                   <Route path="Product/:id" element={<Product />} />
                   <Route path="Orders" element={<Orders />} /> */}
 
