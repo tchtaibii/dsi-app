@@ -187,21 +187,10 @@ const AchatCl = ({ achats, TypeDachat }) => {
 const Achats = ({ SearchT }) => {
     const { id } = useParams()
     interface QueryParams {
-        typeDachat: number | null;
-        DA: string | null;
-        BC: string | null;
-        BL: string | null;
-        situation_d_achat: number | null;
-        typeDarticle: string | null;
-        apple: boolean;
-        consommable: boolean;
-        isComplet: boolean;
-        search: string;
+        type: string | null,
+        arrivage: string | null,
+        affecté: boolean | null,
     }
-    const [achats, setAchats] = useState<any[]>([])
-
-    const [typeDachat, setTypeDachat] = useState([]);
-    const [situationDachat, setSituationDachat] = useState([]);
     const [isFilter, setFilter] = useState<boolean>(false)
 
     useEffect(() => {
@@ -211,16 +200,9 @@ const Achats = ({ SearchT }) => {
 
 
     const [queryParams, setQueryParams] = useState<QueryParams>({
-        typeDachat: null,
-        DA: null,
-        BC: null,
-        BL: null,
-        situation_d_achat: id ? id : null,
-        typeDarticle: null,
-        isComplet: false,
-        apple: false,
-        consommable: false,
-        search: SearchT
+        type: null,
+        arrivage: null,
+        affecté: false,
     });
     useEffect(() => {
         const fetchData = async () => {
@@ -231,41 +213,8 @@ const Achats = ({ SearchT }) => {
                         nonNullParams[key] = queryParams[key];
                     }
                 });
-                if (SearchT.length > 0) {
-                    await axios.get('/achats/search/', {
-                        params:
-                            { search: SearchT }
-                    }).then((rsp: any) => {
-                        setAchats(rsp.data.reverse());
-                        console.log(rsp.data);
-                    });
-                }
-                else {
-                    const commandsResponse = await axios.get('/achats/get/commandes/', {
-                        params: nonNullParams,
-                    });
-                    setAchats(commandsResponse.data.reverse());
-                }
-                const fileResponse = await axios.get('/achats/excelExport/', {
-                    params: nonNullParams,
-                    responseType: 'blob', // Important for handling binary data
-                });
-
-                const disposition = fileResponse.headers['content-disposition'];
-                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                const filename = matches ? matches[1].replace(/['"]/g, '') : '';
-
-                const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = window.URL.createObjectURL(blob);
-                setFileData({ data: url, name: filename });
-                const typeDachatResponse = await axios.get('/achats/get/types_achats');
-                setTypeDachat(typeDachatResponse.data);
-
-                const situationResponse = await axios.get('/achats/get/situations_article');
-                setSituationDachat(situationResponse.data);
-            } catch (error) {
-                console.error('Error:', error);
             }
+            catch { }
             setLoading(true);
         }
         fetchData()
@@ -277,7 +226,6 @@ const Achats = ({ SearchT }) => {
     const fetchDataB = async () => {
         setQueryParams((state: any) => ({ ...state, search: SearchT }))
     };
-    const [fileData, setFileData] = useState<any>(null);
     useEffect(() => {
         fetchDataB();
     }, []);
@@ -293,16 +241,9 @@ const Achats = ({ SearchT }) => {
                                 <h1>Filter</h1>
                                 <div onClick={() => {
                                     setQueryParams({
-                                        typeDachat: null,
-                                        DA: null,
-                                        BC: null,
-                                        BL: null,
-                                        situation_d_achat: null,
-                                        typeDarticle: null,
-                                        isComplet: false,
-                                        apple: false,
-                                        consommable: false,
-                                        search: SearchT
+                                        type: null,
+                                        arrivage: null,
+                                        affecté: false,
                                     })
                                     setFilter(false)
                                 }} style={{ cursor: 'pointer' }}><ExitSvg /></div>
@@ -492,7 +433,7 @@ const Achats = ({ SearchT }) => {
                                     <p style={{ width: '15%' }}>Etat d’order</p>
                                 </div>
                                 <div className="achatsCL">
-                                    <AchatCl TypeDachat={TypeDachat} achats={achats} />
+                                    {/* <AchatCl TypeDachat={TypeDachat} achats={achats} /> */}
                                 </div>
 
                             </>
