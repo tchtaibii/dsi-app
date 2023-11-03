@@ -164,7 +164,7 @@ const Settings = () => {
                         <div className="fileUplaod">
                             <input onChange={handleFileChange2} type="file" name="" id="" />
                             <div className="inputUplaod">
-                                <img src={redExcel} />
+                                <img style={{width : '2.875rem'}} src={redExcel} />
                                 Chose file
                             </div>
                             <div className="fileName">{file2 ? file2.name : 'No file Chosen'}</div>

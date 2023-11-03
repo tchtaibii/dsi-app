@@ -115,7 +115,8 @@ class Achats(models.Model):
 
             super(Achats, self).save(*args, **kwargs)
         except Exception as e:
-            logger.exception(f'Error in saving Achats instance: {str(e)}')
+            print('')
+            # logger.exception(f'Error in saving Achats instance: {str(e)}')
 
     def __str__(self):
         return str(self.DateDeCommande)

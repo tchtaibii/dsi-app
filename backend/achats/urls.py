@@ -19,6 +19,7 @@ urlpatterns = [
     path('lineChart/', views.dashboard_line, name='Line-dashboard'),
     path('linesChart/', views.dashboard_lines, name='Line-dashboard'),
     path('deleteAchats/<str:id>', views.delete_achats, name='Delete-achats'),
+    path('deleteAllAchats/', views.delete_all_achats, name='Delete-all-achats'),
     path('colChart/', views.types_with_total_quantity, name='TypeDarticle-dash'),
     path('search/', views.search_commands, name='search'),
     path('addArticles/', views.add_articles, name='add-article'),
@@ -26,5 +27,6 @@ urlpatterns = [
     path('downloadAchats/', views.download_achats_file, name='downlaod-achats'),
     path('downloadArticle/', views.download_article_file, name='downlaod-article'),
     path('stock_types/', views.stock_types, name='stock-types'),
-    path('stock_article/<str:type_name>', views.get_articles_by_type, name='stock-article'),
+    path('stock_article/<str:type_name>',
+         views.get_articles_by_type, name='stock-article'),
 ]

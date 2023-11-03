@@ -3,6 +3,7 @@ from django.db import models
 import numpy as np
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
+from Stock.models import inStock, Stock, StockEtat, Stocks
 from datetime import timedelta
 from docx import Document
 from datetime import datetime, timedelta
@@ -37,6 +38,43 @@ class CustomObject:
         self.date = date
         self.is_ = is_
         self.file = file
+
+
+def create_stock():
+    try:
+        achatss = Achats.objects.filter(isComplet=True)
+        if achatss:
+            for achats in achatss:
+                if achats:
+                    in_stock, created = inStock.objects.get_or_create(
+                        BC=achats.BC, entité=achats.entité)
+                    stock_designations = set(
+                        in_stock.stocks.values_list('designation', flat=True))
+                    stock_count = len(stock_designations)
+                    for achat in achats.achat.all():
+                        stock_len = achat.valable - stock_count
+                        if stock_len > 0:
+                            stocks = Stocks.objects.create(
+                                designation=achat.article.designation,
+                                type=achat.article.type,
+                                quantité=stock_len,
+                            )
+                            for i in range(stock_len):
+                                if achats.typeDachat != 1:
+                                    in_stock.fourniseur = achats.fourniseur
+                                else:
+                                    in_stock.fourniseur = achat.article.contrat.name if achat.article.contrat else ""
+                                stock = Stock.objects.create(
+                                    DateArrivage=achats.DateBL,
+                                    etat=StockEtat.objects.get(etat='Stock'),
+                                )
+                                stock.save()
+                                stocks.stocks.add(stock)
+                                stocks.save()
+                            in_stock.stocks.add(stocks)
+                            in_stock.save()
+    except Exception as e:
+        print(e)
 
 
 @api_view(['GET'])
@@ -619,6 +657,32 @@ def delete_achats(request, id):
     return Response({"detail": "Achats deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['DELETE'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def delete_all_achats(request):
+    try:
+        with transaction.atomic():
+            achatss = Achats.objects.all()
+            for achats_instance in achatss:
+                for achat_instance in achats_instance.achat.all():
+                    if not achat_instance.article.code:
+                        try:
+                            with transaction.atomic():
+                                article_instance = achat_instance.article
+                                achat_instance.delete()
+                                article_instance.delete()
+                        except Exception as e:
+                            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        achat_instance.delete()
+                achats_instance.delete()
+    except Achats.DoesNotExist:
+        return Response({"detail": "Achats not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"detail": "Achats deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 @permission_classes([IsAuthenticated, IsManagerAchatPermission])
@@ -869,6 +933,7 @@ def add_achats_file(request):
                 )
                 if achats_instance:
                     achats_instance.achat.add(achat)
+        create_stock()
         return Response({'message': 'The data has been successfully imported.'}, status=status.HTTP_200_OK)
     except Exception as e:
         logger.exception(f'Error in saving Achats instance: {str(e)}')
