@@ -105,7 +105,7 @@ const Sidebar = () => {
                         my.is_reception &&
                         <NavLink className={({ isActive }) =>
                             isActive ? 'nav-icon-act' : ''
-                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Affecté"}</NavLink>
+                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Affectation"}</NavLink>
                     }
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''

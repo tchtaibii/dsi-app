@@ -8,6 +8,7 @@ class StockEtat(models.Model):
     def __str__(self):
         return self.etat
 
+
 class Stock(models.Model):
     NomPrenom = models.CharField(max_length=100, null=True, blank=True)
     Fonction = models.CharField(max_length=50, null=True, blank=True)
@@ -17,12 +18,13 @@ class Stock(models.Model):
     serviceTag = models.CharField(max_length=50, null=True, blank=True)
 
 
-
 class Stocks(models.Model):
     designation = models.TextField(null=False, blank=False)
+    mark = models.TextField(null=False, blank=False, default='')
+    modele = models.TextField(null=False, blank=False, default='')
     type = models.ForeignKey('achats.TypeDArticle', on_delete=models.CASCADE)
-    quantité=models.IntegerField(null=False, blank=False, default=0)
-    affecté=models.IntegerField(null=False, blank=False, default=0)
+    quantité = models.IntegerField(null=False, blank=False, default=0)
+    affecté = models.IntegerField(null=False, blank=False, default=0)
     stocks = models.ManyToManyField('Stock')
 
 

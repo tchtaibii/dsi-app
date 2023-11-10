@@ -1,3 +1,10 @@
+from drf_yasg import openapi
+from rest_framework import serializers
+from drf_yasg.utils import swagger_auto_schema
+from .models import Stocks, Stock
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import api_view
+import pandas as pd
 from django.shortcuts import render
 from .permissions import IsReceptionPermission
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -84,3 +91,124 @@ def stocks_by_type(request, type_name):
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
 
     return JsonResponse(data, safe=False)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@throttle_classes([UserRateThrottle])
+def stock_bc(request, id):
+    try:
+        stocks = inStock.objects.filter(id=id).first()
+        if not stocks:
+            return JsonResponse({'error': 'Stocks not found'}, status=404)
+        data = {
+            'BC': stocks.BC,
+            'fournisseur': stocks.fourniseur,
+            'entité': stocks.entité,
+            'stocks': list(stocks.stocks.values())
+        }
+    except Exception as e:
+        return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
+
+    return JsonResponse(data, safe=False)
+
+
+@api_view(['GET'])
+def count_stocks_with_null_service_tag(request, id):
+    try:
+        stocks_instance = Stocks.objects.get(id=id)
+        mark = stocks_instance.mark if len(stocks_instance.mark) > 0 else None
+        modele = stocks_instance.modele if len(
+            stocks_instance.modele) > 0 else None
+        count_stocks_with_null_service_tag = Stock.objects.filter(
+            stocks=stocks_instance,
+            serviceTag__isnull=True
+        ).count() + Stock.objects.filter(
+            stocks=stocks_instance,
+            serviceTag=''
+        ).count()
+
+        return Response({'count': count_stocks_with_null_service_tag, 'mark': mark, 'modele': modele})
+
+    except Stocks.DoesNotExist:
+        return JsonResponse({'error': 'Stocks not found'}, status=404)
+    except Stock.DoesNotExist:
+        return JsonResponse({'error': 'Stock not found'}, status=404)
+    except Exception as e:
+        # Capture the exception details and print or log them
+        print(f"An error occurred: {str(e)}")
+        return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
+
+
+class StockUpdate(serializers.Serializer):
+    mark = serializers.CharField(max_length=100, required=False)
+    modele = serializers.CharField(max_length=100, required=False)
+    # excel_file = serializers.CharField(required=False)
+
+
+@swagger_auto_schema(method='post', request_body=StockUpdate)
+@api_view(['POST'])
+def update_stock_and_stocks(request, id):
+    try:
+        mark = request.data.get('mark')
+        modele = request.data.get('modele')
+        excel_file = request.data.get('excel_file') if request.data.get(
+            'excel_file') != 'null' else None
+
+        stocks_instance = Stocks.objects.get(id=id)
+        if mark:
+            stocks_instance.mark = mark
+        if modele:
+            stocks_instance.modele = modele
+        stocks_instance.save()
+        if excel_file:
+            df = pd.read_excel(excel_file)
+            if not df.empty:
+                service_tags = df.iloc[0:, 0].tolist()
+                service_tags = [str(tag) for tag in service_tags if tag]
+                service_tags = service_tags[:stocks_instance.stocks.count()]
+                for stock, service_tag in zip(stocks_instance.stocks.all(), service_tags):
+                    if not stock.serviceTag:
+                        stock.serviceTag = service_tag
+                        stock.save()
+
+        return Response({'success': 'Stocks filled successfully'})
+    except Stocks.DoesNotExist:
+        return JsonResponse({'error': 'Stocks not found'}, status=404)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
+
+
+@api_view(['GET'])
+def get_stocks_details(request, id):
+    try:
+        stocks_instance = Stocks.objects.get(id=id)
+        type_art = stocks_instance.type
+        in_stock_instance = stocks_instance.instock_set.first()
+        
+
+        # Serialize the Stocks instance along with details of each related Stock
+        serialized_data = {
+            'id': stocks_instance.id,
+            'mark': stocks_instance.mark,
+            'modele': stocks_instance.modele,
+            'type': str(type_art),
+            'stocks': [
+                {
+                    'stock_id': stock.id,
+                    'NomPrenom': stock.NomPrenom,
+                    'Fonction': stock.Fonction,
+                    'etat': stock.etat.etat,  # Assuming you have an 'etat' field in the 'StockEtat' model
+                    'situation': stock.situation,
+                    'serviceTag': stock.serviceTag,
+                    'entité': in_stock_instance.entité if in_stock_instance else None,
+                }
+                for stock in stocks_instance.stocks.all()
+            ]
+        }
+        return Response(serialized_data)
+    except Stocks.DoesNotExist:
+        return Response({'error': 'Stocks not found'}, status=404)
+    except Exception as e:
+        return Response({'error': f'An error occurred: {str(e)}'}, status=500)

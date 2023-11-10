@@ -39,9 +39,45 @@ class CustomObject:
         self.file = file
 
 
-def create_stock():
+def update_stock(id, old_valable, achat_id):
     try:
-        achatss = Achats.objects.filter(isComplet=True)
+        if id:
+            ach = Achats.objects.filter(situation_d_achat=5, id=id).first()
+            if ach:
+                in_stock = inStock.objects.get(BC=ach.BC, entité=ach.entité)
+                achat = Achat.objects.get(id=achat_id)
+                designation = achat.article.designation
+                quantité = achat.valable
+                add_new = quantité - old_valable
+                stocks = Stocks.objects.get(designation=designation)
+                stocks.quantité = quantité
+                for i in range(add_new):
+                    if ach.typeDachat != 1:
+                        in_stock.fourniseur = ach.fourniseur
+                    else:
+                        in_stock.fourniseur = achat.article.contrat.name if achat.article.contrat else ""
+                    stock = Stock.objects.create(
+                        DateArrivage=ach.DateBL,
+                        etat=StockEtat.objects.get(etat='Stock'),
+                    )
+                    stock.save()
+                    stocks.stocks.add(stock)
+                    stocks.save()
+                in_stock.save()
+    except Exception as e:
+        print(e)
+
+
+def create_stock(id=None):
+    try:
+        achatss = []
+        if id:
+            ach = Achats.objects.filter(Q(situation_d_achat=4) | Q(
+                situation_d_achat=5), id=id).first()
+            achatss.append(ach)
+        else:
+            achatss = Achats.objects.filter(
+                Q(situation_d_achat=4) | Q(situation_d_achat=5))
         if achatss:
             for achats in achatss:
                 if achats:
@@ -53,11 +89,11 @@ def create_stock():
                     for achat in achats.achat.all():
                         stock_len = achat.valable - stock_count
                         if stock_len > 0:
-                            stocks = Stocks.objects.create(
+                            stocks, _ = Stocks.objects.get_or_create(
                                 designation=achat.article.designation,
                                 type=achat.article.type,
-                                quantité=stock_len,
                             )
+                            stocks.quantité = stock_len
                             for i in range(stock_len):
                                 if achats.typeDachat != 1:
                                     in_stock.fourniseur = achats.fourniseur
@@ -216,7 +252,10 @@ def progress(request, id):
         is_ = data.get('is_')
         # Access file directly from request data
         file_data = request.data.get('file')
-        date = datetime.strptime(request.data.get('date'), "%Y-%m-%d").date()
+        date = request.data.get('date')
+        if date:
+            date = datetime.strptime(
+                request.data.get('date'), "%Y-%m-%d").date()
         if is_ == 'DA':
             serializer = PostDaSerializer(data=data)
             if serializer.is_valid():
@@ -284,13 +323,13 @@ def progress(request, id):
                 if file_data:
                     achat.BL_File = file_path
                 for item in reste_data:
-                    achat_obj = Achat.objects.get(id=achat_id)
                     achat_id = item['id']
+                    achat_obj = Achat.objects.get(id=achat_id)
                     new_reste = int(item['reste'])
                     if new_reste > 0:
                         ResteCount = ResteCount + 1
                     achat_obj.reste = new_reste
-                    valable = achat_obj.get('quanité') - new_reste
+                    valable = achat_obj.quantité - new_reste
                     achat_obj.valable = valable
                     achat_obj.save()
                 if ResteCount == 0:
@@ -298,6 +337,7 @@ def progress(request, id):
                 else:
                     achat.situation_d_achat = SituationDachat.objects.get(id=5)
                 achat.save()
+                create_stock(id)
                 return Response({"message": "Data is valid. Process it."})
             logger.exception(f'Error in saving Achats instance: {str(e)}')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -309,17 +349,19 @@ def progress(request, id):
                 achat = Achats.objects.get(id=id)
                 achat.observation = OB
                 for item in reste_data:
-                    achat_obj = Achat.objects.get(id=achat_id)
                     achat_id = item['id']
+                    achat_obj = Achat.objects.get(id=achat_id)
+                    old_valable = achat_obj.valable
                     new_reste = int(item['reste'])
                     if new_reste < 0:
                         new_reste = 0
                     if new_reste > 0:
                         ResteCount = ResteCount + 1
                     achat_obj.reste = new_reste
-                    valable = achat_obj.get('quanité') - new_reste
+                    valable = achat_obj.quantité - new_reste
                     achat_obj.valable = valable
                     achat_obj.save()
+                    update_stock(id, old_valable, achat_id)
                 if ResteCount == 0:
                     achat.situation_d_achat = SituationDachat.objects.get(id=4)
                     achat.isComplet = True

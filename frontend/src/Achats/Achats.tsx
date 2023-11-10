@@ -307,56 +307,8 @@ const Achats = ({ SearchT }) => {
                                     setFilter(false)
                                 }} style={{ cursor: 'pointer' }}><ExitSvg /></div>
                             </div>
-                            <div className="row">
-                                <div className="inputCommande" >
-                                    <div className="inputText" onClick={() => {
-                                        setFilterAchat((state: boolean) => !state)
-                                        if (isFilterTypeArt)
-                                            setFilterArt(false)
-                                        if (isFiltersit)
-                                            setFilterSit(false)
-                                    }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
-                                        <input type="text" placeholder="Type D’achat" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.typeDachat ? TypeDachat(queryParams.typeDachat) : "Type d'achat"} />
-                                    </div>
-                                    {
-                                        isFilterTypeAchat &&
-                                        <div className="typeFilter">
-                                            <div className="contType">
-                                                {
-                                                    typeDachat.length > 0 ?
-                                                        typeDachat.map((e: any) => (
-                                                            <div key={`${e.id}-typede--y`} onClick={() => {
-                                                                setQueryParams((state: any) => ({
-                                                                    ...state,
-                                                                    typeDachat: e.id
-                                                                }))
-                                                                setFilterAchat(false);
-                                                            }} className="typeCont">
-                                                                {e.type}
-                                                            </div>
-                                                        ))
-                                                        :
-                                                        <div style={{ cursor: "initial" }} className="typeCont">
-                                                            No Type Found
-                                                        </div>
-                                                }
-                                            </div>
-
-                                        </div>
-                                    }
-                                </div>
-                                <div className="inputCommande" >
-                                    <div className="inputText" style={{ background: "#F1F1F1", border: "0.06rem solid #B43316" }}>
-                                        <input type="text" onChange={(e: any) => {
-                                            const value = e.target.value;
-                                            setQueryParams((state: any) => ({
-                                                ...state,
-                                                DA: value
-                                            }))
-                                        }} placeholder="Entrez code DA" />
-                                    </div>
-                                </div>
-                            </div>
+                            Bande de commande
+ex: 4500020380
                             <div className="row">
                                 <div className="inputCommande" >
                                     <div className="inputText" onClick={() => {
