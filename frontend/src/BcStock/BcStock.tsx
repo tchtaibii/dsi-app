@@ -140,7 +140,7 @@ const AChatU = ({ e, i }) => {
         e &&
         <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
             <div className="roww" onClick={() => {
-                // navigate(`/stocks/${bc}/${e.id}`)
+                navigate(`/produit/${e.stock_id}`)
             }} >
                 <p style={{ width: '17.2%', paddingRight: '1.4rem' }}>{e.serviceTag ? e.serviceTag : '----'}</p>
                 <p style={{ width: '16.8%' }}>{e.entité}</p>
@@ -180,10 +180,11 @@ const Bcstock = () => {
     useEffect(() => {
         setLoading(false)
         fetchDataB();
-
+        
     }, []);
     useEffect(() => {
         setLoading(true)
+        console.log(data)
     }, [data])
     return (
         !isLoading ? <Loading /> :

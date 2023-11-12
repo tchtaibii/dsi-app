@@ -185,10 +185,7 @@ def get_stocks_details(request, id):
     try:
         stocks_instance = Stocks.objects.get(id=id)
         type_art = stocks_instance.type
-        in_stock_instance = stocks_instance.instock_set.first()
-        
-
-        # Serialize the Stocks instance along with details of each related Stock
+        in_stock_instance = stocks_instance.related_instock.first()
         serialized_data = {
             'id': stocks_instance.id,
             'mark': stocks_instance.mark,
@@ -199,7 +196,7 @@ def get_stocks_details(request, id):
                     'stock_id': stock.id,
                     'NomPrenom': stock.NomPrenom,
                     'Fonction': stock.Fonction,
-                    'etat': stock.etat.etat,  # Assuming you have an 'etat' field in the 'StockEtat' model
+                    'etat': stock.etat.etat,
                     'situation': stock.situation,
                     'serviceTag': stock.serviceTag,
                     'entité': in_stock_instance.entité if in_stock_instance else None,
@@ -212,3 +209,37 @@ def get_stocks_details(request, id):
         return Response({'error': 'Stocks not found'}, status=404)
     except Exception as e:
         return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+
+
+@api_view(['GET'])
+def get_product(request, id):
+    try:
+        stock = Stock.objects.get(id=id)
+        related_stocks = stock.related_stocks.first()
+        if related_stocks:
+            in_stock_instances = related_stocks.related_instock.first()
+        serialized_data = {
+            'id': stock.id,
+            'NomPrenom': stock.NomPrenom,
+            'Fonction': stock.Fonction,
+            'etat': str(stock.etat),
+            'situation': stock.situation,
+            'DateArrivage': stock.DateArrivage,
+            'DateDaffectation': stock.DateDaffectation,
+            'serviceTag': stock.serviceTag,
+            'affected_by': stock.affected_by,
+            # 'designation': related_stocks.designation,
+            'mark': related_stocks.mark,
+            'modele': related_stocks.modele,
+            'type': str(related_stocks.type),
+            'BC': in_stock_instances.BC,
+            'entité': in_stock_instances.entité,
+        }
+        return JsonResponse(serialized_data)
+        # else:
+        #     return JsonResponse({'error': 'No related Stocks instance found'}, status=404)
+
+    except Stock.DoesNotExist:
+        return JsonResponse({'error': 'Stock not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

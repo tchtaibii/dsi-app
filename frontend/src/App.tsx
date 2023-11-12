@@ -15,7 +15,8 @@ import BcStock from './BcStock/BcStock'
 // import Products from './Products/Products'
 // import Product from './Product/Product'
 import Profile from './Profile/Profile'
-import Customer from './Customer/Customer'
+import Produit from './Produit/Produit'
+// import Customer from './Customer/Customer'
 import Settings from './Settings/Settings'
 import Login from './Login/Login'
 import Loading from './Loading/Loading'
@@ -73,6 +74,8 @@ function App() {
 											</>
 										}
 										<Route path="profile" element={<Profile />} />
+										<Route path="produit/:id" element={<Produit />} />
+
 										<Route path="Profile/id" element={<Profile />} />
 										<Route path="Settings" element={<Settings />} />
 										<Route path="stock/:type?" element={<Stock />} />
