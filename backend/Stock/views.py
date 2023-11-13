@@ -1,3 +1,7 @@
+from rest_framework import status
+from django.utils import timezone
+from datetime import datetime, timedelta
+import logging
 from drf_yasg import openapi
 from rest_framework import serializers
 from drf_yasg.utils import swagger_auto_schema
@@ -9,7 +13,7 @@ from django.shortcuts import render
 from .permissions import IsReceptionPermission
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import Stock, inStock, StockEtat, Stocks
+from .models import Stock, inStock, StockEtat, Stocks, StockSituation
 from rest_framework.throttling import UserRateThrottle
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -120,22 +124,16 @@ def count_stocks_with_null_service_tag(request, id):
         mark = stocks_instance.mark if len(stocks_instance.mark) > 0 else None
         modele = stocks_instance.modele if len(
             stocks_instance.modele) > 0 else None
-        count_stocks_with_null_service_tag = Stock.objects.filter(
-            stocks=stocks_instance,
+        related_stocks = stocks_instance.stocks.all()
+        count_stocks_with_null_service_tag = related_stocks.filter(
             serviceTag__isnull=True
-        ).count() + Stock.objects.filter(
-            stocks=stocks_instance,
+        ).count() + related_stocks.filter(
             serviceTag=''
         ).count()
-
         return Response({'count': count_stocks_with_null_service_tag, 'mark': mark, 'modele': modele})
-
     except Stocks.DoesNotExist:
         return JsonResponse({'error': 'Stocks not found'}, status=404)
-    except Stock.DoesNotExist:
-        return JsonResponse({'error': 'Stock not found'}, status=404)
     except Exception as e:
-        # Capture the exception details and print or log them
         print(f"An error occurred: {str(e)}")
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
 
@@ -180,6 +178,9 @@ def update_stock_and_stocks(request, id):
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
 
 
+logger = logging.getLogger(__name__)
+
+
 @api_view(['GET'])
 def get_stocks_details(request, id):
     try:
@@ -197,7 +198,7 @@ def get_stocks_details(request, id):
                     'NomPrenom': stock.NomPrenom,
                     'Fonction': stock.Fonction,
                     'etat': stock.etat.etat,
-                    'situation': stock.situation,
+                    'situation': stock.situation_id,
                     'serviceTag': stock.serviceTag,
                     'entité': in_stock_instance.entité if in_stock_instance else None,
                 }
@@ -205,6 +206,8 @@ def get_stocks_details(request, id):
             ]
         }
         return Response(serialized_data)
+    except Exception as e:
+        logger.exception(f'Error in retrieving achats data: {e}')
     except Stocks.DoesNotExist:
         return Response({'error': 'Stocks not found'}, status=404)
     except Exception as e:
@@ -223,7 +226,7 @@ def get_product(request, id):
             'NomPrenom': stock.NomPrenom,
             'Fonction': stock.Fonction,
             'etat': str(stock.etat),
-            'situation': stock.situation,
+            'situation': stock.situation_id,
             'DateArrivage': stock.DateArrivage,
             'DateDaffectation': stock.DateDaffectation,
             'serviceTag': stock.serviceTag,
@@ -233,13 +236,69 @@ def get_product(request, id):
             'modele': related_stocks.modele,
             'type': str(related_stocks.type),
             'BC': in_stock_instances.BC,
+            'fourniseur': in_stock_instances.fourniseur,
             'entité': in_stock_instances.entité,
         }
         return JsonResponse(serialized_data)
-        # else:
-        #     return JsonResponse({'error': 'No related Stocks instance found'}, status=404)
-
     except Stock.DoesNotExist:
         return JsonResponse({'error': 'Stock not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+def get_situation_stock(request):
+    types = StockSituation.objects.all()
+    types = types.values('id', 'situation')
+    types_list = list(types)
+    return JsonResponse(types_list, safe=False)
+
+
+@api_view(['POST'])
+@throttle_classes([UserRateThrottle])
+def affected_produit(request, id):
+    try:
+        stock = Stock.objects.get(id=id)
+        if stock:
+            data = request.data
+            nom = data.get('nom')
+            entite = data.get('entité')
+            date_pobj = data.get('date')
+            date = datetime.strptime(date_pobj, "%Y-%m-%d")
+            fonction = data.get('fonction')
+            situation = data.get('situation')
+
+            if not (nom and isinstance(nom, str) and entite and isinstance(entite, str) and fonction and isinstance(fonction, str) and situation and isinstance(situation, int)
+                    and date_pobj and date.time() == timezone.datetime.min.time()):
+                return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
+
+            requester_name = request.user.first_name + ' ' + request.user.last_name
+
+            stock.NomPrenom = nom
+            stock.DateDaffectation = date
+            stock.Fonction = fonction
+            stock.situation_id = situation
+            stock.etat_id = 2
+            stock.affected_by = requester_name
+
+            stock.save()
+
+            related_stock = stock.related_stocks.first()
+            if related_stock:
+                related_stock.affecté += 1
+                related_stock.save()
+
+            in_stock_instance = related_stock.related_instock.first()
+            if in_stock_instance:
+                in_stock_instance.entité = entite
+                in_stock_instance.save()
+
+            return Response("Stock updated successfully", status=status.HTTP_200_OK)
+
+    except Stock.DoesNotExist:
+        return Response({'error': 'Stock not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.exception(f'Error updating stock: {e}')
+        return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

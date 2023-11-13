@@ -136,6 +136,26 @@ const Edits = ({ id, setEdits }) => {
 
 const AChatU = ({ e, i }) => {
     let navigate = useNavigate();
+    const Situation = (sda: number) => {
+        switch (sda) {
+            case 1:
+                return "NV";
+            case 2:
+                return "RN"
+            case 3:
+                return "DT"
+            case 4:
+                return "ENT"
+            case 5:
+                return "DP"
+            case 6:
+                return "Présentation"
+            case 7:
+                return "ST"
+            default:
+                return 'Situation..'
+        }
+    }
     return (
         e &&
         <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
@@ -147,7 +167,7 @@ const AChatU = ({ e, i }) => {
                 <p style={{ width: '25%' }}>{e.NomPrenom ? e.NomPrenom : "----"}</p>
                 <p style={{ width: '20.5%' }}>{e.Fonction ? e.Fonction : '----'}</p>
                 <p style={{ width: '11%' }}>{e.etat}</p>
-                <p style={{ width: 'fit-content' }}>{e.situation ? e.situation : '---'}</p>
+                <p style={{ width: 'fit-content' }}>{e.situation ? Situation(e.situation) : '---'}</p>
             </div>
         </div>
 

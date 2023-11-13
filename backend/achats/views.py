@@ -4,7 +4,6 @@ import numpy as np
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
 from Stock.models import inStock, Stock, StockEtat, Stocks
-from datetime import timedelta
 from docx import Document
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -95,10 +94,6 @@ def create_stock(id=None):
                             )
                             stocks.quantité = stock_len
                             for i in range(stock_len):
-                                if achats.typeDachat != 1:
-                                    in_stock.fourniseur = achats.fourniseur
-                                else:
-                                    in_stock.fourniseur = achat.article.contrat.name if achat.article.contrat else ""
                                 stock = Stock.objects.create(
                                     DateArrivage=achats.DateBL,
                                     etat=StockEtat.objects.get(etat='Stock'),
@@ -106,6 +101,13 @@ def create_stock(id=None):
                                 stock.save()
                                 stocks.stocks.add(stock)
                                 stocks.save()
+                            if str(achats.typeDachat) == 'Accord Cadre':
+                                in_stock.fourniseur = achat.article.contrat.name
+                            else:
+                                in_stock.fourniseur = achats.fourniseur
+                            #     print('====>',achat.article.contrat.name)
+
+                            in_stock.save()
                             in_stock.stocks.add(stocks)
                             in_stock.save()
     except Exception as e:
@@ -510,7 +512,6 @@ def get_achat(request, id):
 @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_types_achat(request):
-    print('helod')
     types = TypeDachat.objects.all()
     types = types.values('id', 'type')
     types_list = list(types)
@@ -923,17 +924,19 @@ def add_achats_file(request):
                                 situation: 4
                                 if row["Situation d'achat"] == 'Livraison partielle':
                                     situation = 5
-                # achat infectation
                 achats_instance = Achats.objects.create(
-                    DA=str(row['DA']).split('.')[0],
-                    BC=str(row['BC']).split('.')[0],
-                    BL=str(row['BL']).split('.')[0],
+                    DA=str(row['DA']).split('.')[0] if str(
+                        row['DA']).split('.')[0] != 'None' else None,
+                    BC=str(row['BC']).split('.')[0] if str(
+                        row['BC']).split('.')[0] != 'None' else None,
+                    BL=str(row['BL']).split('.')[0] if str(
+                        row['BL']).split('.')[0] != 'None' else None,
                     demandeur=row['Demandeur'],
                     entité=row['Entité'],
                     ligne_bugetaire=row['Ligne bugétaire'],
                     DateDeCommande=DateDeCommande,
                     typeDachat=TypeDachat.objects.get(
-                        type=row["Type d'achat"]),
+                        type=row["Type d'achat"].strip()),
                     situation_d_achat=SituationDachat.objects.get(
                         id=situation),
                     DateDA=DateDA,
@@ -948,7 +951,6 @@ def add_achats_file(request):
                     achats_instance.isComplet = True
             achats_instance.save()
             if row["Type d'achat"] == 'Accord Cadre':
-                print('code d"article  ==== >', str(row["Code"]))
                 achat_code = str(row["Code"])
                 if achat_code and isinstance(achat_code, str):
                     article = Article.objects.filter(

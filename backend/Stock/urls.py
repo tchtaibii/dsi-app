@@ -14,5 +14,8 @@ urlpatterns = [
     path('get_stocks_details/<str:id>',
          views.get_stocks_details, name='get_stocks_details'),
     path('get_product/<str:id>', views.get_product, name='get_product'),
+    path('affected_produit/<str:id>', views.affected_produit, name='affected_produit'),
+    path('get_situation_stock/', views.get_situation_stock, name='get_situation_stock'),
+    
 
 ]

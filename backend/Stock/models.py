@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import CustomUser
 
+
 class StockEtat(models.Model):
     etat = models.CharField(
         max_length=50, default='Stock', blank=False, null=False)
@@ -9,11 +10,19 @@ class StockEtat(models.Model):
         return self.etat
 
 
+class StockSituation(models.Model):
+    situation = models.CharField(
+        max_length=50, default=None, blank=True, null=True)
+
+    def __str__(self):
+        return self.situation
+
+
 class Stock(models.Model):
     NomPrenom = models.CharField(max_length=100, null=True, blank=True)
     Fonction = models.CharField(max_length=50, null=True, blank=True)
     etat = models.ForeignKey('StockEtat', on_delete=models.CASCADE)
-    situation = models.CharField(max_length=100, null=True, blank=True)
+    situation = models.ForeignKey('StockSituation', on_delete=models.CASCADE)
     DateArrivage = models.DateField(null=True, blank=True)
     DateDaffectation = models.DateField(null=True, blank=True)
     serviceTag = models.CharField(max_length=50, null=True, blank=True)
@@ -35,6 +44,3 @@ class inStock(models.Model):
     fourniseur = models.CharField(max_length=30, null=True, blank=True)
     entité = models.CharField(max_length=50, null=False, blank=False)
     stocks = models.ManyToManyField('Stocks', related_name='related_instock')
-
-
-
