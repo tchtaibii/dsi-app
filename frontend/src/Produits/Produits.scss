@@ -1,0 +1,56 @@
+@import '../tools.scss';
+
+
+table.blueTable {
+    border: 0.05rem solid $primary-color;
+    background-color: $back-color;
+    width: 100%; // 200% in rems might need context or adjustment
+    text-align: left;
+    border-collapse: collapse;
+  
+    td, th {
+      border: 0.05rem solid #aaaaaa; // Remaining borders in px
+      padding: 0.4375rem 0.125rem; // Converted from px to rem
+    }
+  
+    tbody td {
+      font-size: 0.8125rem; // Converted from px to rem
+    }
+
+    tr {
+        cursor: pointer;
+    }
+    tr:nth-child(even) {
+      background: $dark-color;
+    }
+  
+    thead {
+      background: $primary-color;
+      // Gradient background - would need specific gradient functions for rems
+    }
+  
+    th {
+      font-size: 1.125rem; // Converted from px to rem
+      font-weight: bold;
+      color: #ffffff; // Color left as is
+      border-left: 0rem solid #d0e4f5; // Converted from px to rem
+      &:first-child {
+        border-left: none;
+      }
+    }
+  
+    tfoot td {
+      font-size: 0.875rem; // Converted from px to rem
+    }
+  
+    tfoot .links {
+      text-align: right;
+      a {
+        display: inline-block;
+        background: $nav-color;
+        color: #ffffff; // Color left as is
+        padding: 0.25rem 0.5rem; // Converted from px to rem
+        border-radius: 0.3125rem; // Converted from px to rem
+      }
+    }
+  }

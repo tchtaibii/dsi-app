@@ -13,7 +13,7 @@
     overflow: hidden;
     background: rgba(167, 167, 169, 0.18);
     backdrop-filter: blur(3px);
-    z-index: 9999999999;
+    z-index: 999999;
 
     .edit {
         width: 68.375rem;
@@ -50,5 +50,26 @@
             }
         }
 
+    }
+}
+
+select {
+    outline: none;
+    width: 5rem;
+    height: 2rem;
+    border: 0.06rem solid $nav-color;
+    border-radius: 0.7rem;
+    padding: 0.3rem;
+    background-color: $dark-color;
+    font-size: 1rem;
+
+    option {
+        border-radius: 1rem;
+        &:hover {
+            /* Custom background color on hover */
+            background-color: $nav-color;
+            /* Custom text color on hover */
+            color: black;
+        }
     }
 }

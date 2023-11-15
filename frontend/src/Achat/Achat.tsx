@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
 import { useParams, useNavigate } from 'react-router-dom';
 import Loading from '../Loading/Loading';
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
 
 
 const DeleteSvg = () => (
@@ -110,7 +112,7 @@ const Achat = () => {
     const navigate = useNavigate()
     const [isLoading, setLoading] = useState(false)
     const [deleteTab, setDelete] = useState(false);
-
+    const my = useRecoilValue(myData)
     return (
 
 
@@ -142,15 +144,19 @@ const Achat = () => {
                         <>
                             <div style={{ justifyContent: "space-between", alignItems: 'center' }} className="header">
                                 <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.demandeur}`}</h1>
-                                <div className="btnAchats">
-                                    <div onClick={() => {
+                                {
+                                    my.is_achat_manager &&
+                                    <div className="btnAchats">
+                                        <div onClick={() => {
 
-                                        navigate(`/commandes/${id}`)
-                                    }} className="Edits"><Edits /></div>
-                                    <div onClick={() => {
-                                        setDelete(true)
-                                    }} className="Edits"><DeleteSvg /></div>
-                                </div>
+                                            navigate(`/commandes/${id}`)
+                                        }} className="Edits"><Edits /></div>
+                                        <div onClick={() => {
+                                            setDelete(true)
+                                        }} className="Edits"><DeleteSvg /></div>
+                                    </div>
+                                }
+
                             </div>
                             <div className="main">
                                 <table style={{ borderCollapse: "none", borderSpacing: "0" }} className="TableAchat">

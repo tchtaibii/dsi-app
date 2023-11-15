@@ -1,4 +1,11 @@
 # views.py
+from django.db import transaction
+import re
+from django.core.mail import send_mail
+import string
+import random
+from django.http import JsonResponse
+from .decorators import validate_access_token
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -15,52 +22,66 @@ from rest_framework.parsers import MultiPartParser
 from drf_yasg import openapi
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.views.decorators.http import require_http_methods
-
-
 from drf_yasg.utils import swagger_auto_schema
+import logging
 
-import logging  # Import the logging module
-
-# Define the logger
 logger = logging.getLogger(__name__)
 
 
 @swagger_auto_schema(methods=['post'], request_body=CustomUserSerializer)
+@permission_classes([IsAuthenticated, IsSuperuserPermission])
 @api_view(['POST'])
-@permission_classes([IsSuperuserPermission])
 @throttle_classes([UserRateThrottle])
 def user_registration(request):
     try:
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
-            # Extract the password from the request data
-            password = request.data.get('password')
+            email = serializer.validated_data['email']
+            if not is_valid_email(email):
+                return Response("Invalid email format", status=status.HTTP_400_BAD_REQUEST)
 
-            # Create a new user instance
-            user = CustomUser(email=serializer.validated_data['email'],
-                              first_name=serializer.validated_data['first_name'],
-                              last_name=serializer.validated_data['last_name'],
-                              mobile=serializer.validated_data['mobile'],
-                              proffession=serializer.validated_data['proffession'])
+            length = 10
+            chars = string.ascii_letters + string.digits + string.punctuation
+            generated_password = ''.join(random.choice(chars)
+                                         for _ in range(length))
 
-            # Set and hash the password using set_password
-            user.set_password(password)
-
-            # Save the user object
-            user.save()
-
-            # Now the password is hashed and stored securely
-
-            refresh = RefreshToken.for_user(user)
-            token = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-            return Response(token, status=status.HTTP_201_CREATED)
+            with transaction.atomic():
+                user = CustomUser(
+                    email=email,
+                    first_name=serializer.validated_data['first_name'],
+                    last_name=serializer.validated_data['last_name'],
+                    is_superuser=serializer.validated_data['is_superuser'],
+                    is_reception=serializer.validated_data['is_reception'],
+                    is_achat_manager=serializer.validated_data['is_achat_manager'],
+                    agent_affectation=serializer.validated_data['agent_affectation']
+                )
+                user.set_password(generated_password)
+                user.save()
+                send_mail(
+                    'Your Account Details',
+                    f'Your Email: {user.email}<br>Your password: {generated_password}<br>Please change your password after login',
+                    'tehsusrhist@gmail.com',
+                    [user.email],
+                    fail_silently=False,
+                    html_message=f'Your Email: {user.email}<br>Your password: {generated_password}<br>Please change your password after login',
+                )
+                refresh = RefreshToken.for_user(user)
+                token = {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+                return Response(token, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
+        if 'user' in locals() and user:
+            user.delete()
         return Response("An error occurred on the server.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def is_valid_email(email):
+    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    return re.match(pattern, email) is not None
 
 
 @swagger_auto_schema(methods=['post'], request_body=LoginSerializer)
@@ -222,9 +243,6 @@ class LogoutView(APIView):
 
         return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
 
-from django.http import JsonResponse
-from rest_framework.views import APIView
-from .decorators import validate_access_token
 
 class MyProtectedView(APIView):
     @validate_access_token

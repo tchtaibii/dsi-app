@@ -5,8 +5,8 @@ from .models import CustomUser
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('email', 'password', 'first_name',
-                  'last_name', 'mobile', 'proffession')
+        fields = ('email', 'first_name',
+                  'last_name', 'is_superuser', 'is_reception', 'is_achat_manager', 'agent_affectation')
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
@@ -23,11 +23,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         instance.first_name = validated_data.get(
             'first_name', instance.first_name)
 
-        # Update last name if provided
         instance.last_name = validated_data.get(
             'last_name', instance.last_name)
 
-        # Save the updated user instance
         instance.save()
         return instance
 
@@ -51,4 +49,4 @@ class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('email', 'avatar', 'first_name',
-                  'last_name', 'mobile', 'proffession', 'is_achat_manager', 'is_reception')
+                  'last_name', 'is_achat_manager', 'is_reception', 'is_superuser', 'agent_affectation')

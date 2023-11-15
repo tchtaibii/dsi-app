@@ -31,10 +31,10 @@ const Profile = () => {
                         <img src={data.avatar ? data.avatar : DefaultPhoto} className="profilePhoto" />
                         <div className='infoText'>
                             <h1 style={{ textTransform: 'capitalize' }}>{`${data.first_name} ${data.last_name}`}</h1>
-                            <h3 style={{ textTransform: 'capitalize' }}>{data.proffession}</h3>
+                            {/* <h3 style={{ textTransform: 'capitalize' }}>{data.proffession}</h3> */}
                             <div className="phoneNumber">
                                 <PhoneSvg />
-                                {data.mobile}
+                                {/* {data.mobile} */}
                             </div>
                             <div className="emailP">
                                 <PhoneSvg />

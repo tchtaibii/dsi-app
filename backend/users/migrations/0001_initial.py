@@ -23,8 +23,6 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(db_index=True, max_length=250, unique=True)),
                 ('first_name', models.CharField(max_length=100)),
                 ('last_name', models.CharField(max_length=100)),
-                ('mobile', models.CharField(max_length=15, unique=True)),
-                ('proffession', models.CharField(max_length=70)),
                 ('avatar', models.ImageField(blank=True, null=True, upload_to='profile/')),
                 ('is_staff', models.BooleanField(default=False)),
                 ('is_active', models.BooleanField(default=True)),

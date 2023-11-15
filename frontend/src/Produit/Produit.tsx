@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import axios from '../Interceptor'
 import { useParams, useNavigate } from 'react-router-dom';
 import Loading from '../Loading/Loading';
-
+import Error from '../Error';
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
 
 const DeleteSvg = () => (
     <svg style={{
@@ -38,6 +40,7 @@ const Edits = () => (
 
 
 const Produit = () => {
+    const my = useRecoilValue(myData)
     const [Data, setData] = useState<any | null>(null)
     const { id } = useParams()
     const [isSituation, setIsst] = useState<boolean>(false)
@@ -49,10 +52,13 @@ const Produit = () => {
         date: string | null;
         situation: number | null;
     }
-    const navigate = useNavigate()
+    const [statusCode, setStatuss] = useState({
+        color: "#AF4C4C",
+        status: "Failed",
+        text: "Wrong Inputs",
+        is: false
+    })
     const [isLoading, setLoading] = useState(false)
-    const [deleteTab, setDelete] = useState(false);
-
     const [queryParams, setQuery] = useState<Querry>({
         nom: null,
         entité: null,
@@ -80,6 +86,7 @@ const Produit = () => {
                 return 'Situation..'
         }
     }
+
     const [isAffect, setAffect] = useState(false)
     useEffect(() => {
         const fetchData = async () => {
@@ -103,110 +110,138 @@ const Produit = () => {
             fetchData()
     }, [isAffect])
     return (
-
-
         !isLoading ? <Loading /> :
             <div className='ContentMain'>
-                {
-                    isAffect &&
-                    <div className="filter">
-                        <div className="filterBox">
-                            <div className="header">
-                                <h1>Affecté</h1>
-                                <div onClick={() => {
-                                }} style={{ cursor: 'pointer' }}>
-                                    {/* <ExitSvg /> */}
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="inputCommande" >
-                                    <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.nom ? queryParams.nom : null}>
-                                        <input type="text" onChange={(e: any) => {
-                                            const value = e.target.value;
-                                            setQuery((state: Querry) => ({ ...state, nom: value }))
-                                        }} placeholder="Nom & Prénom" />
+                <>
+                    {
+                        statusCode.is &&
+                        <Error statusCode={statusCode} setStatus={setStatuss} />
+                    }
+                    {
+                        isAffect &&
+                        <div className="filter">
+                            <div className="filterBox">
+                                <div className="header">
+                                    <h1>Affecté</h1>
+                                    <div onClick={() => {
+                                    }} style={{ cursor: 'pointer' }}>
+                                        {/* <ExitSvg /> */}
                                     </div>
                                 </div>
-                                <div className="inputCommande" >
-                                    <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.entité ? queryParams.entité : null}>
-                                        <input type="text" onChange={(e: any) => {
-                                            const value = e.target.value;
-                                            setQuery((state: Querry) => ({ ...state, entité: value }))
-                                        }} placeholder="Entité" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="inputCommande" >
-                                    <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.fonction ? queryParams.fonction : null}>
-                                        <input type="text" onChange={(e: any) => {
-                                            const value = e.target.value;
-                                            setQuery((state: Querry) => ({ ...state, fonction: value }))
-                                        }} placeholder="Fonction" />
-                                    </div>
-                                </div>
-                                <div className="inputCommande" >
-                                    <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.date ? queryParams.date : null}>
-                                        <input type="date" onChange={(e: any) => {
-                                            const value = e.target.value;
-                                            setQuery((state: Querry) => ({ ...state, date: value }))
-                                        }} placeholder="Date d'affectation" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="inputCommande" >
-                                    <div className="inputText" onClick={() => {
-                                        setIsst((state: boolean) => !state)
-                                    }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
-                                        <input type="text" placeholder="Situation" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.situation ? Situation(queryParams.situation) : "Situation"} />
-                                    </div>
-                                    {
-                                        isSituation &&
-                                        <div className="typeFilter">
-                                            <div className="contType">
-                                                {
-                                                    (SituationStock && SituationStock.length > 0) ?
-                                                        SituationStock.map((e: any) => (
-                                                            <div key={`${e.id}-typede--y`} onClick={() => {
-                                                                setQuery((state: Querry) => ({ ...state, situation: e.id }))
-                                                            }} className="typeCont">
-                                                                {e.situation}
-                                                            </div>
-                                                        ))
-                                                        :
-                                                        <div style={{ cursor: "initial" }} className="typeCont">
-                                                            No Situation Found
-                                                        </div>
-                                                }
-                                            </div>
-
+                                <div className="row">
+                                    <div className="inputCommande" >
+                                        <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.nom ? queryParams.nom : null}>
+                                            <input type="text" onChange={(e: any) => {
+                                                const value = e.target.value;
+                                                setQuery((state: Querry) => ({ ...state, nom: value }))
+                                            }} placeholder="Nom & Prénom" />
                                         </div>
-                                    }
+                                    </div>
+                                    <div className="inputCommande" >
+                                        <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.entité ? queryParams.entité : null}>
+                                            <input type="text" onChange={(e: any) => {
+                                                const value = e.target.value;
+                                                setQuery((state: Querry) => ({ ...state, entité: value }))
+                                            }} placeholder="Entité" />
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
-                                <button onClick={async () => {
-                                    axios.post(`/stock/affected_produit/${id}`, queryParams).then((rsp) => {
-                                        window.location.reload();
-                                    }).catch((error) => console.log(error))
-                                }}>Submit</button>
-                                <button onClick={() => {
-                                    setAffect(false);
-                                }}>Cancel</button>
+                                <div className="row">
+                                    <div className="inputCommande" >
+                                        <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.fonction ? queryParams.fonction : null}>
+                                            <input type="text" onChange={(e: any) => {
+                                                const value = e.target.value;
+                                                setQuery((state: Querry) => ({ ...state, fonction: value }))
+                                            }} placeholder="Fonction" />
+                                        </div>
+                                    </div>
+                                    <div className="inputCommande" >
+                                        <div className="inputText" style={{ background: "transparent", border: "0.06rem solid #B43316" }} value={queryParams.date ? queryParams.date : null}>
+                                            <input type="date" onChange={(e: any) => {
+                                                const value = e.target.value;
+                                                setQuery((state: Querry) => ({ ...state, date: value }))
+                                            }} placeholder="Date d'affectation" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="inputCommande" >
+                                        <div className="inputText" onClick={() => {
+                                            setIsst((state: boolean) => !state)
+                                        }} style={{ background: 'linear-gradient(180deg, #BABABA 0%, rgba(74, 74, 74, 0.00) 99.99%, rgba(255, 255, 255, 0.00) 100%)', border: "0.06rem solid #B43316" }}>
+                                            <input type="text" placeholder="Situation" style={{ cursor: "pointer", caretColor: 'transparent' }} readOnly={true} value={queryParams.situation ? Situation(queryParams.situation) : "Situation"} />
+                                        </div>
+                                        {
+                                            isSituation &&
+                                            <div className="typeFilter">
+                                                <div className="contType">
+                                                    {
+                                                        (SituationStock && SituationStock.length > 0) ?
+                                                            SituationStock.map((e: any) => (
+                                                                <div key={`${e.id}-typede--y`} onClick={() => {
+                                                                    setQuery((state: Querry) => ({ ...state, situation: e.id }))
+                                                                    setIsst(false)
+                                                                }} className="typeCont">
+                                                                    {e.situation}
+                                                                </div>
+                                                            ))
+                                                            :
+                                                            <div style={{ cursor: "initial" }} className="typeCont">
+                                                                No Situation Found
+                                                            </div>
+                                                    }
+                                                </div>
+
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
+                                    <button onClick={async () => {
+                                        console.log(queryParams.date)
+                                        if (queryParams.nom && queryParams.entité && queryParams.fonction && queryParams.date && queryParams.situation) {
+                                            axios.post(`/stock/affected_produit/${id}`, queryParams).then((rsp) => {
+                                                window.location.reload();
+                                            }).catch((error) => {
+                                                setStatuss({
+                                                    color: "#AF4C4C",
+                                                    status: "Failed!",
+                                                    text: "Wrong Inputs",
+                                                    is: true
+                                                });
+                                            })
+                                        }
+                                        else {
+                                            setStatuss({
+                                                color: "#AF4C4C",
+                                                status: "Failed!",
+                                                text: "Wrong Inputs",
+                                                is: true
+                                            });
+                                        }
+
+                                    }}>Submit</button>
+                                    <button onClick={() => {
+                                        setAffect(false);
+                                    }}>Cancel</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                }
+                    }
+                </>
                 {
                     Data !== null ?
                         <>
                             <div style={{ justifyContent: "space-between", alignItems: 'center' }} className="header">
                                 <h1 style={{ color: "#B43316", textTransform: 'capitalize' }}>{`${Data.serviceTag ? Data.serviceTag : '----'}`}</h1>
                                 <div className="btnAchats">
-                                    <button onClick={() => {
-                                        setAffect(true);
-                                    }}>{'Affecté ->'}</button>
+                                    {
+                                        my.agent_affectation &&
+                                        <button onClick={() => {
+                                            setAffect(true);
+                                        }}>{Data.etat === 'Stock' ? 'Affecté ->' : 'Edit ->'}</button>
+                                    }
+
                                 </div>
                             </div>
                             <div className="main">

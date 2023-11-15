@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -154,9 +155,9 @@ def update_stock_and_stocks(request, id):
             'excel_file') != 'null' else None
 
         stocks_instance = Stocks.objects.get(id=id)
-        if mark:
+        if mark and mark != 'null':
             stocks_instance.mark = mark
-        if modele:
+        if modele and modele != 'null':
             stocks_instance.modele = modele
         stocks_instance.save()
         if excel_file:
@@ -182,6 +183,7 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def get_stocks_details(request, id):
     try:
         stocks_instance = Stocks.objects.get(id=id)
@@ -200,7 +202,7 @@ def get_stocks_details(request, id):
                     'etat': stock.etat.etat,
                     'situation': stock.situation_id,
                     'serviceTag': stock.serviceTag,
-                    'entité': in_stock_instance.entité if in_stock_instance else None,
+                    'entité': in_stock_instance.entité if in_stock_instance else None
                 }
                 for stock in stocks_instance.stocks.all()
             ]
@@ -208,19 +210,19 @@ def get_stocks_details(request, id):
         return Response(serialized_data)
     except Exception as e:
         logger.exception(f'Error in retrieving achats data: {e}')
-    except Stocks.DoesNotExist:
         return Response({'error': 'Stocks not found'}, status=404)
-    except Exception as e:
-        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
 @api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def get_product(request, id):
     try:
         stock = Stock.objects.get(id=id)
         related_stocks = stock.related_stocks.first()
         if related_stocks:
             in_stock_instances = related_stocks.related_instock.first()
+        affected_by_first_name = stock.affected_by.first_name if stock.affected_by else None
+        affected_by_last_name = stock.affected_by.last_name if stock.affected_by else None
         serialized_data = {
             'id': stock.id,
             'NomPrenom': stock.NomPrenom,
@@ -228,9 +230,9 @@ def get_product(request, id):
             'etat': str(stock.etat),
             'situation': stock.situation_id,
             'DateArrivage': stock.DateArrivage,
-            'DateDaffectation': stock.DateDaffectation,
             'serviceTag': stock.serviceTag,
-            'affected_by': stock.affected_by,
+            'affected_by': affected_by_first_name + affected_by_last_name,
+            'DateDaffectation': stock.DateDaffectation,
             # 'designation': related_stocks.designation,
             'mark': related_stocks.mark,
             'modele': related_stocks.modele,
@@ -265,24 +267,19 @@ def affected_produit(request, id):
             data = request.data
             nom = data.get('nom')
             entite = data.get('entité')
-            date_pobj = data.get('date')
-            date = datetime.strptime(date_pobj, "%Y-%m-%d")
             fonction = data.get('fonction')
             situation = data.get('situation')
-
-            if not (nom and isinstance(nom, str) and entite and isinstance(entite, str) and fonction and isinstance(fonction, str) and situation and isinstance(situation, int)
-                    and date_pobj and date.time() == timezone.datetime.min.time()):
+            if not (nom and isinstance(nom, str) and entite and isinstance(entite, str) and fonction and isinstance(fonction, str) and situation and isinstance(situation, int)):
                 return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
 
-            requester_name = request.user.first_name + ' ' + request.user.last_name
+            requester_name = request.user
 
             stock.NomPrenom = nom
-            stock.DateDaffectation = date
             stock.Fonction = fonction
             stock.situation_id = situation
             stock.etat_id = 2
             stock.affected_by = requester_name
-
+            stock.DateDaffectation = timezone.now()
             stock.save()
 
             related_stock = stock.related_stocks.first()
@@ -302,3 +299,60 @@ def affected_produit(request, id):
     except Exception as e:
         logger.exception(f'Error updating stock: {e}')
         return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FilterStock(serializers.Serializer):
+    query = serializers.CharField(max_length=100, required=True)
+
+
+@swagger_auto_schema(method='get', query_serializery=FilterStock)
+@api_view(['GET'])
+def filter_stocks(request, string=None):
+    try:
+        search_query = string
+        if (search_query == None):
+            stocks = Stock.objects.all()
+        else:
+            stocks = Stock.objects.filter(
+                Q(NomPrenom__icontains=search_query) |
+                Q(Fonction__icontains=search_query) |
+                Q(serviceTag__icontains=search_query) |
+                Q(affected_by__icontains=search_query) |
+                Q(related_stocks__designation__icontains=search_query) |
+                Q(related_stocks__mark__icontains=search_query) |
+                Q(related_stocks__modele__icontains=search_query) |
+                Q(related_stocks__type__type__icontains=search_query) |
+                Q(related_stocks__related_instock__BC__icontains=search_query) |
+                Q(related_stocks__related_instock__fourniseur__icontains=search_query) |
+                Q(related_stocks__related_instock__entité__icontains=search_query)
+            ).distinct()
+
+        serialized_data = []
+        for stock in stocks:
+            related_stocks = stock.related_stocks.first()
+            in_stock_instances = related_stocks.related_instock.first() if related_stocks else None
+            affected_by_first_name = stock.affected_by.first_name if stock.affected_by else None
+            affected_by_last_name = stock.affected_by.last_name if stock.affected_by else None
+            data = {
+                'id': stock.id,
+                'NomPrenom': stock.NomPrenom,
+                'Fonction': stock.Fonction,
+                'etat': str(stock.etat),
+                'situation': stock.situation_id,
+                'DateArrivage': stock.DateArrivage,
+                'DateDaffectation': stock.DateDaffectation,
+                'serviceTag': stock.serviceTag,
+                'affected_by': affected_by_first_name + affected_by_last_name,
+                'affected_by_id':  stock.affected_by,
+                'mark': related_stocks.mark if related_stocks else None,
+                'modele': related_stocks.modele if related_stocks else None,
+                'type': str(related_stocks.type) if related_stocks else None,
+                'BC': in_stock_instances.BC if in_stock_instances else None,
+                'fourniseur': in_stock_instances.fourniseur if in_stock_instances else None,
+                'entité': in_stock_instances.entité if in_stock_instances else None,
+            }
+            serialized_data.append(data)
+
+        return JsonResponse(serialized_data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

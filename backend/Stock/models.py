@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.utils import timezone
 from django.db import models
 from users.models import CustomUser
 
@@ -24,9 +26,10 @@ class Stock(models.Model):
     etat = models.ForeignKey('StockEtat', on_delete=models.CASCADE)
     situation = models.ForeignKey('StockSituation', on_delete=models.CASCADE)
     DateArrivage = models.DateField(null=True, blank=True)
-    DateDaffectation = models.DateField(null=True, blank=True)
     serviceTag = models.CharField(max_length=50, null=True, blank=True)
-    affected_by = models.CharField(max_length=200, null=True, blank=True)
+    affected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    DateDaffectation = models.DateTimeField(default=timezone.now)
 
 
 class Stocks(models.Model):

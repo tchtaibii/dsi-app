@@ -6,10 +6,6 @@ class IsSuperuserPermission(permissions.BasePermission):
         return request.user.is_superuser
 
 class IsOwnerOrSuperuser(permissions.BasePermission):
-    """
-    Custom permission to only allow owners or superusers to edit the object.
-    """
-
     def has_object_permission(self, request, view, obj):
         # Allow superusers to edit any object
         if request.user.is_superuser:

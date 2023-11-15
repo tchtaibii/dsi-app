@@ -16,7 +16,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .models import Achats, TypeDachat, TypeDArticle, Article, SituationDachat
 from .serializers import AchatsSerializer, ProgressSerializer, PostDaSerializer, PostBCSerializer, PostBLSerializer, PostOBSerializer, FileSerializer
-from .permissions import IsManagerAchatPermission
+from .permissions import IsManagerAchatPermission, IsAdminOrManagerAchatPermission
 from rest_framework.throttling import UserRateThrottle
 from datetime import datetime
 from django.utils import timezone
@@ -157,7 +157,7 @@ def download_article_file(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def ExcelExportView(request):
     achats = Achats.objects.all().prefetch_related('achat')
@@ -451,7 +451,7 @@ def add_commande(request):
 # @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 
 
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
 def get_commandes(request):
@@ -493,7 +493,7 @@ def get_commandes(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def get_achat(request, id):
     try:
@@ -551,7 +551,7 @@ def get_progress(request, id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_header(request):
     try:
@@ -577,7 +577,7 @@ def dashboard_header(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_pie(request):
     try:
@@ -596,7 +596,7 @@ def dashboard_pie(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_line(request):
     try:
@@ -697,7 +697,7 @@ def delete_achats(request, id):
 
 
 @api_view(['DELETE'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def delete_all_achats(request):
     try:
@@ -724,7 +724,7 @@ def delete_all_achats(request):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 def types_with_total_quantity(request):
     types_with_quantities = TypeDArticle.objects.annotate(
         total_quantity=Sum('article__achat__quantité'))
@@ -735,7 +735,7 @@ def types_with_total_quantity(request):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 def stock_types(request):
     types_with_counts = TypeDArticle.objects.annotate(
         Demande=Sum('article__achat__quantité'),
@@ -748,6 +748,8 @@ def stock_types(request):
 
 
 @api_view(['GET'])
+@throttle_classes([UserRateThrottle])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 def get_articles_by_type(request, type_name):
     try:
         type_article = TypeDArticle.objects.get(type=type_name)
@@ -981,7 +983,7 @@ def add_achats_file(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def dashboard_lines(request):
     try:

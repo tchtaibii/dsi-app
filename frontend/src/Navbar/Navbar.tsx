@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from '../assets/logo.png'
 import { useRecoilValue } from 'recoil';
 import { myData } from '../atoms'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const ArrowP = () => (
     <svg style={{ width: "0.875rem", height: "1.44388rem", transform: "rotate(-90deg)" }} width={24} height={15} viewBox="0 0 24 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -34,15 +34,20 @@ const Navbar = ({ setSearch }) => {
     const [testSerach, setSearchTest] = useState('')
 
     const handleClick = () => {
-        if (window.location.pathname !== '/achats') {
+
+        if (data.is_achat_manager && window.location.pathname !== '/achats') {
             navigate('/achats');
         }
+        if (data.is_reception && window.location.pathname !== '/produits') {
+            navigate('/produits');
+        }
     };
-
+    useEffect(() => {
+        console.log(data)
+    }, [])
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             setSearch(testSerach);
-            // For example, you can call a submit function or any other function you want.
         }
     };
 
@@ -54,9 +59,13 @@ const Navbar = ({ setSearch }) => {
                     <p>{`${data.first_name} ${data.last_name}`}</p>
                     <ArrowP />
                 </div>
-                <Link to='/AddCommande' style={{ cursor: 'pointer' }}>
-                    <BtnAdd />
-                </Link>
+                {
+                    data.is_achat_manager &&
+                    <Link to='/AddCommande' style={{ cursor: 'pointer' }}>
+                        <BtnAdd />
+                    </Link>
+                }
+
             </div>
             <div className="search">
                 <input onKeyPress={handleKeyPress} onClick={handleClick} onChange={(e: any) => {

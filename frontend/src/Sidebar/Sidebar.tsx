@@ -90,38 +90,52 @@ const Sidebar = () => {
                     </div>
                 </div>
                 <ul>
-                    <NavLink className={({ isActive }) =>
-                        isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/"><DashboardSvg />{increaseNav && "Dashboard"}</NavLink>
                     {
-                        my.is_achat_manager &&
+                        (my.is_superuser || my.is_achat_manager) &&
                         <>
+                            <NavLink className={({ isActive }) =>
+                                isActive ? 'nav-icon-act' : ''
+                            } style={{ width: changeWidthC }} to="/"><DashboardSvg />{increaseNav && "Dashboard"}</NavLink>
                             <NavLink className={({ isActive }) =>
                                 isActive ? 'nav-icon-act' : ''
                             } style={{ width: changeWidthC }} to="/achats"><AchatSvg />{increaseNav && "Achats"}</NavLink>
                         </>
                     }
                     {
+                        my.is_superuser &&
+                        <NavLink className={({ isActive }) =>
+                            isActive ? 'nav-icon-act' : ''
+                        } style={{ width: changeWidthC }} to="/customer"><CustomerSvg />{increaseNav && "Customer"}</NavLink>
+                    }
+                    {
+                        my.is_achat_manager &&
+                        <>
+
+                            <NavLink className={({ isActive }) =>
+                                isActive ? 'nav-icon-act' : ''
+                            } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
+                        </>
+                    }
+                    {
                         my.is_reception &&
                         <NavLink className={({ isActive }) =>
                             isActive ? 'nav-icon-act' : ''
-                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Affectation"}</NavLink>
+                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Bon de commande"}</NavLink>
                     }
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>
-                    <NavLink className={({ isActive }) =>
-                        isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/customer"><CustomerSvg />{increaseNav && "Customer"}</NavLink>
-                    {/* <NavLink style={{ width: changeWidthC }} to="/commandes/"><CommandeSvg />{increaseNav && "Commandes"}</NavLink> */}
-                    <NavLink className={({ isActive }) =>
-                        isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
 
                 </ul>
             </div>
             <div className="top">
                 <ul>
+                    {
+                        my.is_superuser &&
+                        <NavLink className={({ isActive }) =>
+                            isActive ? 'nav-icon-act' : ''
+                        } style={{ width: changeWidthC }} to="/signup"><CustomerSvg />{increaseNav && "Create Account"}</NavLink>
+                    }
                     <a style={{ width: changeWidthC }} onClick={() => {
                         localStorage.removeItem('access_token');
                         window.location.reload();

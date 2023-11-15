@@ -5,7 +5,8 @@ import axios from '../Interceptor'
 import { useNavigate, useParams } from "react-router-dom";
 import Loading from '../Loading/Loading';
 import Error from '../Error';
-
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
 
 const EditSvg = () => (
     <svg style={{ width: "2.563rem" }} width={41} height={41} viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,32 +45,36 @@ const Edits = ({ id, setEdits }) => {
         setFile(file);
     };
     const handleButtonClick = async () => {
-        try {
-            const formData = new FormData();
+        if (file || data.modele || data.mark) {
+            try {
+                const formData = new FormData();
 
-            // Append other data to formData
-            formData.append('modele', data.modele);
-            formData.append('mark', data.mark);
-            console.log(data.modele)
+                // Append other data to formData
+                formData.append('modele', data.modele);
+                formData.append('mark', data.mark);
+                if (file) {
+                    formData.append('excel_file', file);
+                } else {
+                    formData.append('excel_file', null);
+                }
 
-
-            // Append the file if it exists
-            console.log(file)
-            if (file) {
-                formData.append('excel_file', file);
-            } else {
-                formData.append('excel_file', null); // Sending null if no file is selected
+                await axios.post(`/stock/stock_and_stocks/${id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                setStatuss({
+                    color: "#AF4C4C",
+                    status: "Failed!",
+                    text: "Wrong Inputs",
+                    is: true
+                });
             }
-
-            // Send the formData using axios
-            await axios.post(`/stock/stock_and_stocks/${id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            window.location.reload();
-        } catch (error) {
-            console.error('Error:', error);
+        }
+        else {
             setStatuss({
                 color: "#AF4C4C",
                 status: "Failed!",
@@ -84,7 +89,6 @@ const Edits = ({ id, setEdits }) => {
             {
                 statusCode.is &&
                 <Error statusCode={statusCode} setStatus={setStatuss} />
-
             }
             <div className="edits">
                 <div className="edit">
@@ -175,13 +179,19 @@ const AChatU = ({ e, i }) => {
     )
 }
 
-const AchatCl = ({ achats }) => {
+const AchatCl = ({ achats, selectedOption }) => {
+
     return (
         <div className="achatCf">
             {
-                achats.map((e: any, i: number) => (
-                    <AChatU key={`${i}-achatss`} e={e} i={i} />
-                ))
+                selectedOption === '0' ?
+                    achats.map((e: any, i: number) => (
+                        <AChatU key={`${i}-achatss`} e={e} i={i} />
+                    ))
+                    :
+                    achats.filter((e: any) => selectedOption === e.etat).map((e: any, i: number) => (
+                        <AChatU key={`${i}-achatss`} e={e} i={i} />
+                    ))
             }
         </div>
 
@@ -195,17 +205,22 @@ const Bcstock = () => {
     const [data, setData] = useState<any>(null)
     const fetchDataB = async () => {
         await axios.get(`/stock/get_stocks_details/${id}`).then((rsp: any) => setData(rsp.data))
+        setLoading(true)
         // await axios.get(`/stock/stock_bc/${id}`).then((rsp: any) => setStock(rsp.data));
     };
     useEffect(() => {
         setLoading(false)
         fetchDataB();
-        
+
     }, []);
-    useEffect(() => {
-        setLoading(true)
-        console.log(data)
-    }, [data])
+    const [selectedOption, setSelectedOption] = useState('0'); // Default selected option
+
+    const handleChange = (event) => {
+        console.log(event.target.value)
+        setSelectedOption(event.target.value);
+    };
+    const my = useRecoilValue(myData)
+
     return (
         !isLoading ? <Loading /> :
             <>
@@ -219,12 +234,21 @@ const Bcstock = () => {
                             data &&
                             <h1>{`${bc} -> ${data.type.length > 0 ? data.type : '---'} -> ${data.mark.length > 0 ? data.mark : '---'} -> ${data.modele.length > 0 ? data.modele : '---'}`}</h1>
                         }
-                        <div className="header2" style={{ flexDirection: 'row' }}>
-                            <div onClick={() => {
-                                setEdits(true)
-                            }}>
-                                <EditSvg />
-                            </div>
+                        <div className="header2" style={{ flexDirection: 'row-reverse' }}>
+                            {
+                                my.is_reception &&
+                                <div onClick={() => {
+                                    setEdits(true)
+                                }}>
+                                    <EditSvg />
+                                </div>
+                            }
+                            <select value={selectedOption} onChange={handleChange}>
+                                <option value={0}>ALL</option>
+                                <option value={'Stock'}>Stock</option>
+                                <option value={'Affecté'}>Affecté</option>
+                            </select>
+
                         </div>
                     </div>
                     <div style={{ gap: "1.44rem" }} className="main">
@@ -240,7 +264,7 @@ const Bcstock = () => {
                                     <p style={{ width: 'fit-content' }}>Situation</p>
                                 </div>
                                 <div className="achatsCL">
-                                    <AchatCl achats={data.stocks} />
+                                    <AchatCl selectedOption={selectedOption} achats={data.stocks.filter((e: any) => e.serviceTag !== null)} />
                                 </div>
 
                             </>
