@@ -85,13 +85,13 @@ function App() {
 												<Route path="Settings" element={<Settings />} />
 											</>
 										}
-										{
+										{/* {
 											(recoilMyData.is_achat_manager || recoilMyData.is_superuser) &&
-											<Route path="stocks/:bc/:id" element={<BcStock />} />
-										}
+										} */}
 										{
 											(recoilMyData.is_reception || recoilMyData.agent_affectation) &&
 											<>
+											<Route path="stocks/:bc/:id" element={<BcStock />} />
 												<Route path="produit/:id" element={<Produit />} />
 												<Route path="/" element={<Dashboard />} />
 												<Route path="affecté" element={<Affecté />} />

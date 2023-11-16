@@ -209,6 +209,11 @@ const Achat = () => {
                                             <td className="ValueTd">{TypeDachat(Data.typeDachat)}</td>
                                         </tr>
                                         <tr>
+                                            <td className="keyTd">Fournisseur</td>
+                                            <td className="ValueTd">{Data.typeDachat != 1 ? Data.fourniseur : ((Data.achat && Data.achat.lenght) ? Data.achat[0].article.contrat : '----')}</td>
+                                        </tr>
+                                        
+                                        <tr>
                                             <td className="keyTd">BL</td>
                                             <td className="ValueTd">{Data.BL ? Data.BL : "-----"}</td>
                                         </tr>

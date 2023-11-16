@@ -111,15 +111,22 @@ const Achats = () => {
                                     <p style={{ width: '16.66%' }}>BC</p>
                                     <p style={{ width: '16.66%' }}>Entité</p>
                                     <p style={{ width: '20%' }}>Fournisseur</p>
-                                    <p style={{ width: '17.5%' }}>BC</p>
-                                    <p style={{ width: '16.66%' }}>Entité</p>
-                                    <p style={{ width: 'fit-content' }}>Fournisseur</p>
+                                    {
+                                        Stock1.length > 1 &&
+                                        <>
+                                            <p style={{ width: '17.5%' }}>BC</p>
+                                            <p style={{ width: '16.66%' }}>Entité</p>
+                                            <p style={{ width: 'fit-content' }}>Fournisseur</p>
+                                        </>
+                                    }
+
+
                                 </div>
                                 <div style={{ flexDirection: 'row' }} className="achatsCLL">
                                     <AchatCl achats={Stock1} />
                                     <AchatCl achats={Stock2} />
                                 </div>
-                                
+
                             </>
                             : <h1 style={{ fontSize: '1.5rem' }}>No Stock</h1>
                     }

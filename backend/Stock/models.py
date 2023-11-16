@@ -24,12 +24,11 @@ class Stock(models.Model):
     NomPrenom = models.CharField(max_length=100, null=True, blank=True)
     Fonction = models.CharField(max_length=50, null=True, blank=True)
     etat = models.ForeignKey('StockEtat', on_delete=models.CASCADE)
-    situation = models.ForeignKey('StockSituation', on_delete=models.CASCADE)
+    situation = models.ForeignKey('StockSituation', on_delete=models.CASCADE, null=True)
     DateArrivage = models.DateField(null=True, blank=True)
     serviceTag = models.CharField(max_length=50, null=True, blank=True)
-    affected_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    DateDaffectation = models.DateTimeField(default=timezone.now)
+    affected_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    DateDaffectation = models.DateTimeField(null=True, blank=True)
 
 
 class Stocks(models.Model):

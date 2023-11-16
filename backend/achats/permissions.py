@@ -7,6 +7,9 @@ class IsManagerAchatPermission(permissions.BasePermission):
 
 
 class IsAdminOrManagerAchatPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view):
-        if request.user.is_superuser or request.user.is_achat_manager:
+    def has_permission(self, request, view):
+        if request.user.is_achat_manager == True:
             return True
+        if request.user.is_superuser == True:
+            return True
+        return False

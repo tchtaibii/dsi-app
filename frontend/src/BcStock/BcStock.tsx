@@ -204,7 +204,11 @@ const Bcstock = () => {
     const [isEdits, setEdits] = useState(false)
     const [data, setData] = useState<any>(null)
     const fetchDataB = async () => {
-        await axios.get(`/stock/get_stocks_details/${id}`).then((rsp: any) => setData(rsp.data))
+        await axios.get(`/stock/get_stocks_details/${id}`).then((rsp: any) => {
+            setData(rsp.data)
+            console.log(rsp.data)
+        }
+        )
         setLoading(true)
         // await axios.get(`/stock/stock_bc/${id}`).then((rsp: any) => setStock(rsp.data));
     };
@@ -264,7 +268,7 @@ const Bcstock = () => {
                                     <p style={{ width: 'fit-content' }}>Situation</p>
                                 </div>
                                 <div className="achatsCL">
-                                    <AchatCl selectedOption={selectedOption} achats={data.stocks.filter((e: any) => e.serviceTag !== null)} />
+                                    <AchatCl selectedOption={selectedOption} achats={data.stocks} />
                                 </div>
 
                             </>

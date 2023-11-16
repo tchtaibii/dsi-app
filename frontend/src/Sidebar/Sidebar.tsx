@@ -90,12 +90,15 @@ const Sidebar = () => {
                     </div>
                 </div>
                 <ul>
+                    <NavLink className={({ isActive }) =>
+                        isActive ? 'nav-icon-act' : ''
+                    } style={{ width: changeWidthC }} to="/"><DashboardSvg />{increaseNav && "Dashboard"}</NavLink>
                     {
                         (my.is_superuser || my.is_achat_manager) &&
                         <>
-                            <NavLink className={({ isActive }) =>
+                            {/* <NavLink className={({ isActive }) =>
                                 isActive ? 'nav-icon-act' : ''
-                            } style={{ width: changeWidthC }} to="/"><DashboardSvg />{increaseNav && "Dashboard"}</NavLink>
+                            } style={{ width: changeWidthC }} to="/"><DashboardSvg />{increaseNav && "Dashboard"}</NavLink> */}
                             <NavLink className={({ isActive }) =>
                                 isActive ? 'nav-icon-act' : ''
                             } style={{ width: changeWidthC }} to="/achats"><AchatSvg />{increaseNav && "Achats"}</NavLink>

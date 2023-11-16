@@ -343,7 +343,6 @@ def filter_stocks(request, string=None):
                 'DateDaffectation': stock.DateDaffectation,
                 'serviceTag': stock.serviceTag,
                 'affected_by': affected_by_first_name + affected_by_last_name,
-                'affected_by_id':  stock.affected_by,
                 'mark': related_stocks.mark if related_stocks else None,
                 'modele': related_stocks.modele if related_stocks else None,
                 'type': str(related_stocks.type) if related_stocks else None,

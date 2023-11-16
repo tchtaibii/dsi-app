@@ -104,9 +104,8 @@ def create_stock(id=None):
                             if str(achats.typeDachat) == 'Accord Cadre':
                                 in_stock.fourniseur = achat.article.contrat.name
                             else:
+                                print('====>', achats.fourniseur)
                                 in_stock.fourniseur = achats.fourniseur
-                            #     print('====>',achat.article.contrat.name)
-
                             in_stock.save()
                             in_stock.stocks.add(stocks)
                             in_stock.save()
@@ -252,7 +251,6 @@ def progress(request, id):
         data = request.data
         ResteCount = 0
         is_ = data.get('is_')
-        # Access file directly from request data
         file_data = request.data.get('file')
         date = request.data.get('date')
         if date:
@@ -280,7 +278,6 @@ def progress(request, id):
                 file_data = file_data.split(',', 1)[1]
                 decoded_file = base64.b64decode(file_data)
                 file_object = io.BytesIO(decoded_file)
-                # Assuming 'MEDIA_ROOT' is your media directory
                 file_path = os.path.join(
                     settings.MEDIA_ROOT, f"{data['code']}.pdf")
                 with open(file_path, 'wb') as f:
@@ -861,10 +858,9 @@ def add_articles(request):
         return Response({'message': f'Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @api_view(['POST'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 def add_achats_file(request):
     if 'file' not in request.FILES:
         return Response({'message': 'No file was found'}, status=status.HTTP_400_BAD_REQUEST)
@@ -982,9 +978,9 @@ def add_achats_file(request):
         return Response({'message': f'Error: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
 @permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
+@api_view(['GET'])
 def dashboard_lines(request):
     try:
         achats = Achats.objects.all()
