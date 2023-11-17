@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 import redExcel from '../assets/excelRed.svg'
 import axios from '../Interceptor'
 import Error from '../Error'
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
+import DefaultPhoto from '../assets/profile.png'
+
 
 
 const ExcelSvg = () => (
@@ -27,6 +31,7 @@ const Settings = () => {
     const handleFileChange = (event: any) => {
         setFile(event.target.files[0]);
     };
+    const my = useRecoilValue(myData)
 
     const handleSubmit = async (event: any) => {
         if (file) {
@@ -117,92 +122,169 @@ const Settings = () => {
                 <h1>Settings</h1>
             </div>
             <div className="main">
-                <div className="row1S">
-                    <div className="boxSet">
-                        <h1>Importation de Contrat</h1>
-                        <div className="fileUplaod">
-                            <input onChange={handleFileChange} type="file" name="" id="" />
-                            <div className="inputUplaod">
-                                <ExcelSvg />
-                                Chose file
+                {
+                    my.is_achat_manager &&
+                    <div className="row1S">
+                        <div className="boxSet">
+                            <h1>Importation de Contrat</h1>
+                            <div className="fileUplaod">
+                                <input onChange={handleFileChange} type="file" name="" id="" />
+                                <div className="inputUplaod">
+                                    <ExcelSvg />
+                                    Chose file
+                                </div>
+                                <div className="fileName">{file ? file.name : 'No file Chosen'}</div>
                             </div>
-                            <div className="fileName">{file ? file.name : 'No file Chosen'}</div>
-                        </div>
-                        <div className="saveFile">
-                            <button onClick={handleSubmit} className='saveBtn'>Save</button>
-                            <div title="Template Articles file" onClick={async () => {
-                                const response = await axios.get('/achats/downloadArticle/', {
-                                    responseType: 'blob',
-                                });
-                                const url = window.URL.createObjectURL(new Blob([response.data]));
-                                const link = document.createElement('a');
-                                link.href = url;
-                                link.setAttribute('download', 'Article.xlsx');
-                                document.body.appendChild(link);
-                                link.click();
-                            }} className="downloadTemplate">
-                                <svg style={{
-                                    width: "3rem",
-                                    height: "3rem"
-                                }} xmlns="http://www.w3.org/2000/svg" width={48} height={48} viewBox="0 0 48 48" fill="none">
-                                    <path d="M34.2863 20.2446H28.4087V11.4282H19.5924V20.2446H13.7148L24.0006 30.5303L34.2863 20.2446ZM13.7148 33.469V36.4078H34.2863V33.469H13.7148Z" fill="#3BB056" />
-                                    <circle cx={24} cy={24} r="22.8571" stroke="url(#paint0_linear_297_157)" strokeWidth="2.28571" />
-                                    <defs>
-                                        <linearGradient id="paint0_linear_297_157" x1={24} y1={0} x2={24} y2={48} gradientUnits="userSpaceOnUse">
-                                            <stop offset="0.479167" stopColor="#3BB056" />
-                                            <stop offset={1} stopColor="white" />
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
+                            <div className="saveFile">
+                                <button onClick={handleSubmit} className='saveBtn'>Save</button>
+                                <div title="Template Articles file" onClick={async () => {
+                                    const response = await axios.get('/achats/downloadArticle/', {
+                                        responseType: 'blob',
+                                    });
+                                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.setAttribute('download', 'Article.xlsx');
+                                    document.body.appendChild(link);
+                                    link.click();
+                                }} className="downloadTemplate">
+                                    <svg style={{
+                                        width: "3rem",
+                                        height: "3rem"
+                                    }} xmlns="http://www.w3.org/2000/svg" width={48} height={48} viewBox="0 0 48 48" fill="none">
+                                        <path d="M34.2863 20.2446H28.4087V11.4282H19.5924V20.2446H13.7148L24.0006 30.5303L34.2863 20.2446ZM13.7148 33.469V36.4078H34.2863V33.469H13.7148Z" fill="#3BB056" />
+                                        <circle cx={24} cy={24} r="22.8571" stroke="url(#paint0_linear_297_157)" strokeWidth="2.28571" />
+                                        <defs>
+                                            <linearGradient id="paint0_linear_297_157" x1={24} y1={0} x2={24} y2={48} gradientUnits="userSpaceOnUse">
+                                                <stop offset="0.479167" stopColor="#3BB056" />
+                                                <stop offset={1} stopColor="white" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
 
+
+                                </div>
+                            </div>
+                        </div>
+                        <div className="boxSet redBox">
+                            <h1>Importation Demande d'achats</h1>
+                            <div className="fileUplaod">
+                                <input onChange={handleFileChange2} type="file" name="" id="" />
+                                <div className="inputUplaod">
+                                    <img style={{ width: '2.875rem' }} src={redExcel} />
+                                    Chose file
+                                </div>
+                                <div className="fileName">{file2 ? file2.name : 'No file Chosen'}</div>
+                            </div>
+                            <div className="saveFile">
+                                <button onClick={handleSubmit2} className='saveBtn'>Save</button>
+                                <div title="Template Achats file" onClick={async () => {
+
+                                    const response = await axios.get('/achats/downloadAchats/', {
+                                        responseType: 'blob',
+                                    });
+                                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.setAttribute('download', 'Achats.xlsx');
+                                    document.body.appendChild(link);
+                                    link.click();
+
+                                }} className="downloadTemplate">
+                                    <svg style={{
+                                        width: "3rem",
+                                        height: "3rem"
+                                    }} xmlns="http://www.w3.org/2000/svg" width={48} height={48} viewBox="0 0 48 48" fill="none">
+                                        <path d="M34.2863 20.2446H28.4087V11.4282H19.5924V20.2446H13.7148L24.0006 30.5303L34.2863 20.2446ZM13.7148 33.469V36.4078H34.2863V33.469H13.7148Z" fill="#EA3B15" />
+                                        <circle cx={24} cy={24} r="22.8571" stroke="url(#paint0_linear_297_156)" strokeWidth="2.28571" />
+                                        <defs>
+                                            <linearGradient id="paint0_linear_297_156" x1={24} y1={0} x2={24} y2={48} gradientUnits="userSpaceOnUse">
+                                                <stop offset="0.479167" stopColor="#EA3B15" />
+                                                <stop offset={1} stopColor="white" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+
+                                </div>
 
                             </div>
                         </div>
                     </div>
-                    <div className="boxSet redBox">
-                        <h1>Importation Demande d'achats</h1>
-                        <div className="fileUplaod">
-                            <input onChange={handleFileChange2} type="file" name="" id="" />
-                            <div className="inputUplaod">
-                                <img style={{ width: '2.875rem' }} src={redExcel} />
-                                Chose file
-                            </div>
-                            <div className="fileName">{file2 ? file2.name : 'No file Chosen'}</div>
+                }
+                {/* <div style={{gap :'1rem'}} className="inputsCommande">
+
+                    <div className="inputCommande">
+                        <div className="label">Prénom</div>
+                        <div className="inputText">
+                            <input onChange={(e: any) => {
+                                const newD = e.target.value;
+                                // setData((state: any) => ({ ...state, email: newD }))
+                            }} placeholder="${my.first_name}" type="text" name="prenom" id="" />
                         </div>
-                        <div className="saveFile">
-                            <button onClick={handleSubmit2} className='saveBtn'>Save</button>
-                            <div title="Template Achats file" onClick={async () => {
-
-                                const response = await axios.get('/achats/downloadAchats/', {
-                                    responseType: 'blob',
-                                });
-                                const url = window.URL.createObjectURL(new Blob([response.data]));
-                                const link = document.createElement('a');
-                                link.href = url;
-                                link.setAttribute('download', 'Achats.xlsx');
-                                document.body.appendChild(link);
-                                link.click();
-
-                            }} className="downloadTemplate">
-                                <svg style={{
-                                    width: "3rem",
-                                    height: "3rem"
-                                }} xmlns="http://www.w3.org/2000/svg" width={48} height={48} viewBox="0 0 48 48" fill="none">
-                                    <path d="M34.2863 20.2446H28.4087V11.4282H19.5924V20.2446H13.7148L24.0006 30.5303L34.2863 20.2446ZM13.7148 33.469V36.4078H34.2863V33.469H13.7148Z" fill="#EA3B15" />
-                                    <circle cx={24} cy={24} r="22.8571" stroke="url(#paint0_linear_297_156)" strokeWidth="2.28571" />
-                                    <defs>
-                                        <linearGradient id="paint0_linear_297_156" x1={24} y1={0} x2={24} y2={48} gradientUnits="userSpaceOnUse">
-                                            <stop offset="0.479167" stopColor="#EA3B15" />
-                                            <stop offset={1} stopColor="white" />
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-
-                            </div>
-
+                    </div>
+                    <div className="inputCommande">
+                        <div className="label">Nom</div>
+                        <div className="inputText">
+                            <input onChange={(e: any) => {
+                                const newD = e.target.value;
+                                // setData((state: any) => ({ ...state, first_name: newD }))
+                            }} placeholder="${my.first_name}" type="text" name="nom" id="" />
                         </div>
+                    </div>
+                    <div className="inputCommande">
+                        <div className="label">Password</div>
+                        <div className="inputText">
+                            <input onChange={(e: any) => {
+                                const newD = e.target.value;
+                                // setData((state: any) => ({ ...state, last_name: newD }))
+                            }} placeholder="*********" type="password" name="password" id="" />
+                        </div>
+                    </div>
+                    <div className="inputCommande">
+                        <div className="label">Re-Password</div>
+                        <div className="inputText">
+                            <input onChange={(e: any) => {
+                                const newD = e.target.value;
+                                // setData((state: any) => ({ ...state, first_name: newD }))
+                            }} placeholder="*********" type="password" name="password2" id="" />
+                        </div>
+                    </div>
+                </div> */}
+
+
+                <div className="settingsInfo">
+                    <div className="row1Set">
+                        <div className="img">
+                            <img src={DefaultPhoto} />
+                            <input className='photoChange' type="file" />
+                            <div className="choseLayer">Choisir une nouvelle photo</div>
+                        </div>
+                        <div className="inputsC">
+                            <div style={{ width: '46.10463rem' }} className="inputCommande">
+                                <div className="label">Prénom</div>
+                                <div className="inputText">
+                                    <input onChange={(e: any) => {
+                                        const newD = e.target.value;
+                                        // setData((state: any) => ({ ...state, email: newD }))
+                                    }} placeholder="Entrez votre nouveau Prénom" type="text" name="Prénom" id="" />
+                                </div>
+                            </div>
+                            <div style={{ width: '46.10463rem' }} className="inputCommande">
+                                <div className="label">Nom</div>
+                                <div className="inputText">
+                                    <input onChange={(e: any) => {
+                                        const newD = e.target.value;
+                                        // setData((state: any) => ({ ...state, email: newD }))
+                                    }} placeholder="Entrez votre nouveau Nom" type="text" name="Nom" id="" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="row2set">
+                        <button>Change</button>
                     </div>
                 </div>
+
             </div>
         </div>
     )

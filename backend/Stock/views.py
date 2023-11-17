@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework import status
 from django.utils import timezone
@@ -21,6 +22,8 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from django.db.models import Sum
 from achats.models import TypeDArticle
+
+from users.models import CustomUser
 
 
 @api_view(['GET'])
@@ -231,7 +234,7 @@ def get_product(request, id):
             'situation': stock.situation_id,
             'DateArrivage': stock.DateArrivage,
             'serviceTag': stock.serviceTag,
-            'affected_by': affected_by_first_name + affected_by_last_name,
+            'affected_by': (affected_by_first_name or '') + (' ' + affected_by_last_name if affected_by_last_name else ''),
             'DateDaffectation': stock.DateDaffectation,
             # 'designation': related_stocks.designation,
             'mark': related_stocks.mark,
@@ -243,8 +246,11 @@ def get_product(request, id):
         }
         return JsonResponse(serialized_data)
     except Stock.DoesNotExist:
+        logger.exception(f'Error updating stock: {e}')
+
         return JsonResponse({'error': 'Stock not found'}, status=404)
     except Exception as e:
+        logger.exception(f'Error updating stock: {e}')
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
@@ -355,3 +361,36 @@ def filter_stocks(request, string=None):
         return JsonResponse(serialized_data, safe=False)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+
+
+@api_view(['GET'])
+def user_stock_affectations(request, id):
+    try:
+        user = get_object_or_404(CustomUser, id=id)
+
+        affected_stocks = Stock.objects.filter(affected_by=user)
+
+        serialized_data = {
+            'stocks': [
+                {
+                    'stock_id': stock.id,
+                    'NomPrenom': stock.NomPrenom,
+                    'Fonction': stock.Fonction,
+                    'etat': stock.etat.etat,
+                    'situation': stock.situation_id,
+                    'serviceTag': stock.serviceTag,
+                    'DateDaffectation': stock.DateDaffectation,
+                    'mark': stock.related_stocks.first().mark if stock.related_stocks.exists() else None,
+                    'modele': stock.related_stocks.first().modele if stock.related_stocks.exists() else None,
+                    'type': str(stock.related_stocks.first().type) if stock.related_stocks.exists() else None,
+                    'entité': stock.related_stocks.first().related_instock.first().entité
+                    if stock.related_stocks.exists() and stock.related_stocks.first().related_instock.exists() else None
+                }
+                for stock in affected_stocks
+            ]
+        }
+        return Response(serialized_data)
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return Response({'error': f'An error occurred: {str(e)}'}, status=500)

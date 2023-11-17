@@ -104,19 +104,15 @@ const Sidebar = () => {
                             } style={{ width: changeWidthC }} to="/achats"><AchatSvg />{increaseNav && "Achats"}</NavLink>
                         </>
                     }
-                    {
+                    {/* {
                         my.is_superuser &&
-                        <NavLink className={({ isActive }) =>
-                            isActive ? 'nav-icon-act' : ''
-                        } style={{ width: changeWidthC }} to="/customer"><CustomerSvg />{increaseNav && "Customer"}</NavLink>
-                    }
+                        
+                    } */}
                     {
                         my.is_achat_manager &&
                         <>
 
-                            <NavLink className={({ isActive }) =>
-                                isActive ? 'nav-icon-act' : ''
-                            } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
+
                         </>
                     }
                     {
@@ -128,6 +124,12 @@ const Sidebar = () => {
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
                     } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>
+                    <NavLink className={({ isActive }) =>
+                        isActive ? 'nav-icon-act' : ''
+                    } style={{ width: changeWidthC }} to="/customers"><CustomerSvg />{increaseNav && "Customer"}</NavLink>
+                    <NavLink className={({ isActive }) =>
+                        isActive ? 'nav-icon-act' : ''
+                    } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
 
                 </ul>
             </div>
@@ -138,6 +140,7 @@ const Sidebar = () => {
                         <NavLink className={({ isActive }) =>
                             isActive ? 'nav-icon-act' : ''
                         } style={{ width: changeWidthC }} to="/signup"><CustomerSvg />{increaseNav && "Create Account"}</NavLink>
+
                     }
                     <a style={{ width: changeWidthC }} onClick={() => {
                         localStorage.removeItem('access_token');

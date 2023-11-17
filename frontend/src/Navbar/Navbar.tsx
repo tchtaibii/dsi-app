@@ -54,7 +54,9 @@ const Navbar = ({ setSearch }) => {
     return (
         <div className='Navbar'>
             <div className="navLeft">
-                <div style={{ cursor: 'pointer', }} className="profileNav">
+                <div onClick={() => {
+                    navigate('/profile');
+                }} style={{ cursor: 'pointer', }} className="profileNav">
                     <img style={{ width: "2rem", borderRadius: "0.625rem" }} src={data.avatar ? data.avatar : profile} />
                     <p>{`${data.first_name} ${data.last_name}`}</p>
                     <ArrowP />

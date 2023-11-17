@@ -200,9 +200,9 @@ class AvatarUpdateAPIView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @throttle_classes([UserRateThrottle])
-def get_profile(request, email):
+def get_profile(request, id):
     try:
-        profile = get_object_or_404(CustomUser, email=email)
+        profile = get_object_or_404(CustomUser, id=id)
         serializer = GetUserSerializer(profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except CustomUser.DoesNotExist:
@@ -214,7 +214,7 @@ def get_profile(request, email):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 @throttle_classes([UserRateThrottle])
 def get_all_profile(request):
     try:

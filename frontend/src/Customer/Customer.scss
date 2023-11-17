@@ -1,6 +1,25 @@
 @import '../tools.scss';
 
 
-.Customer{
-    
+.cardProfile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    height: fit-content;
+    flex-direction: column;
+
+    .cardAvatar {
+        width: 12rem;
+        height: 12rem;
+        border-radius: 1.08263rem;
+        object-fit: cover;
+        border: 0.06rem solid $nav-color;
+    }
+    h1{
+        font-size: 1.2rem;
+        color: $nav-color;
+        text-transform: capitalize;
+    }
 }

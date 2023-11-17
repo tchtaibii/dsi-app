@@ -15,7 +15,7 @@ import BcStock from './BcStock/BcStock'
 import Produits from './Produits/Produits'
 import Profile from './Profile/Profile'
 import Produit from './Produit/Produit'
-// import Customer from './Customer/Customer'
+import Customer from './Customer/Customer'
 import Settings from './Settings/Settings'
 import Login from './Login/Login'
 import Loading from './Loading/Loading'
@@ -82,7 +82,7 @@ function App() {
 											<>
 												<Route path="AddCommande" element={<AddCommande />} />
 												<Route path="commandes/:id" element={<Progress />} />
-												<Route path="Settings" element={<Settings />} />
+
 											</>
 										}
 										{/* {
@@ -91,7 +91,7 @@ function App() {
 										{
 											(recoilMyData.is_reception || recoilMyData.agent_affectation) &&
 											<>
-											<Route path="stocks/:bc/:id" element={<BcStock />} />
+												<Route path="stocks/:bc/:id" element={<BcStock />} />
 												<Route path="produit/:id" element={<Produit />} />
 												<Route path="/" element={<Dashboard />} />
 												<Route path="affecté" element={<Affecté />} />
@@ -99,11 +99,10 @@ function App() {
 												<Route path="produits" element={<Produits SearchT={SearchT} />} />
 											</>
 										}
-
+										<Route path="Settings" element={<Settings />} />
 										<Route path="stock/:type?" element={<Stock />} />
-
-										<Route path="Profile/id" element={<Profile />} />
-										<Route path="profile" element={<Profile />} />
+										<Route path="customers" element={<Customer />} />
+										<Route path="Profile/:id?" element={<Profile />} />
 									</Routes>
 								</div>
 							</div>

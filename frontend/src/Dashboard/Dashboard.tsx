@@ -75,7 +75,7 @@ const Dashboard = () => {
     const [boxData, setBoxData] = useState({
         n: 0,
         ect: 0,
-        ecl: 1,
+        ecl: 0,
         lp: 0
     })
     const [pieData, setDataPie] = useState({

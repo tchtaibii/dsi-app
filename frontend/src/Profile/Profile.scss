@@ -9,6 +9,11 @@
     display: flex;
     flex-direction: column;
     border: 0.065rem solid $nav-color;
+    background-image: url('../assets/bg-costumer.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: darken;
 
     .cardProfile {
         width: 100%;
@@ -16,6 +21,7 @@
         display: flex;
         gap: 2.58rem;
         align-items: center;
+        justify-content: center;
 
         .profilePhoto {
             width: 14.4375rem;
@@ -27,9 +33,10 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
+            align-items: center;
 
             h1 {
-                color: $second-color;
+                color: $dark-color;
                 font-size: 2.5rem;
                 font-style: normal;
                 font-weight: 600;
@@ -37,7 +44,7 @@
             }
 
             h3 {
-                color: $nav-color;
+                color: $dark-color;
                 font-size: 1.25rem;
                 font-style: normal;
                 font-weight: 400;
@@ -48,6 +55,7 @@
                 align-items: center;
                 gap: 0.69rem;
                 margin-top: 0.4rem;
+                color: $dark-color;
             }
         }
     }
