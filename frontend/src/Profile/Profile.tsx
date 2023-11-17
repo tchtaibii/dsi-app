@@ -130,7 +130,6 @@ const Profile = () => {
                                         <th>{'Mark'}</th>
                                         <th>{'Modéle'}</th>
                                         <th>{'Type'}</th>
-                                        <th>{'Etat'}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,7 +147,6 @@ const Profile = () => {
                                                     <td>{e.mark ? e.mark : '---'}</td>
                                                     <td>{e.modele ? e.modele : '---'}</td>
                                                     <td>{e.type}</td>
-                                                    <td>{e.etat ? e.etat : '---'}</td>
                                                 </tr>
                                             ))
                                             : (

@@ -112,6 +112,23 @@ const Settings = () => {
         }
     }, [statusCode])
 
+    const [passwords, setPasswords] = useState({
+        oldPass: '',
+        newPAss: '',
+        new2pass: ''
+    })
+
+    const CheckPassword = async () => {
+        if (passwords.oldPass.length > 0 && passwords.newPAss.length > 0 && passwords.new2pass.length > 0) {
+            if (passwords.newPAss === passwords.new2pass) {
+
+            }
+        }
+        else {
+
+        }
+    }
+
     return (
         <div className='ContentMain'>
             {
@@ -260,28 +277,39 @@ const Settings = () => {
                             <div className="choseLayer">Choisir une nouvelle photo</div>
                         </div>
                         <div className="inputsC">
-                            <div style={{ width: '46.10463rem' }} className="inputCommande">
-                                <div className="label">Prénom</div>
+                            <div style={{ width: '46.10463rem', marginBottom: '2rem' }} className="inputCommande">
+                                <div className="label">Old Password</div>
                                 <div className="inputText">
                                     <input onChange={(e: any) => {
                                         const newD = e.target.value;
                                         // setData((state: any) => ({ ...state, email: newD }))
-                                    }} placeholder="Entrez votre nouveau Prénom" type="text" name="Prénom" id="" />
+                                    }} placeholder="Entrez l'ancien mot de passe" type="password" name="oldPassword" id="" />
                                 </div>
                             </div>
                             <div style={{ width: '46.10463rem' }} className="inputCommande">
-                                <div className="label">Nom</div>
+                                <div className="label">New Password</div>
                                 <div className="inputText">
                                     <input onChange={(e: any) => {
                                         const newD = e.target.value;
                                         // setData((state: any) => ({ ...state, email: newD }))
-                                    }} placeholder="Entrez votre nouveau Nom" type="text" name="Nom" id="" />
+                                    }} placeholder="Entrez un nouveau mot de passe" type="password" name="password1" id="" />
+                                </div>
+                            </div>
+                            <div style={{ width: '46.10463rem' }} className="inputCommande">
+                                <div className="label">Re-New Password</div>
+                                <div className="inputText">
+                                    <input onChange={(e: any) => {
+                                        const newD = e.target.value;
+                                        // setData((state: any) => ({ ...state, email: newD }))
+                                    }} placeholder="Entrez un nouveau mot de passe" type="password" name="password1" id="" />
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="row2set">
-                        <button>Change</button>
+                        <button onClick={() => {
+                            CheckPassword()
+                        }}>Change</button>
                     </div>
                 </div>
 
