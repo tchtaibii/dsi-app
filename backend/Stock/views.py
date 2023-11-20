@@ -12,7 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view
 import pandas as pd
 from django.shortcuts import render
-from .permissions import IsReceptionPermission
+from .permissions import IsReceptionPermission, IsStockV
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Stock, inStock, StockEtat, Stocks, StockSituation
@@ -102,7 +102,7 @@ def stocks_by_type(request, type_name):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def stock_bc(request, id):
     try:
@@ -277,9 +277,7 @@ def affected_produit(request, id):
             situation = data.get('situation')
             if not (nom and isinstance(nom, str) and entite and isinstance(entite, str) and fonction and isinstance(fonction, str) and situation and isinstance(situation, int)):
                 return Response("Invalid Data", status=status.HTTP_400_BAD_REQUEST)
-
             requester_name = request.user
-
             stock.NomPrenom = nom
             stock.Fonction = fonction
             stock.situation_id = situation

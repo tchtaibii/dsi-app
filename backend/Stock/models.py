@@ -24,7 +24,7 @@ class Stock(models.Model):
     NomPrenom = models.CharField(max_length=100, null=True, blank=True)
     Fonction = models.CharField(max_length=50, null=True, blank=True)
     etat = models.ForeignKey('StockEtat', on_delete=models.CASCADE)
-    situation = models.ForeignKey('StockSituation', on_delete=models.CASCADE, null=True)
+    situation = models.ForeignKey('StockSituation', on_delete=models.CASCADE, null=True, blank=True)
     DateArrivage = models.DateField(null=True, blank=True)
     serviceTag = models.CharField(max_length=50, null=True, blank=True)
     affected_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)

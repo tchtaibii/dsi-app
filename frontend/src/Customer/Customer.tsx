@@ -29,7 +29,7 @@ const Customer = () => {
                             <div style={{ cursor: 'pointer' }} onClick={() => {
                                 navigate(`/profile/${e.id}`)
                             }} className="cardProfile">
-                                <img className='cardAvatar' src={e.avatar ? e.avatar : DefaultPhoto} />
+                                <img className='cardAvatar' src={e.avatar ? (`${import.meta.env.VITE_URL}:${import.meta.env.VITE_PORT}${e.avatar}`) : DefaultPhoto} />
                                 <h1>{`${e.first_name + ' ' + e.last_name}`}</h1>
                             </div>
                         ))

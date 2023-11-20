@@ -23,7 +23,7 @@ const Edits = () => (
     <svg style={{
         width: '2.155rem',
         height: '2.155rem'
-    }} width={35} height={35} viewBox="0 0  " fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+    }} width={35} height={35} viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
         <circle cx="17.24" cy="17.24" r="17.24" fill="#BD391B" />
         <rect x={6} y={6} width="21.55" height="21.55" fill="url(#pattern0)" />
         <defs>
@@ -40,8 +40,9 @@ const Edits = () => (
 
 
 const Achat = () => {
+    const [fileData, setfileData] = useState<any>({ data: null, name: null })
 
-    const convertDaysToMonthWeeksDays = (days) => {
+    const convertDaysToMonthWeeksDays = (days:any) => {
         const months = Math.floor(days / 30);
         const weeks = Math.floor((days % 30) / 7);
         const remainingDays = days - months * 30 - weeks * 7;
@@ -113,6 +114,34 @@ const Achat = () => {
     const [isLoading, setLoading] = useState(false)
     const [deleteTab, setDelete] = useState(false);
     const my = useRecoilValue(myData)
+    useEffect(() => {
+        if (Data) {
+            const fetchData = async () => {
+                const fileResponse = await axios.get(`/achats/get/PV/${id}`, {
+                    responseType: 'blob',
+                });
+                var filename;
+                const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+                // Append the timestamp to the filename
+                filename = `${timestamp}`;
+                const disposition = fileResponse.headers['content-disposition'];
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    const matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                const url = window.URL.createObjectURL(blob);
+                console.log(filename)
+                setfileData({ data: url, name: filename });
+                setfileData({ data: url, name: filename });
+            }
+            if (Data.DateBL)
+                fetchData()
+        }
+    }, [Data])
     return (
 
 
@@ -212,7 +241,7 @@ const Achat = () => {
                                             <td className="keyTd">Fournisseur</td>
                                             <td className="ValueTd">{Data.typeDachat != 1 ? Data.fourniseur : ((Data.achat && Data.achat.lenght) ? Data.achat[0].article.contrat : '----')}</td>
                                         </tr>
-                                        
+
                                         <tr>
                                             <td className="keyTd">BL</td>
                                             <td className="ValueTd">{Data.BL ? Data.BL : "-----"}</td>
@@ -251,6 +280,29 @@ const Achat = () => {
                                             <td className="keyTd">{'Temps de Livraison' + (Data.DateBL ? ' ✔' : '')}</td>
                                             <td className="ValueTd">{Data.TL !== null ? convertDaysToMonthWeeksDays(Data.TL) : '----'}</td>
                                         </tr>
+                                        {
+                                            Data.DateBL &&
+                                            <tr>
+                                                <td className="keyTd">{'Temps de Livraison' + (Data.DateBL ? ' ✔' : '')}</td>
+                                                <td className="ValueTd">
+                                                    <button onClick={() => {
+                                                        const downloadData = () => {
+                                                            if (fileData.name) {
+                                                                console.log('glm')
+                                                                const link = document.createElement('a');
+                                                                link.href = fileData.data ? fileData.data : '#';
+                                                                link.setAttribute('download', fileData.name ? fileData.name : 'Pv');
+                                                                document.body.appendChild(link);
+                                                                link.click();
+                                                                document.body.removeChild(link);
+                                                                return;
+                                                            }
+                                                        }
+                                                        downloadData();
+                                                    }}>Donwload PV</button>
+                                                </td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
                                 <div className="achatArr">
@@ -266,9 +318,9 @@ const Achat = () => {
                                     <div className="achatZ">
 
                                         {
-                                            Data.achat && Data.achat.map((ele: any) => {
+                                            Data.achat && Data.achat.map((ele: any, n:number) => {
                                                 return (
-                                                    <div className="achatSD">
+                                                    <div key={n + '-Achat'} className="achatSD">
 
                                                         <p style={{ width: '45%' }}>{ele.article.designation}</p>
                                                         <p style={{ width: '10%' }}>{ele.article.type}</p>

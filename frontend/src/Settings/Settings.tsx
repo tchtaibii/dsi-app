@@ -117,17 +117,84 @@ const Settings = () => {
         newPAss: '',
         new2pass: ''
     })
-
+    // const [status, setStatuss] = useState(0)
     const CheckPassword = async () => {
         if (passwords.oldPass.length > 0 && passwords.newPAss.length > 0 && passwords.new2pass.length > 0) {
             if (passwords.newPAss === passwords.new2pass) {
-
+                await axios.post('/auth/update_password/', passwords).then((rsp: any) => window.location.reload()).catch((error: any) => setStatus({
+                    color: "#AF4C4C",
+                    status: "Failed",
+                    text: "Something wrong in your inputs",
+                    is: true
+                }))
+            }
+            else {
+                setStatus({
+                    color: "#AF4C4C",
+                    status: "Failed",
+                    text: "Something wrong in your inputs",
+                    is: true
+                })
             }
         }
         else {
-
+            setStatus({
+                color: "#AF4C4C",
+                status: "Failed",
+                text: "Something wrong in your inputs",
+                is: true
+            })
         }
+
     }
+    const handleFileChangeImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedImage = event.target.files[0];
+
+        // Use FileReader to create a URL for the selected image
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAvatar(reader.result);
+        };
+
+        if (selectedImage) {
+            reader.readAsDataURL(selectedImage);
+        }
+        if (event.target.files && event.target.files.length > 0) {
+            setFileI(event.target.files[0]);
+        }
+    };
+    const handleImage = async () => {
+        if (fileI) {
+            const formData = new FormData();
+            formData.append('image', fileI);
+
+            try {
+                const response = await axios.post('/auth/file_upload_view/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                window.location.reload()
+            } catch (error) {
+                setStatus({
+                    color: "#AF4C4C",
+                    status: "Failed",
+                    text: "Image doesn't upload!",
+                    is: true
+                })
+            }
+        }
+    };
+    const [fileI, setFileI] = useState<File | null>(null);
+
+    const [avatar, setAvatar] = useState(DefaultPhoto);
+
+    useEffect(() => {
+        if (my.avatar)
+            setAvatar(`${import.meta.env.VITE_URL}:${import.meta.env.VITE_PORT}${my.avatar}`)
+        else
+            setAvatar(DefaultPhoto)
+    }, [my])
 
     return (
         <div className='ContentMain'>
@@ -228,52 +295,11 @@ const Settings = () => {
                         </div>
                     </div>
                 }
-                {/* <div style={{gap :'1rem'}} className="inputsCommande">
-
-                    <div className="inputCommande">
-                        <div className="label">Prénom</div>
-                        <div className="inputText">
-                            <input onChange={(e: any) => {
-                                const newD = e.target.value;
-                                // setData((state: any) => ({ ...state, email: newD }))
-                            }} placeholder="${my.first_name}" type="text" name="prenom" id="" />
-                        </div>
-                    </div>
-                    <div className="inputCommande">
-                        <div className="label">Nom</div>
-                        <div className="inputText">
-                            <input onChange={(e: any) => {
-                                const newD = e.target.value;
-                                // setData((state: any) => ({ ...state, first_name: newD }))
-                            }} placeholder="${my.first_name}" type="text" name="nom" id="" />
-                        </div>
-                    </div>
-                    <div className="inputCommande">
-                        <div className="label">Password</div>
-                        <div className="inputText">
-                            <input onChange={(e: any) => {
-                                const newD = e.target.value;
-                                // setData((state: any) => ({ ...state, last_name: newD }))
-                            }} placeholder="*********" type="password" name="password" id="" />
-                        </div>
-                    </div>
-                    <div className="inputCommande">
-                        <div className="label">Re-Password</div>
-                        <div className="inputText">
-                            <input onChange={(e: any) => {
-                                const newD = e.target.value;
-                                // setData((state: any) => ({ ...state, first_name: newD }))
-                            }} placeholder="*********" type="password" name="password2" id="" />
-                        </div>
-                    </div>
-                </div> */}
-
-
                 <div className="settingsInfo">
                     <div className="row1Set">
                         <div className="img">
-                            <img src={DefaultPhoto} />
-                            <input className='photoChange' type="file" />
+                            <img src={avatar} />
+                            <input className='photoChange' onChange={handleFileChangeImage} type="file" />
                             <div className="choseLayer">Choisir une nouvelle photo</div>
                         </div>
                         <div className="inputsC">
@@ -282,7 +308,7 @@ const Settings = () => {
                                 <div className="inputText">
                                     <input onChange={(e: any) => {
                                         const newD = e.target.value;
-                                        // setData((state: any) => ({ ...state, email: newD }))
+                                        setPasswords((state: any) => ({ ...state, oldPass: newD }))
                                     }} placeholder="Entrez l'ancien mot de passe" type="password" name="oldPassword" id="" />
                                 </div>
                             </div>
@@ -291,7 +317,7 @@ const Settings = () => {
                                 <div className="inputText">
                                     <input onChange={(e: any) => {
                                         const newD = e.target.value;
-                                        // setData((state: any) => ({ ...state, email: newD }))
+                                        setPasswords((state: any) => ({ ...state, newPAss: newD }))
                                     }} placeholder="Entrez un nouveau mot de passe" type="password" name="password1" id="" />
                                 </div>
                             </div>
@@ -300,7 +326,7 @@ const Settings = () => {
                                 <div className="inputText">
                                     <input onChange={(e: any) => {
                                         const newD = e.target.value;
-                                        // setData((state: any) => ({ ...state, email: newD }))
+                                        setPasswords((state: any) => ({ ...state, new2pass: newD }))
                                     }} placeholder="Entrez un nouveau mot de passe" type="password" name="password1" id="" />
                                 </div>
                             </div>
@@ -308,7 +334,8 @@ const Settings = () => {
                     </div>
                     <div className="row2set">
                         <button onClick={() => {
-                            CheckPassword()
+                            CheckPassword();
+                            handleImage();
                         }}>Change</button>
                     </div>
                 </div>

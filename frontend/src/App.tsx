@@ -89,7 +89,7 @@ function App() {
 											(recoilMyData.is_achat_manager || recoilMyData.is_superuser) &&
 										} */}
 										{
-											(recoilMyData.is_reception || recoilMyData.agent_affectation) &&
+											(recoilMyData.is_reception || recoilMyData.agent_affectation || recoilMyData.is_superuser) &&
 											<>
 												<Route path="stocks/:bc/:id" element={<BcStock />} />
 												<Route path="produit/:id" element={<Produit />} />

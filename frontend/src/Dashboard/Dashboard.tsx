@@ -140,7 +140,7 @@ const Dashboard = () => {
                             <div className="col2">
 
                                 <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune achats en retard (DA)" : "Validation en retard (DA)")}</h1>
+                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune demande achat en retard (DA)" : "Validation en retard (DA)")}</h1>
                                     {
                                         dataLine.TT.length > 0 &&
 

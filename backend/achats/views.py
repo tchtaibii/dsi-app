@@ -3,7 +3,7 @@ from django.db import models
 import numpy as np
 from django.db import transaction
 from .models import Achats, Achat, Article, Contrat, TypeDachat, SituationDachat
-from Stock.models import inStock, Stock, StockEtat, Stocks
+from Stock.models import inStock, Stock, StockEtat, Stocks, StockSituation
 from docx import Document
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -97,6 +97,8 @@ def create_stock(id=None):
                                 stock = Stock.objects.create(
                                     DateArrivage=achats.DateBL,
                                     etat=StockEtat.objects.get(etat='Stock'),
+                                    # situation=StockSituation.objects.get(
+                                    #     situation='NV'),
                                 )
                                 stock.save()
                                 stocks.stocks.add(stock)

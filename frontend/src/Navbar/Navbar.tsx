@@ -35,7 +35,7 @@ const Navbar = ({ setSearch }) => {
 
     const handleClick = () => {
 
-        if (data.is_achat_manager && window.location.pathname !== '/achats') {
+        if ((data.is_achat_manager || data.is_superuser) && window.location.pathname !== '/achats') {
             navigate('/achats');
         }
         if (data.is_reception && window.location.pathname !== '/produits') {
@@ -57,7 +57,7 @@ const Navbar = ({ setSearch }) => {
                 <div onClick={() => {
                     navigate('/profile');
                 }} style={{ cursor: 'pointer', }} className="profileNav">
-                    <img style={{ width: "2rem", borderRadius: "0.625rem" }} src={data.avatar ? data.avatar : profile} />
+                    <img style={{ width: "2rem", height: "2rem", objectFit: 'cover', borderRadius: "0.625rem" }} src={data.avatar ? (`${import.meta.env.VITE_URL}:${import.meta.env.VITE_PORT}${data.avatar}`) : profile} />
                     <p>{`${data.first_name} ${data.last_name}`}</p>
                     <ArrowP />
                 </div>

@@ -116,10 +116,10 @@ const Sidebar = () => {
                         </>
                     }
                     {
-                        my.is_reception &&
+                        (my.is_reception || my.is_superuser) &&
                         <NavLink className={({ isActive }) =>
                             isActive ? 'nav-icon-act' : ''
-                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Bon de commande"}</NavLink>
+                        } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Achats Livré"}</NavLink>
                     }
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''

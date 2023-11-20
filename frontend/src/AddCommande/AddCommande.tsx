@@ -181,7 +181,7 @@ function AddCommande() {
             }
         ])
     const [statusCode, setStatus] = useState({
-        color: "#AF4C4C",
+        d: "#AF4C4C",
         status: "Failed",
         text: "Wrong Inputs",
         is: false

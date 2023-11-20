@@ -104,7 +104,7 @@ const Stock = () => {
     const [backUp, setBackUp] = useState([])
     useEffect(() => {
         const fetchData = async () => {
-            if (my.is_achat_manager) {
+            if (my.is_achat_manager || my.is_superuser) {
                 if (!type)
                     await axios.get('/achats/stock_types/').then((rsp: any) => {
                         rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande)));
@@ -157,7 +157,6 @@ const Stock = () => {
                 </div>
             </div>
             {
-                (my.is_achat_manager || my.is_reception) &&
                 <>
                     {
                         !isLoading ? <Loading /> :

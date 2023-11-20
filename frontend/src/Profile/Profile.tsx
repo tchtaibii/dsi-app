@@ -28,6 +28,15 @@ const EmailSvg = () => (
 
 )
 
+const SettingSvg = () => (
+    <svg style={{
+        width: "1.4375rem",
+        height: "1.50588rem"
+    }} width={39} height={41} viewBox="0 0 39 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M34.41 22.0101C34.4936 21.3836 34.5353 20.7362 34.5353 20.0471C34.5353 19.3789 34.4936 18.7106 34.3892 18.0842L38.6283 14.7847C39.0042 14.4924 39.1086 13.9286 38.8789 13.5109L34.8695 6.57796C34.6189 6.11855 34.0968 5.97237 33.6374 6.11854L28.6465 8.12326C27.6024 7.32972 26.4956 6.66149 25.2635 6.16031L24.5118 0.856178C24.4282 0.355001 24.0106 0 23.5094 0H15.4906C14.9894 0 14.5926 0.355001 14.5091 0.856178L13.7573 6.16031C12.5253 6.66149 11.3976 7.35061 10.3744 8.12326L5.38349 6.11854C4.92407 5.95149 4.40201 6.11855 4.15143 6.57796L0.162884 13.5109C-0.0877054 13.9494 -0.00417599 14.4924 0.413472 14.7847L4.6526 18.0842C4.54819 18.7106 4.46466 19.3998 4.46466 20.0471C4.46466 20.6945 4.50643 21.3836 4.61084 22.0101L0.371708 25.3095C-0.00417596 25.6018 -0.108588 26.1657 0.121119 26.5833L4.13054 33.5163C4.38113 33.9757 4.90319 34.1219 5.36261 33.9757L10.3535 31.971C11.3976 32.7645 12.5044 33.4327 13.7365 33.9339L14.4882 39.238C14.5926 39.7392 14.9894 40.0942 15.4906 40.0942H23.5094C24.0106 40.0942 24.4283 39.7392 24.4909 39.238L25.2427 33.9339C26.4747 33.4327 27.6024 32.7645 28.6256 31.971L33.6165 33.9757C34.0759 34.1427 34.598 33.9757 34.8486 33.5163L38.858 26.5833C39.1086 26.1239 39.0042 25.6018 38.6074 25.3095L34.41 22.0101ZM19.5 27.5648C15.3653 27.5648 11.9823 24.1818 11.9823 20.0471C11.9823 15.9124 15.3653 12.5294 19.5 12.5294C23.6347 12.5294 27.0177 15.9124 27.0177 20.0471C27.0177 24.1818 23.6347 27.5648 19.5 27.5648Z" fill="white" />
+    </svg>
+
+)
 
 const PersonSvg = () => (
     <svg style={{
@@ -89,6 +98,28 @@ const Profile = () => {
         else if (x.is_superuser)
             return "Admin"
     }
+    const [isSession, setSession] = useState(false)
+
+    const [boolSend, setBool] = useState<any>()
+    useEffect(() => {
+        if (dataApi)
+            setBool({
+                Affectation: dataApi.agent_affectation,
+                Reception: dataApi.is_reception,
+                AchaManager: dataApi.is_achat_manager
+            })
+    }, [dataApi])
+
+
+    useEffect(() => {
+        if (isSession && (dataApi && (boolSend.Affectation !== dataApi.Affectation || boolSend.AchaManager !== dataApi.AchaManager || boolSend.Reception !== dataApi.Reception))) {
+            const FecthData = async () => {
+                await axios.post(`/auth/update_session/${id}`, boolSend).then((rsp: any) => { }).catch((error: any) => {
+                })
+            }
+            FecthData();
+        }
+    }, [boolSend])
 
     return (
         !isLoading ? <Loading /> :
@@ -99,9 +130,42 @@ const Profile = () => {
                 <div className="main">
                     <div className="mainmain">
                         <div className="cardProfile">
-                            <img src={data.avatar ? data.avatar : DefaultPhoto} className="profilePhoto" />
+                            {
+                                (id && dataApi && data.is_superuser && !dataApi.is_superuser) && <>
+                                    <div onClick={() => {
+                                        setSession((state: any) => !state)
+                                    }} className="settingsP">
+                                        <SettingSvg />
+                                    </div>
+                                    {
+                                        isSession &&
+                                        <div className="listSession">
+                                            <div style={{ borderBottom: '0.065rem solid #BD391B', width: '100%', paddingLeft: '0.5rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }} className="checkboxs">
+                                                <input onChange={() => {
+                                                    setBool((state: any) => ({ ...state, Affectation: !state.Affectation }))
+                                                }} style={{ width: '1rem', height: '1rem' }} type="checkbox" name="Affectation" id="" checked={boolSend.Affectation} />
+                                                <h4 style={{ fontSize: '0.7rem' }}>Affectation</h4>
+                                            </div>
+                                            <div style={{ borderBottom: '0.065rem solid #BD391B', width: '100%', paddingLeft: '0.5rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }} className="checkboxs">
+                                                <input onChange={() => {
+                                                    setBool((state: any) => ({ ...state, Reception: !state.Reception }))
+                                                }} style={{ width: '1rem', height: '1rem' }} type="checkbox" name="Récéption" id="" checked={boolSend.Reception} />
+                                                <h4 style={{ fontSize: '0.7rem' }}>Récéption</h4>
+                                            </div>
+                                            <div style={{ borderBottom: '0.065rem solid #BD391B', width: '100%', paddingLeft: '0.5rem', paddingTop: '0.5rem', paddingBottom: '0.5rem', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }} className="checkboxs">
+                                                <input onChange={() => {
+                                                    setBool((state: any) => ({ ...state, AchaManager: !state.AchaManager }))
+                                                }} style={{ width: '1rem', height: '1rem' }} type="checkbox" name="Achat Manager" id="" checked={boolSend.AchaManager} />
+                                                <h4 style={{ fontSize: '0.7rem' }}>Achat Manager</h4>
+                                            </div>
+                                        </div>
+                                    }
+                                </>
+
+                            }
+                            <img src={data.avatar ? (`${import.meta.env.VITE_URL}:${import.meta.env.VITE_PORT}${data.avatar}`) : DefaultPhoto} className="profilePhoto" />
                             <div className='infoText'>
-                                <h1 style={{ textTransform: 'capitalize', textAlign : 'center' }}>{`${((id && dataApi) ? dataApi.first_name : data.first_name)} ${((id && dataApi) ? dataApi.last_name : data.last_name)}`}</h1>
+                                <h1 style={{ textTransform: 'capitalize', textAlign: 'center' }}>{`${((id && dataApi) ? dataApi.first_name : data.first_name)} ${((id && dataApi) ? dataApi.last_name : data.last_name)}`}</h1>
                                 <div className="emailP">
                                     <EmailSvg />
                                     {((id && dataApi) ? dataApi.email : data.email)}
