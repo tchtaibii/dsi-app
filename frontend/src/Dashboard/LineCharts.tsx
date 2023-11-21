@@ -6,7 +6,6 @@ const ApexChart = ({ data, color }) => {
     const [lineData, setData] = useState([])
     const [CategoData, setCatego] = useState([])
     useEffect(() => {
-        console.log(data)
         setData(() => (
             data && data.map((e: any) => (
                 e.weeks_count
@@ -18,10 +17,6 @@ const ApexChart = ({ data, color }) => {
             ))
         ))
     }, [data])
-
-    useEffect(() => {
-        console.log(CategoData)
-    }, [CategoData])
     const navigate = useNavigate()
 
     const options = {

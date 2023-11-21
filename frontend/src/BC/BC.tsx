@@ -21,9 +21,6 @@ const GoSvg = () => (
 
 const AChatU = ({ e, i, bc }) => {
     let navigate = useNavigate();
-    useEffect(() => {
-        console.log(e)
-    }, [e])
     return (
         <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
             <div className="roww" onClick={() => {
@@ -73,7 +70,6 @@ const Achats = () => {
     };
     useEffect(() => {
         fetchDataB();
-        console.log(stock)
         setLoading(true)
     }, []);
 

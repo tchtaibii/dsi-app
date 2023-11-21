@@ -76,7 +76,6 @@ const Profile = () => {
             }
             await axios.get(`/stock/user_stock_affectations/${apiId}`).then((rsp: any) => {
                 setData(rsp.data.stocks)
-                console.log(rsp.data.stocks)
             }).catch((error: any) => console.log(error))
         }
         fetchData()

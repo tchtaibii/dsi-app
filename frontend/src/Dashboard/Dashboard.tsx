@@ -6,6 +6,9 @@ import ChartPie from './PieChart'
 import LinePie from './LineCharts'
 import ColCharts from './ColCharts'
 import Loading from '../Loading/Loading';
+import { useRecoilValue } from 'recoil';
+import { myData } from '../atoms'
+
 
 const Nouveau = () => (
     <svg style={{
@@ -71,7 +74,7 @@ const BoxDash = ({ title, color, icon, data }) => {
 }
 
 const Dashboard = () => {
-
+    const my = useRecoilValue(myData)
     const [boxData, setBoxData] = useState({
         n: 0,
         ect: 0,
@@ -89,22 +92,34 @@ const Dashboard = () => {
     })
     const [isLoading, setLoading] = useState(false)
     const [series, setSeries] = useState<any>([])
+    const [MM, setMM] = useState<any>([])
+    const [LD, setLD] = useState<any>([])
 
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get('/achats/situationDash/').then((rsp: any) => setBoxData(rsp.data))
-            await axios.get('/achats/pieChart/').then((rsp: any) => setDataPie(rsp.data))
-            await axios.get('/achats/linesChart/').then((rsp: any) => {
-                setDataLine(rsp.data[0])
-            })
-            await axios.get('/achats/colChart/').then((rsp: any) => setSeries(rsp.data))
+            if (my.is_achat_manager || my.is_superuser) {
+                await axios.get('/achats/situationDash/').then((rsp: any) => setBoxData(rsp.data))
+                await axios.get('/achats/pieChart/').then((rsp: any) => setDataPie(rsp.data))
+                await axios.get('/achats/linesChart/').then((rsp: any) => {
+                    setDataLine(rsp.data[0])
+                })
+                await axios.get('/achats/colChart/').then((rsp: any) => setSeries(rsp.data))
+            }
+            else if (my.is_reception) {
+                await axios.get('/stock/dashboard_mark_modele/').then((rsp: any) => {
+                    console.log(rsp.data)
+                    setMM(rsp.data)
+                })
+                await axios.get('/stock/get_recently_affected_stocks/').then((rsp: any) => {
+                    console.log(rsp.data)
+                    setLD(rsp.data)
+                })
+            }
         }
+
         fetchData();
         setLoading(true);
     }, [])
-    useEffect(() => {
-        console.log(dataLine)
-    }, [dataLine])
     const navigate = useNavigate()
     return (
         <>
@@ -115,73 +130,156 @@ const Dashboard = () => {
                             <h1>Dashboard</h1>
                         </div>
                         <div className="main" style={{ paddingBottom: '7rem' }}>
-                            <div className="dash-col">
-                                <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
-                                <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
-                                <BoxDash title={"En cours de livraison"} data={boxData.ecl} color={"rgba(243, 198, 39,"} icon={3} />
-                                <BoxDash title={"Livraison partielle"} data={boxData.lp} color={"rgba(72, 156, 255,"} icon={4} />
-                            </div>
-                            <div className="col2">
-                                <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune achats en retard (BL)" : "Livraison en retard (BL)")}</h1>
-                                    {
-                                        dataLine.TL.length > 0 &&
-                                        <LinePie color={'#f3c627'} data={dataLine.TL} />
-                                    }
+                            {
+                                (my.is_achat_manager || my.is_superuser) &&
+                                <div className="dash-col">
+                                    <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
+                                    <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
+                                    <BoxDash title={"En cours de livraison"} data={boxData.ecl} color={"rgba(243, 198, 39,"} icon={3} />
+                                    <BoxDash title={"Livraison partielle"} data={boxData.lp} color={"rgba(72, 156, 255,"} icon={4} />
                                 </div>
-                                <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune achats en retard (BC)" : "Traitement d'achat en retard (BC)")}</h1>
-                                    {
-                                        dataLine.TT.length > 0 &&
-                                        <LinePie color={'#ff7a00'} data={dataLine.TT} />
-                                    }
+                            }
+                            {
+                                (my.is_achat_manager || my.is_superuser) &&
+                                <div className="col2">
+                                    <div className="pieChart">
+                                        <h1>{((pieData.livre <= 0 && dataLine.TL.length === 0) ? "il n'y a aucune achats en retard (BL)" : "Livraison en retard (BL)")}</h1>
+                                        {
+                                            dataLine.TL.length > 0 &&
+                                            <LinePie color={'#f3c627'} data={dataLine.TL} />
+                                        }
+                                    </div>
+                                    <div className="pieChart">
+                                        <h1>{((pieData.livre <= 0 && dataLine.TT.length === 0) ? "il n'y a aucune achats en retard (BC)" : "Traitement d'achat en retard (BC)")}</h1>
+                                        {
+                                            dataLine.TT.length > 0 &&
+                                            <LinePie color={'#ff7a00'} data={dataLine.TT} />
+                                        }
+                                    </div>
                                 </div>
-                            </div>
+                            }
+
                             <div className="col2">
+                                {
+                                    (my.is_achat_manager || my.is_superuser) &&
+                                    <>
+                                        <div className="pieChart">
+                                            <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune demande achat en retard (DA)" : "Validation en retard (DA)")}</h1>
+                                            {
+                                                dataLine.TT.length > 0 &&
 
-                                <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && dataLine.TV.length === 0) ? "il n'y a aucune demande achat en retard (DA)" : "Validation en retard (DA)")}</h1>
-                                    {
-                                        dataLine.TT.length > 0 &&
+                                                <div className="validationRetard">
+                                                    <div className="VRheader">
+                                                        <p style={{ width: '22%' }}>Demandeur</p>
+                                                        <p style={{ width: '20%' }}>Entité</p>
+                                                        <p style={{ width: '26%' }}>Date de commande</p>
+                                                        <p style={{ width: '15%' }}>Type d'achat</p>
+                                                    </div>
+                                                    <div className="mainVRH">
+                                                        {
+                                                            dataLine.TV && dataLine.TV.map((e: any, i: number) => {
+                                                                return (
+                                                                    <div key={`${i}-retardV`} onClick={() => {
+                                                                        navigate(`/achat/${e.achat_id}`)
+                                                                    }} className="RetardValidationAchat">
+                                                                        <p style={{ width: '22.3%' }}>{e.demandeur}</p>
+                                                                        <p style={{ width: '20%' }}>{e.entité}</p>
+                                                                        <p style={{ width: '26.2%' }}>{e.DateDeCommande}</p>
+                                                                        <p style={{ width: '22.3%' }}>{e.typeDachat}</p>
+                                                                        <div className='weeksCircle'>{e.weeks_count}</div>
+                                                                        {/* <p>Type d'achat</p> */}
+                                                                    </div>
+                                                                )
+                                                            })
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div className="pieChart">
+                                            <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>
+                                            <ChartPie data={pieData} />
+                                        </div>
+                                    </>
+                                }
+                                {
+                                    (my.is_reception) &&
+                                    <>
+                                        <div className="pieChart">
+                                            <h1>{"Non marque setter"}</h1>
+                                            {
+                                                MM.length > 0 &&
 
-                                        <div className="validationRetard">
-                                            <div className="VRheader">
-                                                <p style={{ width: '22%' }}>Demandeur</p>
-                                                <p style={{ width: '20%' }}>Entité</p>
-                                                <p style={{ width: '26%' }}>Date de commande</p>
-                                                <p style={{ width: '15%' }}>Type d'achat</p>
-                                            </div>
-                                            <div className="mainVRH">
+                                                <div className="validationRetard">
+                                                    <div className="VRheader">
+                                                        <p style={{ width: '40%' }}>Type</p>
+                                                        <p style={{ width: '60%' }}>Désignation</p>
+                                                    </div>
+                                                    <div className="mainVRH">
+                                                        {
+                                                            MM.map((e: any, i: number) => {
+                                                                return (
+                                                                    <div key={`${i}-retardV`} onClick={() => {
+                                                                        navigate(`/BC/${e.id}`)
+                                                                    }} className="RetardValidationAchat">
+                                                                        <p style={{ width: '40%' }}>{e.type}</p>
+                                                                        <p style={{ width: '60%' }}>{e.designation}</p>
+                                                                    </div>
+                                                                )
+                                                            })
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                        {
+                                            (my.agent_affectation || my.is_reception) &&
+                                            <div className="pieChart">
+                                                <h1>{"Afféctation Récent"}</h1>
                                                 {
-                                                    dataLine.TV && dataLine.TV.map((e: any, i: number) => {
-                                                        return (
-                                                            <div key={`${i}-retardV`} onClick={() => {
-                                                                navigate(`/achat/${e.achat_id}`)
-                                                            }} className="RetardValidationAchat">
-                                                                <p style={{ width: '22.3%' }}>{e.demandeur}</p>
-                                                                <p style={{ width: '20%' }}>{e.entité}</p>
-                                                                <p style={{ width: '26.2%' }}>{e.DateDeCommande}</p>
-                                                                <p style={{ width: '22.3%' }}>{e.typeDachat}</p>
-                                                                <div className='weeksCircle'>{e.weeks_count}</div>
-                                                                {/* <p>Type d'achat</p> */}
-                                                            </div>
-                                                        )
-                                                    })
+                                                    LD.length > 0 &&
+
+                                                    <div className="validationRetard">
+                                                        <div className="VRheader">
+                                                            <p style={{ width: '20%' }}>Nom et Prénom</p>
+                                                            <p style={{ width: '20%' }}>Fonction</p>
+                                                            <p style={{ width: '20%' }}>Date D'affectation</p>
+                                                            <p style={{ width: '20%' }}>Service Tag</p>
+                                                            <p style={{ width: '20%' }}>Situation</p>
+                                                        </div>
+                                                        <div className="mainVRH">
+                                                            {
+                                                                LD.map((e: any, i: number) => {
+                                                                    return (
+                                                                        <div key={`${i}-retardV`} onClick={() => {
+                                                                            navigate(`/BC/${e.id}`)
+                                                                        }} className="RetardValidationAchat">
+                                                                            <p style={{ width: '20%' }}>{e.NomPrenom}</p>
+                                                                            <p style={{ width: '20%' }}>{e.Fonction}</p>
+                                                                            <p style={{ width: '20%' }}>{e.DateDaffectation}</p>
+                                                                            <p style={{ width: '20%' }}>{e.ServiceTag ? e.ServiceTag : '----'}</p>
+                                                                            <p style={{ width: '20%' }}>{e.situation}</p>
+                                                                        </div>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </div>
+                                                    </div>
                                                 }
                                             </div>
-                                        </div>
-                                    }
-                                </div>
-                                <div className="pieChart">
-                                    <h1>{((pieData.livre <= 0 && pieData.non_livre <= 0) ? "No achats Found" : "Demande d'achat")}</h1>
-                                    <ChartPie data={pieData} />
-                                </div>
+                                        }
+                                    </>
+                                }
                             </div>
-                            <div className="col2" >
-                                <div style={{ width: '100%' }} className="pieChart">
-                                    <ColCharts Series={series} />
+                            {
+                                (my.is_achat_manager || my.is_superuser) &&
+                                <div className="col2" >
+                                    <div style={{ width: '100%' }} className="pieChart">
+                                        <ColCharts Series={series} />
+                                    </div>
                                 </div>
-                            </div>
+                            }
+
                         </div>
                     </div>
             }

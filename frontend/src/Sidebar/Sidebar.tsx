@@ -116,7 +116,7 @@ const Sidebar = () => {
                         </>
                     }
                     {
-                        (my.is_reception || my.is_superuser) &&
+                        (my.is_reception || my.is_superuser || my.agent_affectation) &&
                         <NavLink className={({ isActive }) =>
                             isActive ? 'nav-icon-act' : ''
                         } style={{ width: changeWidthC }} to="/affecté"><AffectéSvg />{increaseNav && "Achats Livré"}</NavLink>
@@ -126,10 +126,10 @@ const Sidebar = () => {
                     } style={{ width: changeWidthC }} to="/stock"><StockSvg />{increaseNav && "Stock"}</NavLink>
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/customers"><CustomerSvg />{increaseNav && "Customer"}</NavLink>
+                    } style={{ width: changeWidthC }} to="/customers"><CustomerSvg />{increaseNav && "Agents"}</NavLink>
                     <NavLink className={({ isActive }) =>
                         isActive ? 'nav-icon-act' : ''
-                    } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Settings"}</NavLink>
+                    } style={{ width: changeWidthC }} to="/settings"><SettingSvg />{increaseNav && "Paramétres"}</NavLink>
 
                 </ul>
             </div>
@@ -139,7 +139,7 @@ const Sidebar = () => {
                         my.is_superuser &&
                         <NavLink className={({ isActive }) =>
                             isActive ? 'nav-icon-act' : ''
-                        } style={{ width: changeWidthC }} to="/signup"><CustomerSvg />{increaseNav && "Create Account"}</NavLink>
+                        } style={{ width: changeWidthC }} to="/signup"><CustomerSvg />{increaseNav && "Créer un Compte"}</NavLink>
 
                     }
                     <a style={{ width: changeWidthC }} onClick={() => {

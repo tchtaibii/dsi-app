@@ -42,9 +42,7 @@ const Navbar = ({ setSearch }) => {
             navigate('/produits');
         }
     };
-    useEffect(() => {
-        console.log(data)
-    }, [])
+
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
             setSearch(testSerach);

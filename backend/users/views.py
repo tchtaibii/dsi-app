@@ -280,7 +280,6 @@ def update_password(request):
         return Response({'error': 'Old password and new password are required.'}, status=400)
 
     if not check_password(old_password, user.password):
-        print('heree')
         return Response({'error': 'Old password is incorrect.'}, status=400)
 
     password_regex = (

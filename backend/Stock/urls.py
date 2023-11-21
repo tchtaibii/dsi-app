@@ -22,7 +22,9 @@ urlpatterns = [
          name='get_situation_stock'),
     path('filter_stocks/', views.filter_stocks, name='filter_stocks'),
     path('filter_stocks/<str:string>', views.filter_stocks, name='filter_stocks'),
-
-
+    path('dashboard_mark_modele/', views.dashboard_mark_modele,
+         name='dashboard_mark_modele'),
+    path('get_recently_affected_stocks/', views.get_recently_affected_stocks,
+         name='get_recently_affected_stocks'),
 
 ]

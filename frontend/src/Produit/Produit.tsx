@@ -83,7 +83,6 @@ const Produit = () => {
         const fetchData = async () => {
             await axios.get('/stock/get_situation_stock/').then((rsp: any) => {
                 setSituation(rsp.data)
-                console.log(rsp.data)
             }).catch((error: any) => console.log(error))
         }
         if (isAffect)
@@ -178,7 +177,6 @@ const Produit = () => {
                                 </div>
                                 <div style={{ flexDirection: 'row-reverse', justifyContent: 'initial', gap: '1rem' }} className="row">
                                     <button onClick={async () => {
-                                        console.log(queryParams.date)
                                         if (queryParams.nom && queryParams.entité && queryParams.fonction && queryParams.date && queryParams.situation) {
                                             axios.post(`/stock/affected_produit/${id}`, queryParams).then((rsp) => {
                                                 window.location.reload();
@@ -217,9 +215,10 @@ const Produit = () => {
                                 <div className="btnAchats">
                                     {
                                         my.agent_affectation &&
+                                        Data.etat === 'Stock' &&
                                         <button onClick={() => {
                                             setAffect(true);
-                                        }}>{Data.etat === 'Stock' ? 'Affecté ->' : 'Edit ->'}</button>
+                                        }}>{'Affecté ->'}</button>
                                     }
 
                                 </div>

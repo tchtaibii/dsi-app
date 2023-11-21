@@ -63,7 +63,6 @@ const Achat = () => {
                 result += 's';
             }
         }
-        console.log(result)
         return result.trim();
     };
 
@@ -103,7 +102,6 @@ const Achat = () => {
         const fetchData = async () => {
             await axios.get(`/achats/get/achat/${id}`).then((rsp: any) => {
                 setData(rsp.data)
-                console.log(rsp.data)
             })
         }
         fetchData();
@@ -134,7 +132,6 @@ const Achat = () => {
                 }
                 const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
                 const url = window.URL.createObjectURL(blob);
-                console.log(filename)
                 setfileData({ data: url, name: filename });
                 setfileData({ data: url, name: filename });
             }
@@ -288,7 +285,6 @@ const Achat = () => {
                                                     <button onClick={() => {
                                                         const downloadData = () => {
                                                             if (fileData.name) {
-                                                                console.log('glm')
                                                                 const link = document.createElement('a');
                                                                 link.href = fileData.data ? fileData.data : '#';
                                                                 link.setAttribute('download', fileData.name ? fileData.name : 'Pv');

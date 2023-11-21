@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { Chart } from "react-google-charts";
 
 
@@ -14,9 +14,6 @@ export const options = {
 };
 
 function PieChart({ data }) {
-    useEffect(() => {
-        console.log(data)
-    },[])
     const dataP = [
         ["Situation", "Achats"],
         ["Livré", data.livre],
@@ -24,7 +21,7 @@ function PieChart({ data }) {
 
     ];
     return (
-        <div style={{transform: 'translateX(5rem)', width: '100%', marginTop: '-5rem', height: '100%', display: 'flex', alignItems: 'center' }}>
+        <div style={{ transform: 'translateX(5rem)', width: '100%', marginTop: '-5rem', height: '100%', display: 'flex', alignItems: 'center' }}>
             <Chart
                 chartType="PieChart"
                 data={dataP}

@@ -98,7 +98,6 @@ const AChatU = ({ TypeDachat, e, i }) => {
     const [showMore, setMore] = useState(false)
     let navigate = useNavigate();
     useEffect(() => {
-        console.log(e)
     }, [e])
     return (
         <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
@@ -237,7 +236,6 @@ const Achats = ({ SearchT }) => {
                             { search: SearchT }
                     }).then((rsp: any) => {
                         setAchats(rsp.data.reverse());
-                        console.log(rsp.data);
                     });
                 }
                 else {

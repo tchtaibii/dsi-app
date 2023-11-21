@@ -106,7 +106,6 @@ def create_stock(id=None):
                             if str(achats.typeDachat) == 'Accord Cadre':
                                 in_stock.fourniseur = achat.article.contrat.name
                             else:
-                                print('====>', achats.fourniseur)
                                 in_stock.fourniseur = achats.fourniseur
                             in_stock.save()
                             in_stock.stocks.add(stocks)
@@ -168,7 +167,6 @@ def ExcelExportView(request):
 
     if 'search' in params and len(params['search']) > 0:
         srch = params['search']
-        print('enter', srch)
         achats = Achats.objects.filter(Q(demandeur=srch) | Q(entité=srch) | Q(
             ligne_bugetaire=srch) | Q(DA=srch) | Q(BC=srch) | Q(BL=srch))
     else:
@@ -265,7 +263,6 @@ def progress(request, id):
                 DateDA = date
                 achat = Achats.objects.get(id=id)
                 achat.DA = DA
-                print(DateDA, '******')
                 achat.DateDA = DateDA
                 achat.situation_d_achat = SituationDachat.objects.get(id=2)
                 achat.save()
@@ -734,7 +731,7 @@ def types_with_total_quantity(request):
 
 @api_view(['GET'])
 @throttle_classes([UserRateThrottle])
-@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
+@permission_classes([IsAuthenticated])
 def stock_types(request):
     types_with_counts = TypeDArticle.objects.annotate(
         Demande=Sum('article__achat__quantité'),
@@ -806,7 +803,6 @@ def search_commands(request):
     try:
         achats_list = []  # Initialize an empty list
         params = request.query_params
-        print(params['search'])
         if 'search' in params:
             params = params['search']
             achats = Achats.objects.filter(Q(demandeur=params) | Q(entité=params) | Q(

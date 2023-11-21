@@ -74,7 +74,6 @@ def types_in_stock(request):
                 'affecté': affecté
             })
     except Exception as e:
-        print(e)
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
     return JsonResponse(data, safe=False)
 
@@ -95,7 +94,6 @@ def stocks_by_type(request, type_name):
                 'affecté': stock[2]
             })
     except Exception as e:
-        print(e)
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
 
     return JsonResponse(data, safe=False)
@@ -138,7 +136,6 @@ def count_stocks_with_null_service_tag(request, id):
     except Stocks.DoesNotExist:
         return JsonResponse({'error': 'Stocks not found'}, status=404)
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
 
 
@@ -178,7 +175,6 @@ def update_stock_and_stocks(request, id):
     except Stocks.DoesNotExist:
         return JsonResponse({'error': 'Stocks not found'}, status=404)
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
         return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
 
 
@@ -346,7 +342,7 @@ def filter_stocks(request, string=None):
                 'DateArrivage': stock.DateArrivage,
                 'DateDaffectation': stock.DateDaffectation,
                 'serviceTag': stock.serviceTag,
-                'affected_by': affected_by_first_name + affected_by_last_name,
+                'affected_by': (affected_by_first_name or '') + (' ' + affected_by_last_name if affected_by_last_name else ''),
                 'mark': related_stocks.mark if related_stocks else None,
                 'modele': related_stocks.modele if related_stocks else None,
                 'type': str(related_stocks.type) if related_stocks else None,
@@ -358,6 +354,7 @@ def filter_stocks(request, string=None):
 
         return JsonResponse(serialized_data, safe=False)
     except Exception as e:
+        logger.exception(f'Error in retrieving achats data: {e}')
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
@@ -392,3 +389,45 @@ def user_stock_affectations(request, id):
         return Response({'error': 'User not found'}, status=404)
     except Exception as e:
         return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsReceptionPermission])
+@throttle_classes([UserRateThrottle])
+def dashboard_mark_modele(request):
+    try:
+        stocks = Stocks.objects.filter(modele__isnull=True, mark__isnull=True) | \
+            Stocks.objects.filter(modele__exact='', mark__exact='')
+        serialized_data = []
+        for stock in stocks:
+            serialized_data.append({
+                'id': stock.id,
+                'designation': stock.designation,
+                'type': str(stock.type),
+            })
+        return Response(serialized_data)
+    except:
+        return Response({'error': ''}, status=404)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@throttle_classes([UserRateThrottle])
+def get_recently_affected_stocks(request):
+    try:
+        recent_stocks = Stock.objects.exclude(
+            DateDaffectation=None).order_by('-DateDaffectation')[:10]
+        serialized_data = []
+        for stock in recent_stocks:
+            serialized_data.append({
+                'id': stock.id,
+                'NomPrenom': stock.NomPrenom,
+                'Fonction': stock.Fonction,
+                'DateDaffectation': stock.DateDaffectation.strftime("%Y-%m-%d %H:%M:%S") if stock.DateDaffectation else None,
+                'serviceTag': stock.serviceTag,
+                'situation': stock.situation.situation
+            })
+
+        return JsonResponse(serialized_data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

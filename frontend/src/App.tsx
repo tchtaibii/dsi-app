@@ -37,7 +37,6 @@ function App() {
 			await axios.get('/auth/my/').then((resp: any) => {
 				setLogin(true)
 				setData(resp.data);
-				console.log(resp.data)
 			}).catch((resp: any) => {
 				localStorage.removeItem('access_token');
 			})

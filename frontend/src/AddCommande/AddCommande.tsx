@@ -307,7 +307,6 @@ function AddCommande() {
     const [value, SetValue] = useState<number>(1)
 
     useEffect(() => {
-        console.log(value, children.length)
         if (value > children.length) {
             const tmp = value - children.length
             for (let i = 0; i < tmp; i++) {

@@ -108,7 +108,6 @@ const Achats = () => {
     const statusFunc = (obj: any) => {
         setarticle({ demandeur: obj.demandeur, typeDachat: obj.typeDachat });
         setReste(obj.achats);
-        console.log(obj)
         if (obj.isComplet === true) {
             setStatus({
                 DA: {
@@ -280,10 +279,8 @@ const Achats = () => {
     useEffect(() => {
         const fetchData = async () => {
             await axios.get(`/achats/getprogrss/${id}`).then((rsp: any) => {
-                console.log(rsp.data)
                 statusFunc(rsp.data)
                 OldsetReste(rsp.data.achats);
-                console.log(rsp.data.achats)
             })
             setLoading(true)
         }
@@ -426,11 +423,6 @@ const Achats = () => {
         if (postData.is_ === 'OB' || postData.is_ === 'DONE')
             fetchData()
     }, [postData.is_])
-
-    useEffect(() => {
-        console.log(OldReste)
-    }, [OldReste])
-
     return (
         !isLoading ? <Loading /> :
             <div className='ContentMain'>

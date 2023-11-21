@@ -25,22 +25,20 @@ const Search = () => (
 )
 
 
-const AChatU = ({ e, i, is_achat_manager }) => {
+const AChatU = ({ e, i, is_achat_manager, is_superuser }) => {
     const [showMore, setMore] = useState(false)
     let navigate = useNavigate();
-    useEffect(() => {
-        console.log(e)
-    }, [e])
+
     return (
         <div style={{ cursor: 'pointer' }} key={'achat-' + i} className="rowAchats">
             <div style={{ height: '7.211rem', justifyContent: 'initial', paddingRight: '0rem' }} className="roww">
                 <p style={{ width: '60%' }}>{e.designation}</p>
-                <p style={{ width: '6.80rem', textAlign: 'center', marginRight: '6.5rem' }}>{is_achat_manager ? e.quantité : ''}</p>
-                <p style={{ width: '3.1rem', maxWidth: '6rem', textAlign: 'center', marginRight: '7.2rem' }}>{is_achat_manager ? e.valable : e.quantité}</p>
-                <p style={{ width: '6.1rem', textAlign: 'center', marginRight: '5rem' }}>{is_achat_manager ? e.reste : e.affecté}</p>
+                <p style={{ width: '6.80rem', textAlign: 'center', marginRight: '6.5rem' }}>{(is_achat_manager || is_superuser) ? e.quantité : ''}</p>
+                <p style={{ width: '3.1rem', maxWidth: '6rem', textAlign: 'center', marginRight: '7.2rem' }}>{(is_achat_manager || is_superuser) ? e.valable : e.quantité}</p>
+                <p style={{ width: '6.1rem', textAlign: 'center', marginRight: '5rem' }}>{(is_achat_manager || is_superuser) ? e.reste : e.affecté}</p>
             </div>
             {
-                is_achat_manager && showMore &&
+                (is_achat_manager || is_superuser) && showMore &&
                 <div className="achatArr">
                     <div className="headerMain" style={{ paddingRight: "0rem" }}>
                         <p style={{ width: '30%', color: '#BD391B' }}>Demandeur</p>
@@ -70,7 +68,7 @@ const AChatU = ({ e, i, is_achat_manager }) => {
                 </div>
             }
             {
-                is_achat_manager &&
+                (is_achat_manager || is_superuser) &&
                 <div onClick={() => {
                     setMore((state: any) => (!state))
                 }} className="More">
@@ -83,12 +81,12 @@ const AChatU = ({ e, i, is_achat_manager }) => {
 }
 
 
-const AchatCl = ({ data, is_achat_manager }) => {
+const AchatCl = ({ data, is_achat_manager, is_superuser }) => {
     return (
         <div className="achatCf">
             {
                 data.map((e: any, i: number) => (
-                    <AChatU is_achat_manager={is_achat_manager} key={`${i}-article-des`} e={e} i={i} />
+                    <AChatU is_achat_manager={is_achat_manager} is_superuser={is_superuser} key={`${i}-article-des`} e={e} i={i} />
                 ))
             }
         </div>
@@ -104,10 +102,10 @@ const Stock = () => {
     const [backUp, setBackUp] = useState([])
     useEffect(() => {
         const fetchData = async () => {
-            if (my.is_achat_manager || my.is_superuser) {
+            if (!my.is_reception) {
                 if (!type)
                     await axios.get('/achats/stock_types/').then((rsp: any) => {
-                        rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande)));
+                        rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande))).filter((e: any) => (e.quantity > 0 || e.Demande > 0));
                         setData(rsp.data.reverse())
                     });
                 else
@@ -116,7 +114,7 @@ const Stock = () => {
             else if (my.is_reception) {
                 if (!type)
                     await axios.get('/stock/types_in_stock/').then((rsp: any) => {
-                        rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande)));
+                        rsp.data.sort((a: any, b: any) => (my.is_reception ? (a.quantity - b.quantity) : (a.Demande - b.Demande))).filter((e: any) => (e.quantity > 0 || e.Demande > 0));
                         setData(rsp.data.reverse())
                     });
                 else
@@ -138,11 +136,11 @@ const Stock = () => {
     return (
         <div className='ContentMain'>
             <div className="header">
-                <h1>{(my.is_achat_manager || my.is_reception) && (type ? type : (Data.length > 0 ? "Stock" : "No type artcile with this name"))}</h1>
+                <h1>{((my.is_achat_manager || my.is_superuser) || my.is_reception) && (type ? type : (Data.length > 0 ? "Stock" : "No type artcile with this name"))}</h1>
                 <div style={{ border: '0.06rem solid #bd391b', width: '20rem' }} className="search">
                     <input onKeyPress={() => { }} onClick={() => { }} onChange={(e: any) => {
                         const value = e.target.value;
-                        if (my.is_achat_manager || my.is_reception) {
+                        if ((my.is_achat_manager || my.is_superuser) || my.is_reception) {
                             if (value === '' || value === null)
                                 setBackUp(Data.map((e) => e))
                             if (!type)
@@ -206,12 +204,12 @@ const Stock = () => {
                                                 <>
                                                     <div style={{ paddingRight: 0, justifyContent: 'initial' }} className="headerMain">
                                                         <p style={{ width: '60%' }}>Designation</p>
-                                                        <p style={{ width: '13%' }}>{my.is_achat_manager ? 'Demandes' : ''}</p>
-                                                        <p style={{ width: '10%' }}>{my.is_achat_manager ? 'Livré' : 'Stock'}</p>
-                                                        <p style={{ width: '10%' }}>{my.is_achat_manager ? 'Non Livré' : 'Affecté'}</p>
+                                                        <p style={{ width: '13%' }}>{(my.is_achat_manager || my.is_superuser) ? 'Demandes' : ''}</p>
+                                                        <p style={{ width: '10%' }}>{(my.is_achat_manager || my.is_superuser) ? 'Livré' : 'Stock'}</p>
+                                                        <p style={{ width: '10%' }}>{(my.is_achat_manager || my.is_superuser) ? 'Non Livré' : 'Affecté'}</p>
                                                     </div>
                                                     <div className="achatsCL">
-                                                        <AchatCl is_achat_manager={my.is_achat_manager} data={backUp} />
+                                                        <AchatCl is_achat_manager={my.is_achat_manager} is_superuser={my.is_superuser} data={backUp} />
                                                     </div>
                                                 </>
                                             }

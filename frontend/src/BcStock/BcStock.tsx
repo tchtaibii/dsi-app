@@ -35,8 +35,6 @@ const Edits = ({ id, setEdits }) => {
     };
     useEffect(() => {
         fetchDataB();
-
-        // console.log(stock)
     }, []);
 
     const [file, setFile] = useState(null);
@@ -206,7 +204,6 @@ const Bcstock = () => {
     const fetchDataB = async () => {
         await axios.get(`/stock/get_stocks_details/${id}`).then((rsp: any) => {
             setData(rsp.data)
-            console.log(rsp.data)
         }
         )
         setLoading(true)
@@ -220,7 +217,6 @@ const Bcstock = () => {
     const [selectedOption, setSelectedOption] = useState('0'); // Default selected option
 
     const handleChange = (event) => {
-        console.log(event.target.value)
         setSelectedOption(event.target.value);
     };
     const my = useRecoilValue(myData)
