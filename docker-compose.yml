@@ -29,7 +29,7 @@ services:
   backend:
     container_name: my-backend
     build:
-      context: ./backend  # Use this directory as the build context
+      context: ./backend
     restart: always
     depends_on:
       - my-mariadb
