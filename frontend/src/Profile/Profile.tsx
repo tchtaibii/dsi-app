@@ -162,7 +162,7 @@ const Profile = () => {
                                 </>
 
                             }
-                            <img src={data.avatar ? (`${import.meta.env.VITE_URL}:${import.meta.env.VITE_PORT}${data.avatar}`) : DefaultPhoto} className="profilePhoto" />
+                            <img src={data.avatar ? (`${import.meta.env.VITE_URL}/api${data.avatar}`) : DefaultPhoto} className="profilePhoto" />
                             <div className='infoText'>
                                 <h1 style={{ textTransform: 'capitalize', textAlign: 'center' }}>{`${((id && dataApi) ? dataApi.first_name : data.first_name)} ${((id && dataApi) ? dataApi.last_name : data.last_name)}`}</h1>
                                 <div className="emailP">

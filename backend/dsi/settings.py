@@ -12,7 +12,6 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -146,7 +145,7 @@ MEDIA_URL = '/files/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/files')
 
 CORS_ORIGIN_WHITELIST = [
-    "http://10.16.180.24:3000",
+    "http://10.16.180.24",
     # "http://localhost:3000",
 ]
 
@@ -180,6 +179,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # SMTP server address (e.g., smtp.gmail.com)
 EMAIL_PORT = 587  # SMTP port (587 for TLS/STARTTLS, 465 for SSL)
 EMAIL_HOST_USER = 'tehsusrhist@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'csxjvmofskepglje'  # Your email password or app-specific password
+# Your email password or app-specific password
+EMAIL_HOST_PASSWORD = 'csxjvmofskepglje'
 EMAIL_USE_TLS = True  # Set to True if using TLS/STARTTLS
 EMAIL_USE_SSL = False  # Set to True if using SSL
