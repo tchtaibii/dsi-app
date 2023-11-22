@@ -66,6 +66,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - my-backend
+      - my-frontend
+    networks:
+      - net
 volumes:
   # mariadb volume
   db:

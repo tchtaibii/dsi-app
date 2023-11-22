@@ -55,7 +55,7 @@ const Navbar = ({ setSearch }) => {
                 <div onClick={() => {
                     navigate('/profile');
                 }} style={{ cursor: 'pointer', }} className="profileNav">
-                    <img style={{ width: "2rem", height: "2rem", objectFit: 'cover', borderRadius: "0.625rem" }} src={data.avatar ? (`${import.meta.env.VITE_URL}/api`) : profile} />
+                    <img style={{ width: "2rem", height: "2rem", objectFit: 'cover', borderRadius: "0.625rem" }} src={data.avatar ? (`${import.meta.env.VITE_URL + data.avatar}`) : profile} />
                     <p>{`${data.first_name} ${data.last_name}`}</p>
                     <ArrowP />
                 </div>

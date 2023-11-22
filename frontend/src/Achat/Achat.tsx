@@ -88,7 +88,7 @@ const Achat = () => {
             case 2:
                 return "En cours de traitement"
             case 3:
-                return "En cours de livraison"
+                return "Non Livré"
             case 4:
                 return "Livré"
             case 5:

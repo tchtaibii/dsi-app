@@ -191,7 +191,7 @@ const Settings = () => {
 
     useEffect(() => {
         if (my.avatar)
-            setAvatar(`${import.meta.env.VITE_URL}/api${my.avatar}`)
+            setAvatar(`${import.meta.env.VITE_URL}${my.avatar}`)
         else
             setAvatar(DefaultPhoto)
     }, [my])

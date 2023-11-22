@@ -24,7 +24,7 @@ def create_default_situation_dachat(apps, schema_editor):
     situation_dachat = apps.get_model('achats', 'SituationDachat')
     situation_dachat.objects.create(situation='Nouveau')
     situation_dachat.objects.create(situation='En cours de traitement')
-    situation_dachat.objects.create(situation="En cours de livraison")
+    situation_dachat.objects.create(situation="Non Livré")
     situation_dachat.objects.create(situation="Livré")
     situation_dachat.objects.create(situation="Livraison partielle")
 
