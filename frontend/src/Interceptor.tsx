@@ -1,7 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 
 const api = axios.create({
-    baseURL: `http://10.16.180.24/api`,
+    // baseURL: `http://10.16.180.24/api`,
+    baseURL: import.meta.env.VITE_URL,
     withCredentials: true,
 });
 

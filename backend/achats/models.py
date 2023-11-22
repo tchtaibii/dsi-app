@@ -32,7 +32,6 @@ class Article(models.Model):
     def __str__(self):
         return self.designation
 
-
 class TypeDachat(models.Model):
     type = models.CharField(
         max_length=50, default='Accord Cadre', blank=False, null=False)

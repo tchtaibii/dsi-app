@@ -4,11 +4,11 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def create_default_contrat(apps, schema_editor):
-    Contrat = apps.get_model('achats', 'Contrat')
-    Contrat.objects.create(name='Microdata OCP')
-    Contrat.objects.create(name='Microdata UM6P')
-    Contrat.objects.create(name="Munisys")
+# def create_default_contrat(apps, schema_editor):
+#     Contrat = apps.get_model('achats', 'Contrat')
+#     Contrat.objects.create(name='Microdata OCP')
+#     Contrat.objects.create(name='Microdata UM6P')
+#     Contrat.objects.create(name="Munisys")
 
 
 def create_default_type_dachat(apps, schema_editor):
@@ -239,7 +239,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.PROTECT, to='achats.article'),
         ),
-        migrations.RunPython(create_default_contrat),
+        # migrations.RunPython(create_default_contrat),
         migrations.RunPython(create_default_type_dachat),
         migrations.RunPython(create_default_situation_dachat),
         # migrations.RunPython(create_default_articles),

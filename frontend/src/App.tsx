@@ -19,6 +19,8 @@ import Customer from './Customer/Customer'
 import Settings from './Settings/Settings'
 import Login from './Login/Login'
 import Loading from './Loading/Loading'
+import Article from './Article/Article'
+
 import Register from './Register/Register'
 import { Routes, Route } from "react-router-dom"
 import { useState, useEffect } from 'react'
@@ -74,6 +76,7 @@ function App() {
 												<Route path="/" element={<Dashboard />} />
 												<Route path="achats/:id?" element={<Achats SearchT={SearchT} />} />
 												<Route path="achat/:id" element={<Achat />} />
+												<Route path="article/:id?" element={<Article />} />
 											</>
 										}
 										{

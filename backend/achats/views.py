@@ -836,7 +836,7 @@ def add_articles(request):
         df = df.replace({'Nan': None})
         df = df.replace({np.nan: None})
 
-        contrat = excel_file.name
+        contrat = os.path.splitext(excel_file.name)[0]
         Contrat.objects.get_or_create(name=contrat)
         for _, row in df.iterrows():
             if not Article.objects.filter(code=row['CODE']).exists():
@@ -1040,3 +1040,40 @@ def dashboard_lines(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)})
+
+
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+@api_view(['GET'])
+def contart_all(request):
+    try:
+        contrats = Contrat.objects.all()
+        serialized_data = []
+        for contrat in contrats:
+            serialized_data.append({
+                'id': contrat.id,
+                'name': contrat.name,
+                # Add other fields if needed
+            })
+        return Response(serialized_data)
+    except Exception as e:
+        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
+
+
+@permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
+@throttle_classes([UserRateThrottle])
+@api_view(['GET'])
+def article_contart(request, id):
+    try:
+        articles = Article.objects.filter(contrat_id=id)
+        serialized_data = []
+        for article in articles:
+            serialized_data.append({
+                'id': article.id,
+                'code': article.code,
+                'designation': article.designation,
+                'type': article.type.type,
+            })
+        return Response(serialized_data)
+    except Exception as e:
+        return Response({'error': f'An error occurred: {str(e)}'}, status=500)
