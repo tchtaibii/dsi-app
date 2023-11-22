@@ -58,17 +58,17 @@ services:
       - ./frontend/src:/app/src
     networks:
       - net
-  # nginx:
-  #   image: nginx
-  #   ports:
-  #     - 80:80
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-  #   depends_on:
-  #     - my-backend
-  #     - my-frontend
-  #   networks:
-  #     - net
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - my-backend
+      - my-frontend
+    networks:
+      - net
 volumes:
   # mariadb volume
   db:
