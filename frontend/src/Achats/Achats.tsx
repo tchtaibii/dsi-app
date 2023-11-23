@@ -65,15 +65,19 @@ const DownloadSvg = () => (
 
 )
 
-const Situation = (sda: number) => {
+const Situation = (sda: number, typeDachat: number) => {
     switch (sda) {
         case 1:
-            return "Nouveau";
+            return "Pré DA";
         case 2:
-            return "EC de traitement"
+            return "DA en cours"
         case 3:
-            return "EC de livraison"
+            if (typeDachat === 4)
+                return "Non Payé"
+            return "Non Livré"
         case 4:
+            if (typeDachat === 4)
+                return "Payé"
             return "Livré"
         case 5:
             return "Livraison partielle"
@@ -82,7 +86,7 @@ const Situation = (sda: number) => {
 const TypeDachat = (sda: number) => {
     switch (sda) {
         case 1:
-            return "Accord Cadre";
+            return "Contrat Cadre";
         case 2:
             return "Achat Direct"
         case 3:
@@ -121,7 +125,7 @@ const AChatU = ({ TypeDachat, e, i }) => {
                             backgroundColor: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)"),
                             borderRadius: "50%"
                         }} className="pointEtat"></div>
-                        <p style={{ color: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)") }}>{Situation(e.situation_d_achat)}</p>
+                        <p style={{ color: ((e.situation_d_achat === 1 || e.situation_d_achat === 2) ? "#B43316" : e.situation_d_achat === 4 ? "#00B212" : "rgb(196 182 48)") }}>{Situation(e.situation_d_achat, e.typeDachat)}</p>
                     </div>
                 </div>
 

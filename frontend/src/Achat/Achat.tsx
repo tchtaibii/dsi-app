@@ -70,7 +70,7 @@ const Achat = () => {
     const TypeDachat = (sda: number) => {
         switch (sda) {
             case 1:
-                return "Accord Cadre";
+                return "Contrat Cadre";
             case 2:
                 return "Achat Direct"
             case 3:
@@ -81,15 +81,19 @@ const Achat = () => {
                 return "Convention Partenari"
         }
     }
-    const Situation = (sda: number) => {
+    const Situation = (sda: number, typeDachat:number) => {
         switch (sda) {
             case 1:
-                return "Nouveau";
+                return "Pré DA";
             case 2:
                 return "En cours de traitement"
             case 3:
+                if (typeDachat === 4)
+                    return "Non Payé"
                 return "Non Livré"
             case 4:
+                if (typeDachat === 4)
+                    return "Payé"
                 return "Livré"
             case 5:
                 return "Livraison partielle"
@@ -259,7 +263,7 @@ const Achat = () => {
                                         </tr>
                                         <tr>
                                             <td className="keyTd">Situation d'achat</td>
-                                            <td className="ValueTd">{Situation(Data.situation_d_achat)}</td>
+                                            <td className="ValueTd">{Situation(Data.situation_d_achat, Data.typeDacha)}</td>
                                         </tr>
                                         <tr>
                                             <td className="keyTd">Observation</td>

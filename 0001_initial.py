@@ -13,7 +13,7 @@ def create_default_contrat(apps, schema_editor):
 
 def create_default_type_dachat(apps, schema_editor):
     typedachat = apps.get_model('achats', 'TypeDachat')
-    typedachat.objects.create(type='Accord Cadre')
+    typedachat.objects.create(type='Contrat Cadre')
     typedachat.objects.create(type='Achat Direct')
     typedachat.objects.create(type="Appel d'offre")
     typedachat.objects.create(type="Achat en ligne")
@@ -22,7 +22,7 @@ def create_default_type_dachat(apps, schema_editor):
 
 def create_default_situation_dachat(apps, schema_editor):
     situation_dachat = apps.get_model('achats', 'SituationDachat')
-    situation_dachat.objects.create(situation='Nouveau')
+    situation_dachat.objects.create(situation='Pré DA')
     situation_dachat.objects.create(situation='En cours de traitement')
     situation_dachat.objects.create(situation="Non Livré")
     situation_dachat.objects.create(situation="Livré")
@@ -173,7 +173,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True,
                  primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(default='Accord Cadre', max_length=50)),
+                ('type', models.CharField(default='Contrat Cadre', max_length=50)),
             ],
         ),
         migrations.CreateModel(

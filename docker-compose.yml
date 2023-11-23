@@ -69,10 +69,23 @@ services:
       - my-frontend
     networks:
       - net
+  #glances
+  glances:
+    container_name: glances
+    build : ./glances
+    networks:
+      - net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+    ports:
+      - 9000:9000
 volumes:
   # mariadb volume
   db:
     driver: local
+  grafana-data:
+    external: true
 
 networks:
   net:

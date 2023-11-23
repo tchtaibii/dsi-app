@@ -133,8 +133,8 @@ const Dashboard = () => {
                             {
                                 (my.is_achat_manager || my.is_superuser) &&
                                 <div className="dash-col">
-                                    <BoxDash title={"Nouveau"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
-                                    <BoxDash title={"En cours de traitement"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
+                                    <BoxDash title={"Pré DA"} data={boxData.n} color={"rgba(187, 59, 59,"} icon={1} />
+                                    <BoxDash title={"DA en cours"} data={boxData.ect} color={"rgba(255, 122, 0,"} icon={2} />
                                     <BoxDash title={"Non Livré"} data={boxData.ecl} color={"rgba(243, 198, 39,"} icon={3} />
                                     <BoxDash title={"Livraison partielle"} data={boxData.lp} color={"rgba(72, 156, 255,"} icon={4} />
                                 </div>

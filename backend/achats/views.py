@@ -103,7 +103,7 @@ def create_stock(id=None):
                                 stock.save()
                                 stocks.stocks.add(stock)
                                 stocks.save()
-                            if str(achats.typeDachat) == 'Accord Cadre':
+                            if str(achats.typeDachat) == 'Contrat Cadre':
                                 in_stock.fourniseur = achat.article.contrat.name
                             else:
                                 in_stock.fourniseur = achats.fourniseur
@@ -637,7 +637,7 @@ def generate_word_file(request, id):
         current_date = datetime.now()
         formatted_date = current_date.strftime("%d/%m/%Y")
 
-        if achats.typeDachat.type != 'Accord Cadre':
+        if achats.typeDachat.type != 'Contrat Cadre':
             contrat = achats.fourniseur
         else:
             contrat = achats.achat.all()[0].article.contrat.name
@@ -946,7 +946,7 @@ def add_achats_file(request):
                 if situation == 4:
                     achats_instance.isComplet = True
             achats_instance.save()
-            if row["Type d'achat"] == 'Accord Cadre':
+            if row["Type d'achat"] == 'Contrat Cadre':
                 achat_code = str(row["Code"])
                 if achat_code and isinstance(achat_code, str):
                     article = Article.objects.filter(
