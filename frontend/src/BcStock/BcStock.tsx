@@ -201,9 +201,21 @@ const Bcstock = () => {
     const [isLoading, setLoading] = useState(false)
     const [isEdits, setEdits] = useState(false)
     const [data, setData] = useState<any>(null)
-    const fetchDataB = async () => {
-        await axios.get(`/stock/get_stocks_details/${id}`).then((rsp: any) => {
-            setData(rsp.data)
+    const [paginator, setPAginator] = useState({
+        has_next: false,
+        next_page_number: 1,
+        has_previous: false,
+        previous_page_number: null
+    })
+    const fetchDataB = async (page = 1) => {
+        await axios.get(`/stock/get_stocks_details/${id}`, { params: { page: page } }).then((rsp: any) => {
+            setData(rsp.data.results)
+            setPAginator({
+                has_next: rsp.data.has_next,
+                next_page_number: rsp.data.next_page_number,
+                has_previous: rsp.data.has_previous,
+                previous_page_number: rsp.data.previous_page_number
+            })
         }
         )
         setLoading(true)
@@ -265,6 +277,14 @@ const Bcstock = () => {
                                 </div>
                                 <div className="achatsCL">
                                     <AchatCl selectedOption={selectedOption} achats={data.stocks} />
+                                </div>
+                                <div className="paginator">
+                                    <button onClick={() => {
+                                        fetchDataB(paginator.next_page_number)
+                                    }} disabled={!paginator.has_next}>{"Suivant >>"}</button>
+                                    <button onClick={() => {
+                                        fetchDataB(paginator.previous_page_number)
+                                    }} disabled={!paginator.has_previous}>{"<< Précédent"}</button>
                                 </div>
 
                             </>

@@ -156,3 +156,12 @@ $base-screen-font-size: $base-font-size;
   $base-screen-font-size: $base-font-size;
   @include font-size($i);
 }
+
+
+.paginator{
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 1rem;
+  
+}

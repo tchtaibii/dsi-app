@@ -19,8 +19,8 @@ services:
   my-adminer:
     image: adminer:latest
     container_name: my-adminer
-    # ports:
-    #   - "8080:8080"
+    ports:
+      - "8080:8080"
     depends_on:
       - my-mariadb
     networks:

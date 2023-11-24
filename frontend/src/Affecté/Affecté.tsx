@@ -82,15 +82,31 @@ const Achats = () => {
     const [isLoading, setLoading] = useState(false)
     const [Stock1, setStock1] = useState([])
     const [Stock2, setStock2] = useState([])
-    const fetchDataB = async () => {
-        await axios.get('/stock/all_inStock/').then((rsp: any) => {
-            const halfLength = Math.ceil(rsp.data.length / 2);
-            const firstHalf = rsp.data.slice(0, halfLength);
-            const secondHalf = rsp.data.slice(halfLength);
+    const [paginator, setPAginator] = useState({
+        has_next: false,
+        next_page_number: 1,
+        has_previous: false,
+        previous_page_number: null
+    })
+    const fetchDataB = async (page = 1, search = null) => {
+        await axios.get('/stock/all_inStock/', { params: { page: page, search } }).then((rsp: any) => {
+            console.log(rsp.data)
+            const halfLength = Math.ceil(rsp.data.results.length / 2);
+            const firstHalf = rsp.data.results.slice(0, halfLength);
+            const secondHalf = rsp.data.results.slice(halfLength);
             setStock1(firstHalf)
             setStock2(secondHalf)
+            setPAginator({
+                has_next: rsp.data.has_next,
+                next_page_number: rsp.data.next_page_number,
+                has_previous: rsp.data.has_previous,
+                previous_page_number: rsp.data.previous_page_number
+            })
         }
-        )
+        ).catch((error: any) => {
+            setStock1([])
+            setStock2([])
+        })
     };
     useEffect(() => {
         fetchDataB();
@@ -102,6 +118,15 @@ const Achats = () => {
             <div className='ContentMain'>
                 <div className="header">
                     <h1>Stocks</h1>
+                    <div style={{ border: '0.06rem solid #bd391b', width: '20rem' }} className="search">
+                        <input onChange={(e: any) => {
+                            const value = e.target.value;
+                            fetchDataB(1, value);
+                        }} type="text" placeholder='Search...' />
+                        <div onClick={() => { }}>
+                            {/* <Search /> */}
+                        </div>
+                    </div>
                 </div>
                 <div style={{ gap: "1.44rem" }} className="main">
                     {
@@ -125,6 +150,14 @@ const Achats = () => {
                                 <div style={{ flexDirection: 'row' }} className="achatsCLL">
                                     <AchatCl achats={Stock1} />
                                     <AchatCl achats={Stock2} />
+                                </div>
+                                <div className="paginator">
+                                    <button onClick={() => {
+                                        fetchDataB(paginator.next_page_number)
+                                    }} disabled={!paginator.has_next}>{"Suivant >>"}</button>
+                                    <button onClick={() => {
+                                        fetchDataB(paginator.previous_page_number)
+                                    }} disabled={!paginator.has_previous}>{"<< Précédent"}</button>
                                 </div>
 
                             </>

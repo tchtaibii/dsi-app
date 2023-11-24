@@ -103,7 +103,10 @@ const Dashboard = () => {
                 await axios.get('/achats/linesChart/').then((rsp: any) => {
                     setDataLine(rsp.data[0])
                 })
-                await axios.get('/achats/colChart/').then((rsp: any) => setSeries(rsp.data))
+                await axios.get('/achats/colChart/').then((rsp: any) => {
+                    console.log(rsp.data)
+                    setSeries(rsp.data)
+                })
             }
             else if (my.is_reception) {
                 await axios.get('/stock/dashboard_mark_modele/').then((rsp: any) => {

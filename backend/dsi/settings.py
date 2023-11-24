@@ -145,8 +145,8 @@ MEDIA_URL = '/files/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/files')
 
 CORS_ORIGIN_WHITELIST = [
-    "http://10.16.180.24",
-    # "http://localhost:3000",
+    # "http://10.16.180.24",
+    "http://localhost:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

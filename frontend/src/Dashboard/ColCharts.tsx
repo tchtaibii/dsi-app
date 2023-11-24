@@ -24,7 +24,7 @@ const ApexChart = ({ Series }) => {
             },
         },
         title: {
-            text: 'Type d\'artcile',
+            text: 'Les plus articles demandé',
         },
     }
 

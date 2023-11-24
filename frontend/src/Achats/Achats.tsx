@@ -225,53 +225,71 @@ const Achats = ({ SearchT }) => {
         consommable: false,
         search: SearchT
     });
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const nonNullParams = {};
-                Object.keys(queryParams).forEach((key) => {
-                    if (queryParams[key] !== null) {
-                        nonNullParams[key] = queryParams[key];
-                    }
-                });
-                if (SearchT.length > 0) {
-                    await axios.get('/achats/search/', {
-                        params:
-                            { search: SearchT }
-                    }).then((rsp: any) => {
-                        setAchats(rsp.data.reverse());
-                    });
+    const fetchData = async (page = 1) => {
+        try {
+            const nonNullParams = {};
+            Object.keys(queryParams).forEach((key) => {
+                if (queryParams[key] !== null) {
+                    nonNullParams[key] = queryParams[key];
                 }
-                else {
-                    const commandsResponse = await axios.get('/achats/get/commandes/', {
-                        params: nonNullParams,
-                    });
-                    setAchats(commandsResponse.data.reverse());
-                }
-                const fileResponse = await axios.get('/achats/excelExport/', {
-                    params: nonNullParams,
-                    responseType: 'blob', // Important for handling binary data
+            });
+            if (SearchT.length > 0) {
+                await axios.get('/achats/search/', {
+                    params:
+                        { search: SearchT, page }
+                }).then((rsp: any) => {
+                    setPAginator({
+                        has_next: rsp.data.has_next,
+                        next_page_number: rsp.data.next_page_number,
+                        has_previous: rsp.data.has_previous,
+                        previous_page_number: rsp.data.previous_page_number
+                    })
+                    setAchats(rsp.data.results.reverse());
                 });
-
-                const disposition = fileResponse.headers['content-disposition'];
-                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                const filename = matches ? matches[1].replace(/['"]/g, '') : '';
-
-                const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const url = window.URL.createObjectURL(blob);
-                setFileData({ data: url, name: filename });
-                const typeDachatResponse = await axios.get('/achats/get/types_achats');
-                setTypeDachat(typeDachatResponse.data);
-
-                const situationResponse = await axios.get('/achats/get/situations_article');
-                setSituationDachat(situationResponse.data);
-            } catch (error) {
-                console.error('Error:', error);
             }
-            setLoading(true);
+            else {
+                const commandsResponse = await axios.get('/achats/get/commandes/', {
+                    params: { nonNullParams, page },
+                });
+                setPAginator({
+                    has_next: commandsResponse.data.has_next,
+                    next_page_number: commandsResponse.data.next_page_number,
+                    has_previous: commandsResponse.data.has_previous,
+                    previous_page_number: commandsResponse.data.previous_page_number
+                })
+                setAchats(commandsResponse.data.results.reverse());
+            }
+            const fileResponse = await axios.get('/achats/excelExport/', {
+                params: { nonNullParams, page },
+                responseType: 'blob', // Important for handling binary data
+            });
+
+            const disposition = fileResponse.headers['content-disposition'];
+            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+            const filename = matches ? matches[1].replace(/['"]/g, '') : '';
+
+            const blob = new Blob([fileResponse.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            setFileData({ data: url, name: filename });
+            const typeDachatResponse = await axios.get('/achats/get/types_achats');
+            setTypeDachat(typeDachatResponse.data);
+
+            const situationResponse = await axios.get('/achats/get/situations_article');
+            setSituationDachat(situationResponse.data);
+        } catch (error) {
+            console.error('Error:', error);
         }
+        setLoading(true);
+    }
+    useEffect(() => {
         fetchData()
     }, [queryParams])
+    const [paginator, setPAginator] = useState({
+        has_next: false,
+        next_page_number: 1,
+        has_previous: false,
+        previous_page_number: null
+    })
     const [isFilterTypeAchat, setFilterAchat] = useState<boolean>(false);
     const [isFilterTypeArt, setFilterArt] = useState<boolean>(false);
     const [isFiltersit, setFilterSit] = useState<boolean>(false);
@@ -495,6 +513,14 @@ const Achats = ({ SearchT }) => {
                                 </div>
                                 <div className="achatsCL">
                                     <AchatCl TypeDachat={TypeDachat} achats={achats} />
+                                </div>
+                                <div className="paginator">
+                                    <button onClick={() => {
+                                        fetchData(paginator.next_page_number)
+                                    }} disabled={!paginator.has_next}>{"Suivant >>"}</button>
+                                    <button onClick={() => {
+                                        fetchData(paginator.previous_page_number)
+                                    }} disabled={!paginator.has_previous}>{"<< Précédent"}</button>
                                 </div>
 
                             </>

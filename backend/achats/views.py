@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.db.models import Count, Sum
 from django.db import models
 import numpy as np
@@ -185,11 +186,13 @@ def ExcelExportView(request):
             achats = achats.filter(isComplet=False)
         if 'apple' in params and params['apple'].lower() == 'true':
             achats = achats.filter(apple=True)
-
         if 'consommable' in params and params['consommable'].lower() == 'true':
             achats = achats.filter(consommable=True)
+        paginator = Paginator(achats, 20)
+        page_number = request.GET.get('page') or 1
+        page_obj = paginator.get_page(page_number)
     achats_data = []
-    for achat in achats:
+    for achat in page_obj:
         for a in achat.achat.all():
             achat_data = {
                 'Demandeur': achat.demandeur,
@@ -444,6 +447,7 @@ def add_commande(request):
         logger.exception(f'Error in creating Achats instance: {str(e)}')
         return Response({'message': f'Error in adding commande. {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 # @swagger_auto_schema(method='get', query_serializer=AchatFilterSerializer)
 
 
@@ -477,11 +481,21 @@ def get_commandes(request):
 
         if 'consommable' in params and params['consommable'].lower() == 'true':
             achats = achats.filter(consommable=True)
+        paginator = Paginator(achats, 20)
+        page_number = request.GET.get('page') or 1
+        page_obj = paginator.get_page(page_number)
 
-        serializer = AchatsSerializer(achats, many=True)
+        serializer = AchatsSerializer(page_obj, many=True)
         achats_list = serializer.data
+        data = {
+            'results': achats_list,
+            'has_next': page_obj.has_next(),
+            'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
+            'has_previous': page_obj.has_previous(),
+            'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+        }
 
-        return Response(achats_list)
+        return Response(data)
 
     except Exception as e:
         logger.exception(f'Error in retrieving achats data: {e}')
@@ -693,7 +707,7 @@ def delete_achats(request, id):
 
 
 @api_view(['DELETE'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def delete_all_achats(request):
     try:
@@ -722,10 +736,17 @@ def delete_all_achats(request):
 @throttle_classes([UserRateThrottle])
 @permission_classes([IsAuthenticated, IsAdminOrManagerAchatPermission])
 def types_with_total_quantity(request):
-    types_with_quantities = TypeDArticle.objects.annotate(
-        total_quantity=Sum('article__achat__quantité'))
-    result = [{"x": type_with_quantity.type, "y": type_with_quantity.total_quantity}
-              for type_with_quantity in types_with_quantities]
+    types_with_quantities = (
+        TypeDArticle.objects.annotate(
+            total_quantity=Sum('article__achat__quantité')
+        )
+        # Order by total_quantity and get the top 10
+        .order_by('-total_quantity')[:10]
+    )
+    result = [
+        {"x": type_with_quantity.type, "y": type_with_quantity.total_quantity}
+        for type_with_quantity in types_with_quantities
+    ]
     return Response(result)
 
 
@@ -807,9 +828,19 @@ def search_commands(request):
             params = params['search']
             achats = Achats.objects.filter(Q(demandeur=params) | Q(entité=params) | Q(
                 ligne_bugetaire=params) | Q(DA=params) | Q(BC=params) | Q(BL=params))
-            serializer = AchatsSerializer(achats, many=True)
+            paginator = Paginator(achats, 20)
+            page_number = request.GET.get('page') or 1
+            page_obj = paginator.get_page(page_number)
+            serializer = AchatsSerializer(page_obj, many=True)
             achats_list = serializer.data
-            return Response(achats_list)
+            data = {
+                'results': achats_list,
+                'has_next': page_obj.has_next(),
+                'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
+                'has_previous': page_obj.has_previous(),
+                'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+            }
+            return Response(data)
         else:
             return Response({'message': 'Data not provided'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:

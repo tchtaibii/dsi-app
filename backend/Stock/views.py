@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework import status
@@ -12,7 +13,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view
 import pandas as pd
 from django.shortcuts import render
-from .permissions import IsReceptionPermission, IsStockV
+from .permissions import IsReceptionPermission, IsStockV, AffecterPer
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Stock, inStock, StockEtat, Stocks, StockSituation
@@ -27,37 +28,55 @@ from users.models import CustomUser
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def all_inStock(request):
     try:
-        in_stocks = inStock.objects.all()
-        data = []
-        for in_stock in in_stocks:
-            stock_data = []
-            for stock in in_stock.stocks.all():
-                stock_data.append({
-                    'designation': stock.designation,
-                    'type': stock.type.type,
-                    'quantité': stock.quantité,
-                    'affecté': stock.affecté,
-                    'id': stock.id
-                })
-            in_stock_data = {
-                'id': in_stock.id,
-                'BC': in_stock.BC,
-                'entité': in_stock.entité,
-                'fourniseur': in_stock.fourniseur,
-                'stocks': stock_data,
-            }
-            data.append(in_stock_data)
+        search = request.GET.get('search')
+        if search:
+            in_stocks = inStock.objects.filter(BC__icontains=search)
+        else:
+            in_stocks = inStock.objects.all()
+        if in_stocks:
+            paginator = Paginator(in_stocks, 20)
+            page_number = request.GET.get('page') or 1
+            print(request.GET.get('page'))
+            page_obj = paginator.get_page(page_number)
+            serialized_data = []
+            for in_stock in page_obj:
+                stock_data = []
+                for stock in in_stock.stocks.all():
+                    stock_data.append({
+                        'designation': stock.designation,
+                        'type': stock.type.type,
+                        'quantité': stock.quantité,
+                        'affecté': stock.affecté,
+                        'id': stock.id
+                    })
+                in_stock_data = {
+                    'id': in_stock.id,
+                    'BC': in_stock.BC,
+                    'entité': in_stock.entité,
+                    'fourniseur': in_stock.fourniseur,
+                    'stocks': stock_data,
+                }
+                serialized_data.append(in_stock_data)
+                data = {
+                    'results': serialized_data,
+                    'has_next': page_obj.has_next(),
+                    'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
+                    'has_previous': page_obj.has_previous(),
+                    'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+                }
+        else:
+            return JsonResponse({'error': 'An error occurred while processing the request.'}, status=500)
     except Exception as e:
         print(e)
     return JsonResponse(data, safe=False)
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def types_in_stock(request):
     try:
@@ -79,7 +98,7 @@ def types_in_stock(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def stocks_by_type(request, type_name):
     try:
@@ -120,6 +139,7 @@ def stock_bc(request, id):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, IsReceptionPermission])
 def count_stocks_with_null_service_tag(request, id):
     try:
         stocks_instance = Stocks.objects.get(id=id)
@@ -146,6 +166,7 @@ class StockUpdate(serializers.Serializer):
 
 
 @swagger_auto_schema(method='post', request_body=StockUpdate)
+@permission_classes([IsAuthenticated, IsReceptionPermission])
 @api_view(['POST'])
 def update_stock_and_stocks(request, id):
     try:
@@ -182,12 +203,17 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 def get_stocks_details(request, id):
     try:
         stocks_instance = Stocks.objects.get(id=id)
         type_art = stocks_instance.type
         in_stock_instance = stocks_instance.related_instock.first()
+
+        related_stocks = stocks_instance.stocks.all()
+        paginator = Paginator(related_stocks, 30)
+        page_number = request.GET.get('page') or 1
+        page_obj = paginator.get_page(page_number)
         serialized_data = {
             'id': stocks_instance.id,
             'mark': stocks_instance.mark,
@@ -203,17 +229,24 @@ def get_stocks_details(request, id):
                     'serviceTag': stock.serviceTag,
                     'entité': in_stock_instance.entité if in_stock_instance else None
                 }
-                for stock in stocks_instance.stocks.all()
+                for stock in page_obj
             ]
         }
-        return Response(serialized_data)
+        data = {
+            'results': serialized_data,
+            'has_next': page_obj.has_next(),
+            'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
+            'has_previous': page_obj.has_previous(),
+            'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+        }
+        return Response(data)
     except Exception as e:
         logger.exception(f'Error in retrieving achats data: {e}')
         return Response({'error': 'Stocks not found'}, status=404)
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 def get_product(request, id):
     try:
         stock = Stock.objects.get(id=id)
@@ -251,7 +284,7 @@ def get_product(request, id):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def get_situation_stock(request):
     types = StockSituation.objects.all()
@@ -261,6 +294,7 @@ def get_situation_stock(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated, AffecterPer])
 @throttle_classes([UserRateThrottle])
 def affected_produit(request, id):
     try:
@@ -306,6 +340,7 @@ class FilterStock(serializers.Serializer):
 
 
 @swagger_auto_schema(method='get', query_serializery=FilterStock)
+@permission_classes([IsAuthenticated, IsStockV])
 @api_view(['GET'])
 def filter_stocks(request, string=None):
     try:
@@ -317,18 +352,25 @@ def filter_stocks(request, string=None):
                 Q(NomPrenom__icontains=search_query) |
                 Q(Fonction__icontains=search_query) |
                 Q(serviceTag__icontains=search_query) |
-                Q(affected_by__icontains=search_query) |
+                # Q(affected_by__username__icontains=search_query) |  # Assuming 'username' is a field in CustomUser
+                # Using 'designation' field of related 'Stocks' model
                 Q(related_stocks__designation__icontains=search_query) |
                 Q(related_stocks__mark__icontains=search_query) |
                 Q(related_stocks__modele__icontains=search_query) |
                 Q(related_stocks__type__type__icontains=search_query) |
+                # Q(related_stocks__quantité=search_query) |  # Example search directly on related model's field
+                # Q(related_stocks__affecté=search_query) |   # Another example search on related model's field
                 Q(related_stocks__related_instock__BC__icontains=search_query) |
                 Q(related_stocks__related_instock__fourniseur__icontains=search_query) |
                 Q(related_stocks__related_instock__entité__icontains=search_query)
             ).distinct()
 
+        paginator = Paginator(stocks, 20)  # 10 items per page
+        page_number = request.GET.get('page') or 1
+        page_obj = paginator.get_page(page_number)
+
         serialized_data = []
-        for stock in stocks:
+        for stock in page_obj:
             related_stocks = stock.related_stocks.first()
             in_stock_instances = related_stocks.related_instock.first() if related_stocks else None
             affected_by_first_name = stock.affected_by.first_name if stock.affected_by else None
@@ -351,13 +393,21 @@ def filter_stocks(request, string=None):
                 'entité': in_stock_instances.entité if in_stock_instances else None,
             }
             serialized_data.append(data)
+            data = {
+                'results': serialized_data,
+                'has_next': page_obj.has_next(),
+                'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
+                'has_previous': page_obj.has_previous(),
+                'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
+            }
 
-        return JsonResponse(serialized_data, safe=False)
+        return Response(data)
     except Exception as e:
         logger.exception(f'Error in retrieving achats data: {e}')
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
+@permission_classes([IsAuthenticated])
 @api_view(['GET'])
 def user_stock_affectations(request, id):
     try:
@@ -392,7 +442,7 @@ def user_stock_affectations(request, id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsReceptionPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def dashboard_mark_modele(request):
     try:
@@ -411,7 +461,7 @@ def dashboard_mark_modele(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated, IsReceptionPermission])
+@permission_classes([IsAuthenticated, IsStockV])
 @throttle_classes([UserRateThrottle])
 def get_recently_affected_stocks(request):
     try:
