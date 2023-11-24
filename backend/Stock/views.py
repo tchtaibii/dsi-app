@@ -246,7 +246,7 @@ def get_stocks_details(request, id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsStockV])
+# @permission_classes([IsAuthenticated, IsStockV])
 def get_product(request, id):
     try:
         stock = Stock.objects.get(id=id)
@@ -264,7 +264,7 @@ def get_product(request, id):
             'DateArrivage': stock.DateArrivage,
             'serviceTag': stock.serviceTag,
             'affected_by': (affected_by_first_name or '') + (' ' + affected_by_last_name if affected_by_last_name else ''),
-            'DateDaffectation': stock.DateDaffectation,
+            'DateDaffectation': stock.DateDaffectation if stock.DateDaffectation else None,
             # 'designation': related_stocks.designation,
             'mark': related_stocks.mark,
             'modele': related_stocks.modele,

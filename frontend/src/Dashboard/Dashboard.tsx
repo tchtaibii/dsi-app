@@ -259,7 +259,7 @@ const Dashboard = () => {
                                                                         }} className="RetardValidationAchat">
                                                                             <p style={{ width: '20%' }}>{e.NomPrenom}</p>
                                                                             <p style={{ width: '20%' }}>{e.Fonction}</p>
-                                                                            <p style={{ width: '20%' }}>{e.DateDaffectation}</p>
+                                                                            <p style={{ width: '20%' }}>{e.DateDaffectation ? e.DateDaffectation : '----'}</p>
                                                                             <p style={{ width: '20%' }}>{e.ServiceTag ? e.ServiceTag : '----'}</p>
                                                                             <p style={{ width: '20%' }}>{e.situation}</p>
                                                                         </div>
