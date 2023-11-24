@@ -84,8 +84,6 @@ volumes:
   # mariadb volume
   db:
     driver: local
-  grafana-data:
-    external: true
 
 networks:
   net:

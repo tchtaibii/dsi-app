@@ -1,11 +1,5 @@
-FROM debian:buster
+FROM python:3.9
 
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-psutil \ 
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install --no-cache-dir glances[action,browser,cpuinfo,chart,docker,export,folders,gpu,ip,raid,snmp,web,bottle,psutil]
+RUN pip install --no-cache-dir glances[action,browser,cpuinfo,chart,docker,export,folders,gpu,ip,raid,snmp,web,bottle,psutil,ujson]
 
 ENTRYPOINT ["glances", "-w", "-B", "0.0.0.0", "-p", "9000"]
