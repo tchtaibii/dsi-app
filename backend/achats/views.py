@@ -693,7 +693,7 @@ def delete_achats(request, id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated, IsManagerAchatPermission])
+# @permission_classes([IsAuthenticated, IsManagerAchatPermission])
 @throttle_classes([UserRateThrottle])
 def delete_all_achats(request):
     try:

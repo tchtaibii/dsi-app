@@ -78,8 +78,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: always
-    ports:
-      - 9000:9000
+    # ports:
+    #   - 9000:9000
 volumes:
   # mariadb volume
   db:
