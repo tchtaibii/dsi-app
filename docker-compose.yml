@@ -9,8 +9,8 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3306:3306"
+    # ports:
+    #   - "3306:3306"
     volumes:
       - db:/var/lib/mysql
     networks:
@@ -19,8 +19,8 @@ services:
   my-adminer:
     image: adminer:latest
     container_name: my-adminer
-    ports:
-      - "8080:8080"
+    # ports:
+    #   - "8080:8080"
     depends_on:
       - my-mariadb
     networks:
@@ -40,8 +40,8 @@ services:
       - ./backend/.env
     networks:
       - net
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
   #glances
   glances:
     container_name: glances
@@ -62,8 +62,8 @@ services:
       - ./frontend/.env
     depends_on:
       - my-backend
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     volumes:
       - ./frontend/src:/app/src
     networks:
