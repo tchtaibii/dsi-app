@@ -16,7 +16,7 @@ services:
     networks:
       - net
   # database GUI
-  adminer:
+  my-adminer:
     image: adminer:latest
     container_name: my-adminer
     # ports:
