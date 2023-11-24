@@ -42,7 +42,17 @@ services:
       - net
     ports:
       - "8000:8000"
-
+  #glances
+  glances:
+    container_name: glances
+    build : ./glances
+    networks:
+      - net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+    # ports:
+    #   - 9000:9000
   # frontend
   my-frontend:
     container_name: my-frontend
@@ -58,6 +68,7 @@ services:
       - ./frontend/src:/app/src
     networks:
       - net
+  #nginx
   nginx:
     image: nginx
     ports:
@@ -67,19 +78,9 @@ services:
     depends_on:
       - my-backend
       - my-frontend
+      - glances
     networks:
       - net
-  #glances
-  glances:
-    container_name: glances
-    build : ./glances
-    networks:
-      - net
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    restart: always
-    # ports:
-    #   - 9000:9000
 volumes:
   # mariadb volume
   db:
